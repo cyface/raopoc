@@ -72,7 +72,7 @@ export function DocumentAcceptance({
     } finally {
       setLoading(false);
     }
-  }, [selectedProducts, hasNoSSN]);
+  }, [selectedProducts, hasNoSSN, t]);
 
   const loadBankInfo = async () => {
     try {

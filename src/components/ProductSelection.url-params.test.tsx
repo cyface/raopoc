@@ -147,7 +147,7 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         // If we reach here, the component is working correctly
         expect(configService.getProducts).toHaveBeenCalledTimes(2)
         expect(configService.getBankInfo).toHaveBeenCalledTimes(2)
-      } catch (error) {
+      } catch {
         // This is expected to fail with current implementation
         console.log('Expected failure: ProductSelection does not react to URL changes')
         
@@ -181,6 +181,7 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
             setBankInfo(bankInfoData)
           }
           loadConfigs()
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [mockLocation.search]) // This dependency makes it reload when URL changes
 
         return (
@@ -261,7 +262,7 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
 
         // If we reach here, it's working (unexpected with current implementation)
         expect(configService.getProducts).toHaveBeenCalled()
-      } catch (error) {
+      } catch {
         // Expected failure - component doesn't reload after language change
         expect(screen.getByText('Checking Account')).toBeInTheDocument()
         expect(configService.getProducts).not.toHaveBeenCalled()

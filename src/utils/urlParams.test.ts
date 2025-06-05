@@ -48,7 +48,7 @@ describe('URL Parameters Utilities', () => {
 
     it('returns null in server-side environment', () => {
       const originalWindow = global.window
-      // @ts-ignore
+      // @ts-expect-error - intentionally deleting global.window for server-side testing
       delete global.window
       
       expect(getFinancialInstitutionSlug()).toBeNull()
@@ -86,7 +86,7 @@ describe('URL Parameters Utilities', () => {
 
     it('returns false in server-side environment', () => {
       const originalWindow = global.window
-      // @ts-ignore
+      // @ts-expect-error - intentionally deleting global.window for server-side testing
       delete global.window
       
       expect(isDarkModeRequested()).toBe(false)
@@ -142,7 +142,7 @@ describe('URL Parameters Utilities', () => {
 
     it('returns empty object in server-side environment', () => {
       const originalWindow = global.window
-      // @ts-ignore
+      // @ts-expect-error - intentionally deleting global.window for server-side testing
       delete global.window
       
       expect(getUrlParams()).toEqual({})

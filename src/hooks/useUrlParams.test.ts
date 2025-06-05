@@ -291,7 +291,7 @@ describe('useUrlParams Hook', () => {
 
     it('works in server-side environment', () => {
       const originalWindow = global.window
-      // @ts-ignore
+      // @ts-expect-error - intentionally deleting global.window for server-side testing
       delete global.window
       
       const { result } = renderHook(() => useUrlParams())

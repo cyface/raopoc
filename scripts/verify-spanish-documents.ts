@@ -21,11 +21,11 @@ function verifySpanishDocuments() {
   console.log('✅ documents.es.json configuration file exists')
 
   // Load and verify the Spanish configuration
-  let spanishConfig: any
+  let spanishConfig: { documents: Array<{ id: string; url: string; name: string }> }
   try {
     spanishConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
     console.log('✅ documents.es.json is valid JSON')
-  } catch (error) {
+  } catch {
     console.error('❌ documents.es.json contains invalid JSON')
     return false
   }
@@ -44,7 +44,7 @@ function verifySpanishDocuments() {
 
   console.log('\n📋 Checking document configuration:')
   for (const docId of expectedDocuments) {
-    const doc = spanishConfig.documents.find((d: any) => d.id === docId)
+    const doc = spanishConfig.documents.find((d) => d.id === docId)
     if (!doc) {
       console.error(`❌ Missing document: ${docId}`)
       continue
