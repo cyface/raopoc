@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useUrlParams } from './useUrlParams'
-import { configServiceV2, type Product, type BankInfo, type State, type Country, type IdentificationType, type DocumentConfig } from '../services/configService.v2'
+import { configService, type Product, type BankInfo, type State, type Country, type IdentificationType, type DocumentConfig } from '../services/configService'
 
 /**
  * Hook to reactively get products based on current URL parameters
@@ -17,7 +17,7 @@ export function useProducts(): { products: Product[], loading: boolean, error: s
     setLoading(true)
     setError(null)
 
-    configServiceV2.getProductsFor(fi, lng)
+    configService.getProductsFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setProducts(data)
@@ -54,7 +54,7 @@ export function useBankInfo(): { bankInfo: BankInfo | null, loading: boolean, er
     setLoading(true)
     setError(null)
 
-    configServiceV2.getBankInfoFor(fi, lng)
+    configService.getBankInfoFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setBankInfo(data)
@@ -90,7 +90,7 @@ export function useStates(): { states: State[], loading: boolean, error: string 
     setLoading(true)
     setError(null)
 
-    configServiceV2.getStatesFor(fi, lng)
+    configService.getStatesFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setStates(data)
@@ -126,7 +126,7 @@ export function useCountries(): { countries: Country[], loading: boolean, error:
     setLoading(true)
     setError(null)
 
-    configServiceV2.getCountriesFor(fi, lng)
+    configService.getCountriesFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setCountries(data)
@@ -162,7 +162,7 @@ export function useIdentificationTypes(): { identificationTypes: IdentificationT
     setLoading(true)
     setError(null)
 
-    configServiceV2.getIdentificationTypesFor(fi, lng)
+    configService.getIdentificationTypesFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setIdentificationTypes(data)
@@ -198,7 +198,7 @@ export function useDocuments(): { documents: DocumentConfig | null, loading: boo
     setLoading(true)
     setError(null)
 
-    configServiceV2.getDocumentsFor(fi, lng)
+    configService.getDocumentsFor(fi, lng)
       .then(data => {
         if (!isCancelled) {
           setDocuments(data)
@@ -242,8 +242,8 @@ export function useProductsAndBankInfo(): {
     setError(null)
 
     Promise.all([
-      configServiceV2.getProductsFor(fi, lng),
-      configServiceV2.getBankInfoFor(fi, lng)
+      configService.getProductsFor(fi, lng),
+      configService.getBankInfoFor(fi, lng)
     ])
       .then(([productsData, bankInfoData]) => {
         if (!isCancelled) {
@@ -273,11 +273,11 @@ export function useProductsAndBankInfo(): {
  */
 export function useConfigPreloader() {
   const preloadLanguages = async (fi: string | null) => {
-    return configServiceV2.preloadLanguages(fi)
+    return configService.preloadLanguages(fi)
   }
 
   const preloadConfiguration = async (fi: string | null, lng: string) => {
-    return configServiceV2.preloadConfiguration(fi, lng)
+    return configService.preloadConfiguration(fi, lng)
   }
 
   return { preloadLanguages, preloadConfiguration }

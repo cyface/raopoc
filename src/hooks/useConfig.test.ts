@@ -1,12 +1,12 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useProducts, useBankInfo, useProductsAndBankInfo } from './useConfig'
-import { configServiceV2 } from '../services/configService.v2'
+import { configService } from '../services/configService'
 import type { Product } from '../services/configService'
 
 // Mock the configService
-vi.mock('../services/configService.v2', () => ({
-  configServiceV2: {
+vi.mock('../services/configService', () => ({
+  configService: {
     getProductsFor: vi.fn(),
     getBankInfoFor: vi.fn(),
     preloadLanguages: vi.fn(),
@@ -82,7 +82,7 @@ describe('Configuration Hooks', () => {
 
   describe('useProducts Hook', () => {
     it('loads products on initial render', async () => {
-      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockEnglishProducts)
+      vi.mocked(configService.getProductsFor).mockResolvedValue(mockEnglishProducts)
       
       const { result } = renderHook(() => useProducts())
       
@@ -95,11 +95,11 @@ describe('Configuration Hooks', () => {
         expect(result.current.error).toBeNull()
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getProductsFor).toHaveBeenCalledWith(null, 'en')
     })
 
     it('reloads products when language changes', async () => {
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockResolvedValueOnce(mockEnglishProducts)
         .mockResolvedValueOnce(mockSpanishProducts)
       
@@ -110,7 +110,7 @@ describe('Configuration Hooks', () => {
         expect(result.current.products).toEqual(mockEnglishProducts)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getProductsFor).toHaveBeenCalledWith(null, 'en')
       
       // Change to Spanish
       mockUseUrlParams.mockReturnValue({
@@ -126,8 +126,8 @@ describe('Configuration Hooks', () => {
         expect(result.current.products).toEqual(mockSpanishProducts)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith(null, 'es')
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(2)
+      expect(configService.getProductsFor).toHaveBeenCalledWith(null, 'es')
+      expect(configService.getProductsFor).toHaveBeenCalledTimes(2)
     })
 
     it('reloads products when bank changes', async () => {
@@ -136,7 +136,7 @@ describe('Configuration Hooks', () => {
         { type: 'eco-savings', title: 'Eco Savings', description: 'Green savings', icon: 'PiggyBank' }
       ]
       
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockResolvedValueOnce(defaultProducts)
         .mockResolvedValueOnce(warmBankProducts)
       
@@ -147,7 +147,7 @@ describe('Configuration Hooks', () => {
         expect(result.current.products).toEqual(defaultProducts)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getProductsFor).toHaveBeenCalledWith(null, 'en')
       
       // Change to warm bank
       mockUseUrlParams.mockReturnValue({
@@ -163,8 +163,8 @@ describe('Configuration Hooks', () => {
         expect(result.current.products).toEqual(warmBankProducts)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith('warmbank', 'en')
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(2)
+      expect(configService.getProductsFor).toHaveBeenCalledWith('warmbank', 'en')
+      expect(configService.getProductsFor).toHaveBeenCalledTimes(2)
     })
 
     it('handles both bank and language changes simultaneously', async () => {
@@ -172,7 +172,7 @@ describe('Configuration Hooks', () => {
         { type: 'eco-savings', title: 'Ahorros Ecológicos', description: 'Ahorros verdes', icon: 'PiggyBank' }
       ]
       
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockResolvedValueOnce(mockEnglishProducts)
         .mockResolvedValueOnce(warmBankSpanishProducts)
       
@@ -197,12 +197,12 @@ describe('Configuration Hooks', () => {
         expect(result.current.products).toEqual(warmBankSpanishProducts)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith('warmbank', 'es')
+      expect(configService.getProductsFor).toHaveBeenCalledWith('warmbank', 'es')
     })
 
     it('handles loading errors gracefully', async () => {
       const errorMessage = 'Failed to load products'
-      vi.mocked(configServiceV2.getProductsFor).mockRejectedValue(new Error(errorMessage))
+      vi.mocked(configService.getProductsFor).mockRejectedValue(new Error(errorMessage))
       
       const { result } = renderHook(() => useProducts())
       
@@ -218,7 +218,7 @@ describe('Configuration Hooks', () => {
       const slowResponse = new Promise<Product[]>(resolve => setTimeout(() => resolve(mockEnglishProducts), 100))
       const fastResponse = Promise.resolve(mockSpanishProducts)
       
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockReturnValueOnce(slowResponse)
         .mockReturnValueOnce(fastResponse)
       
@@ -246,7 +246,7 @@ describe('Configuration Hooks', () => {
 
   describe('useBankInfo Hook', () => {
     it('loads bank info on initial render', async () => {
-      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
+      vi.mocked(configService.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
       
       const { result } = renderHook(() => useBankInfo())
       
@@ -258,11 +258,11 @@ describe('Configuration Hooks', () => {
         expect(result.current.error).toBeNull()
       })
       
-      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getBankInfoFor).toHaveBeenCalledWith(null, 'en')
     })
 
     it('reloads bank info when bank changes', async () => {
-      vi.mocked(configServiceV2.getBankInfoFor)
+      vi.mocked(configService.getBankInfoFor)
         .mockResolvedValueOnce(mockDefaultBankInfo)
         .mockResolvedValueOnce(mockWarmBankInfo)
       
@@ -287,14 +287,14 @@ describe('Configuration Hooks', () => {
         expect(result.current.bankInfo).toEqual(mockWarmBankInfo)
       })
       
-      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledWith('warmbank', 'en')
+      expect(configService.getBankInfoFor).toHaveBeenCalledWith('warmbank', 'en')
     })
   })
 
   describe('useProductsAndBankInfo Hook', () => {
     it('loads both products and bank info efficiently', async () => {
-      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockEnglishProducts)
-      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
+      vi.mocked(configService.getProductsFor).mockResolvedValue(mockEnglishProducts)
+      vi.mocked(configService.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
       
       const { result } = renderHook(() => useProductsAndBankInfo())
       
@@ -308,8 +308,8 @@ describe('Configuration Hooks', () => {
       })
       
       // Should call both services
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith(null, 'en')
-      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getProductsFor).toHaveBeenCalledWith(null, 'en')
+      expect(configService.getBankInfoFor).toHaveBeenCalledWith(null, 'en')
     })
 
     it('reloads both when URL parameters change', async () => {
@@ -323,11 +323,11 @@ describe('Configuration Hooks', () => {
         displayName: 'Soluciones Bancarias Cálidas'
       }
       
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockResolvedValueOnce(mockEnglishProducts)
         .mockResolvedValueOnce(warmBankSpanishProducts)
       
-      vi.mocked(configServiceV2.getBankInfoFor)
+      vi.mocked(configService.getBankInfoFor)
         .mockResolvedValueOnce(mockDefaultBankInfo)
         .mockResolvedValueOnce(warmBankSpanishInfo)
       
@@ -354,13 +354,13 @@ describe('Configuration Hooks', () => {
         expect(result.current.bankInfo).toEqual(warmBankSpanishInfo)
       })
       
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledWith('warmbank', 'es')
-      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledWith('warmbank', 'es')
+      expect(configService.getProductsFor).toHaveBeenCalledWith('warmbank', 'es')
+      expect(configService.getBankInfoFor).toHaveBeenCalledWith('warmbank', 'es')
     })
 
     it('handles partial failures gracefully', async () => {
-      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockEnglishProducts)
-      vi.mocked(configServiceV2.getBankInfoFor).mockRejectedValue(new Error('Bank info failed'))
+      vi.mocked(configService.getProductsFor).mockResolvedValue(mockEnglishProducts)
+      vi.mocked(configService.getBankInfoFor).mockRejectedValue(new Error('Bank info failed'))
       
       const { result } = renderHook(() => useProductsAndBankInfo())
       
@@ -376,7 +376,7 @@ describe('Configuration Hooks', () => {
   describe('Performance Optimizations', () => {
     it('demonstrates instant switching with cached data', async () => {
       // Simulate cached responses (instant resolution)
-      vi.mocked(configServiceV2.getProductsFor)
+      vi.mocked(configService.getProductsFor)
         .mockResolvedValue(mockEnglishProducts) // Cached English
         .mockResolvedValue(mockSpanishProducts) // Cached Spanish
       
@@ -415,7 +415,7 @@ describe('Configuration Hooks', () => {
       })
       
       // All switches should be processed
-      expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(3)
+      expect(configService.getProductsFor).toHaveBeenCalledTimes(3)
     })
   })
 })
