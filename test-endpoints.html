@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Endpoint Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        pre { background-color: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>API Endpoint Tests</h1>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        async function testEndpoint(name, url) {
+            const div = document.createElement('div');
+            div.className = 'test';
+            div.innerHTML = `<h3>${name}</h3><p>Testing: ${url}</p>`;
+            results.appendChild(div);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                div.className = 'test success';
+                div.innerHTML += `<p>✅ Success (${response.status})</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                div.className = 'test error';
+                div.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test all combinations
+        async function runTests() {
+            await testEndpoint('1. Default Products (English)', 'http://localhost:3001/api/config/products');
+            await testEndpoint('2. Default Products (Spanish)', 'http://localhost:3001/api/config/products.es');
+            await testEndpoint('3. Warmbank Products (English)', 'http://localhost:3001/api/config/warmbank/products');
+            await testEndpoint('4. Warmbank Products (Spanish)', 'http://localhost:3001/api/config/warmbank/products.es');
+            await testEndpoint('5. Default Bank Info', 'http://localhost:3001/api/config/bank-info');
+            await testEndpoint('6. Warmbank Bank Info', 'http://localhost:3001/api/config/warmbank/bank-info');
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>
