@@ -1,23 +1,59 @@
-import { style } from '@vanilla-extract/css'
+import { createTheme, style } from '@vanilla-extract/css'
 
+// Define the theme contract (shape of our theme)
+export const [themeClass, vars] = createTheme({
+  color: {
+    primary: '#3b82f6',
+    primaryHover: '#2563eb',
+    secondary: '#6b7280',
+    textPrimary: '#1f2937',
+    textSecondary: '#6b7280',
+    textMuted: '#9ca3af',
+    background: '#ffffff',
+    surface: '#ffffff',
+    surfaceHover: '#f9fafb',
+    border: '#e5e7eb',
+    borderLight: '#d1d5db',
+    borderHover: '#3b82f6',
+    borderFocus: '#3b82f6',
+    selectedBg: '#eff6ff',
+    error: '#dc2626',
+    success: '#10b981',
+    disabled: '#9ba0a6',
+    icon: '#3b82f6',
+    white: '#ffffff',
+  }
+})
+
+// Base styles that use the theme variables
 export const container = style({
   maxWidth: '800px',
   margin: '0 auto',
-  padding: '2rem',
+  padding: '1rem 2rem 2rem',
   fontFamily: 'system-ui, -apple-system, sans-serif',
+  '@media': {
+    '(max-width: 768px)': {
+      padding: '0.75rem 1rem 2rem',
+    },
+  },
 })
 
 export const heading = style({
   fontSize: '2rem',
   fontWeight: '600',
   marginBottom: '1.5rem',
-  color: '#1f2937',
+  color: vars.color.textPrimary,
   textAlign: 'center',
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
+  },
 })
 
 export const subheading = style({
   fontSize: '1.125rem',
-  color: '#6b7280',
+  color: vars.color.textSecondary,
   marginBottom: '2rem',
   textAlign: 'center',
 })
@@ -30,37 +66,37 @@ export const productGrid = style({
 })
 
 export const productCard = style({
-  border: '2px solid #e5e7eb',
+  border: `2px solid ${vars.color.border}`,
   borderRadius: '0.5rem',
   padding: '1.5rem',
   cursor: 'pointer',
   transition: 'all 0.2s',
-  backgroundColor: '#ffffff',
+  backgroundColor: vars.color.surface,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   textAlign: 'center',
   ':hover': {
-    borderColor: '#3b82f6',
+    borderColor: vars.color.borderHover,
     transform: 'translateY(-2px)',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
 })
 
 export const productCardSelected = style({
-  borderColor: '#3b82f6',
-  backgroundColor: '#eff6ff',
+  borderColor: vars.color.primary,
+  backgroundColor: vars.color.selectedBg,
 })
 
 export const productTitle = style({
   fontSize: '1.25rem',
   fontWeight: '600',
   marginBottom: '0.5rem',
-  color: '#1f2937',
+  color: vars.color.textPrimary,
 })
 
 export const productDescription = style({
-  color: '#6b7280',
+  color: vars.color.textSecondary,
   lineHeight: '1.5',
 })
 
@@ -81,19 +117,19 @@ export const button = style({
 })
 
 export const primaryButton = style([button, {
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
+  backgroundColor: vars.color.primary,
+  color: vars.color.white,
   ':hover': {
-    backgroundColor: '#2563eb',
+    backgroundColor: vars.color.primaryHover,
   },
   ':disabled': {
-    backgroundColor: '#9ba0a6',
+    backgroundColor: vars.color.disabled,
     cursor: 'not-allowed',
   },
 }])
 
 export const errorMessage = style({
-  color: '#dc2626',
+  color: vars.color.error,
   fontSize: '0.875rem',
   marginBottom: '1rem',
   textAlign: 'center',
@@ -103,29 +139,29 @@ export const productIcon = style({
   width: '3rem',
   height: '3rem',
   marginBottom: '1rem',
-  color: '#3b82f6',
+  color: vars.color.icon,
 })
 
 export const header = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginBottom: '2rem',
-  paddingBottom: '1rem',
-  borderBottom: '1px solid #e5e7eb',
+  marginBottom: '1.25rem',
+  paddingBottom: '0.75rem',
+  borderBottom: `1px solid ${vars.color.border}`,
 })
 
 export const bankIcon = style({
   width: '2rem',
   height: '2rem',
   marginRight: '0.75rem',
-  color: '#3b82f6',
+  color: vars.color.primary,
 })
 
 export const bankName = style({
   fontSize: '1.5rem',
   fontWeight: '700',
-  color: '#1f2937',
+  color: vars.color.primary,
 })
 
 export const formContainer = style({
@@ -154,44 +190,47 @@ export const formField = style({
 export const label = style({
   fontSize: '0.875rem',
   fontWeight: '600',
-  color: '#374151',
+  color: vars.color.textSecondary,
 })
 
 export const input = style({
   padding: '0.75rem',
-  border: '1px solid #d1d5db',
+  border: `1px solid ${vars.color.borderLight}`,
   borderRadius: '0.375rem',
   fontSize: '1rem',
+  backgroundColor: vars.color.surface,
+  color: vars.color.textPrimary,
   transition: 'border-color 0.2s',
   ':focus': {
     outline: 'none',
-    borderColor: '#3b82f6',
+    borderColor: vars.color.borderFocus,
     boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
   },
 })
 
 export const select = style({
   padding: '0.75rem',
-  border: '1px solid #d1d5db',
+  border: `1px solid ${vars.color.borderLight}`,
   borderRadius: '0.375rem',
   fontSize: '1rem',
-  backgroundColor: '#ffffff',
+  backgroundColor: vars.color.surface,
+  color: vars.color.textPrimary,
   transition: 'border-color 0.2s',
   appearance: 'none',
-  backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")',
+  backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%23757575\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")',
   backgroundPosition: 'right 0.5rem center',
   backgroundRepeat: 'no-repeat',
   backgroundSize: '1.5em 1.5em',
   paddingRight: '2.5rem',
   ':focus': {
     outline: 'none',
-    borderColor: '#3b82f6',
+    borderColor: vars.color.borderFocus,
     boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
   },
 })
 
 export const errorText = style({
-  color: '#dc2626',
+  color: vars.color.error,
   fontSize: '0.875rem',
 })
 
@@ -200,8 +239,8 @@ export const toggle = style({
   alignItems: 'center',
   gap: '0.75rem',
   padding: '1rem',
-  backgroundColor: '#f9fafb',
-  border: '1px solid #e5e7eb',
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.borderLight}`,
   borderRadius: '0.5rem',
   marginBottom: '1rem',
 })
@@ -210,13 +249,13 @@ export const toggleSwitch = style({
   position: 'relative',
   width: '3rem',
   height: '1.5rem',
-  backgroundColor: '#d1d5db',
+  backgroundColor: vars.color.borderLight,
   borderRadius: '0.75rem',
   cursor: 'pointer',
   transition: 'background-color 0.2s',
   selectors: {
     '&[data-enabled="true"]': {
-      backgroundColor: '#3b82f6',
+      backgroundColor: vars.color.primary,
     },
   },
 })
@@ -227,7 +266,7 @@ export const toggleHandle = style({
   left: '0.125rem',
   width: '1.25rem',
   height: '1.25rem',
-  backgroundColor: '#ffffff',
+  backgroundColor: vars.color.white,
   borderRadius: '50%',
   transition: 'transform 0.2s',
   selectors: {
@@ -240,19 +279,19 @@ export const toggleHandle = style({
 export const sectionTitle = style({
   fontSize: '1.25rem',
   fontWeight: '600',
-  color: '#1f2937',
+  color: vars.color.textPrimary,
   marginBottom: '1rem',
   paddingBottom: '0.5rem',
-  borderBottom: '1px solid #e5e7eb',
+  borderBottom: `1px solid ${vars.color.border}`,
 })
 
 export const stepIndicator = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '1rem 0 2rem',
-  marginBottom: '1rem',
-  borderBottom: '1px solid #e5e7eb',
+  padding: '0.75rem 0 1.25rem',
+  marginBottom: '0.75rem',
+  borderBottom: `1px solid ${vars.color.border}`,
 })
 
 export const stepItem = style({
@@ -266,46 +305,46 @@ export const stepDot = style({
   width: '2rem',
   height: '2rem',
   borderRadius: '50%',
-  border: '2px solid #d1d5db',
-  backgroundColor: '#ffffff',
+  border: `2px solid ${vars.color.borderLight}`,
+  backgroundColor: vars.color.surface,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontSize: '0.875rem',
   fontWeight: '600',
-  color: '#6b7280',
+  color: vars.color.textSecondary,
   transition: 'all 0.2s',
 })
 
 export const stepLabel = style({
   fontSize: '0.75rem',
-  color: '#6b7280',
+  color: vars.color.textSecondary,
   textAlign: 'center',
   maxWidth: '100px',
 })
 
 export const activeStep = style({
-  borderColor: '#3b82f6',
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
+  borderColor: vars.color.primary,
+  backgroundColor: vars.color.primary,
+  color: vars.color.white,
 })
 
 export const completedStep = style({
-  borderColor: '#10b981',
-  backgroundColor: '#10b981',
-  color: '#ffffff',
+  borderColor: vars.color.success,
+  backgroundColor: vars.color.success,
+  color: vars.color.white,
 })
 
 export const stepConnector = style({
   width: '4rem',
   height: '2px',
-  backgroundColor: '#d1d5db',
+  backgroundColor: vars.color.borderLight,
   margin: '0 0.5rem',
-  marginBottom: '1.5rem',
+  marginBottom: '1rem',
   transition: 'background-color 0.2s',
   selectors: {
     [`&.${completedStep}`]: {
-      backgroundColor: '#10b981',
+      backgroundColor: vars.color.success,
     },
   },
 })
@@ -344,18 +383,58 @@ export const themeToggle = style({
   alignItems: 'center',
   gap: '0.5rem',
   padding: '0.5rem 1rem',
-  backgroundColor: '#ffffff',
-  border: '1px solid #e5e7eb',
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
   borderRadius: '0.5rem',
   cursor: 'pointer',
   transition: 'all 0.2s',
   ':hover': {
-    backgroundColor: '#f9fafb',
+    backgroundColor: vars.color.surfaceHover,
+  },
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
   },
 })
 
 export const themeToggleLabel = style({
   fontSize: '0.875rem',
-  color: '#6b7280',
+  color: vars.color.textSecondary,
   fontWeight: '500',
+})
+
+// Selected products section styles
+export const selectedProductsContainer = style({
+  marginBottom: '1.5rem',
+  padding: '1rem',
+  backgroundColor: vars.color.selectedBg,
+  borderRadius: '0.5rem',
+  border: `1px solid ${vars.color.border}`,
+})
+
+export const selectedProductsContent = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  flexWrap: 'wrap',
+})
+
+export const selectedProductsTitle = style({
+  margin: '0',
+  color: vars.color.primary,
+  fontWeight: '600',
+})
+
+export const productTag = style({
+  padding: '0.25rem 0.75rem',
+  backgroundColor: vars.color.primary,
+  color: vars.color.white,
+  borderRadius: '1rem',
+  fontSize: '0.875rem',
+  textTransform: 'capitalize',
+  transition: 'background-color 0.2s',
+  ':hover': {
+    backgroundColor: vars.color.primaryHover,
+  },
 })
