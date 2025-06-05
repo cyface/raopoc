@@ -1,0 +1,155 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { LanguageSwitcher } from './LanguageSwitcher'
+import { ThemeProvider } from '../context/ThemeContext'
+import { configService } from '../services/configService'
+import '../i18n'
+
+// Mock the config service
+vi.mock('../services/configService', () => ({
+  configService: {
+    refreshForLanguageChange: vi.fn(),
+  }
+}))
+
+// Mock URL manipulation
+const mockReplaceState = vi.fn()
+const mockLocation = {
+  href: 'http://localhost:3000',
+  search: '',
+}
+
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+})
+
+Object.defineProperty(window, 'history', {
+  value: {
+    replaceState: mockReplaceState,
+  },
+  writable: true,
+})
+
+const renderLanguageSwitcher = () => {
+  return render(
+    <ThemeProvider>
+      <LanguageSwitcher />
+    </ThemeProvider>
+  )
+}
+
+describe('LanguageSwitcher', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockLocation.href = 'http://localhost:3000'
+    mockLocation.search = ''
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders with language link buttons', () => {
+    renderLanguageSwitcher()
+    
+    expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'ES' })).toBeInTheDocument()
+  })
+
+  it('displays both English and Spanish buttons', () => {
+    renderLanguageSwitcher()
+    
+    const englishButton = screen.getByRole('button', { name: 'EN' })
+    const spanishButton = screen.getByRole('button', { name: 'ES' })
+    
+    expect(englishButton).toBeInTheDocument()
+    expect(spanishButton).toBeInTheDocument()
+  })
+
+  it('changes language to Spanish and updates URL', async () => {
+    renderLanguageSwitcher()
+    
+    const spanishButton = screen.getByRole('button', { name: 'ES' })
+    fireEvent.click(spanishButton)
+    
+    await waitFor(() => {
+      expect(mockReplaceState).toHaveBeenCalledWith(
+        {},
+        '',
+        'http://localhost:3000?lng=es'
+      )
+    })
+    
+    expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('changes language to English and removes lng parameter', async () => {
+    // Start with Spanish in URL
+    mockLocation.href = 'http://localhost:3000?lng=es'
+    mockLocation.search = '?lng=es'
+    
+    renderLanguageSwitcher()
+    
+    const englishButton = screen.getByRole('button', { name: 'EN' })
+    fireEvent.click(englishButton)
+    
+    await waitFor(() => {
+      expect(mockReplaceState).toHaveBeenCalledWith(
+        {},
+        '',
+        'http://localhost:3000'
+      )
+    })
+    
+    expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('preserves fi parameter when changing language', async () => {
+    mockLocation.href = 'http://localhost:3000?fi=warmbank'
+    mockLocation.search = '?fi=warmbank'
+    
+    renderLanguageSwitcher()
+    
+    const spanishButton = screen.getByRole('button', { name: 'ES' })
+    fireEvent.click(spanishButton)
+    
+    await waitFor(() => {
+      expect(mockReplaceState).toHaveBeenCalledWith(
+        {},
+        '',
+        'http://localhost:3000?fi=warmbank&lng=es'
+      )
+    })
+  })
+
+  it('preserves multiple URL parameters when changing language', async () => {
+    mockLocation.href = 'http://localhost:3000?fi=warmbank&dark=1&other=test'
+    mockLocation.search = '?fi=warmbank&dark=1&other=test'
+    
+    renderLanguageSwitcher()
+    
+    const spanishButton = screen.getByRole('button', { name: 'ES' })
+    fireEvent.click(spanishButton)
+    
+    await waitFor(() => {
+      const call = mockReplaceState.mock.calls[0]
+      const resultUrl = call[2]
+      expect(resultUrl).toContain('fi=warmbank')
+      expect(resultUrl).toContain('dark=1')
+      expect(resultUrl).toContain('other=test')
+      expect(resultUrl).toContain('lng=es')
+    })
+  })
+
+  it('calls configService.refreshForLanguageChange when language changes', async () => {
+    renderLanguageSwitcher()
+    
+    const spanishButton = screen.getByRole('button', { name: 'ES' })
+    fireEvent.click(spanishButton)
+    
+    await waitFor(() => {
+      expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
+    })
+  })
+})

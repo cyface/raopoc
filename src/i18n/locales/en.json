@@ -1,0 +1,143 @@
+{
+  "common": {
+    "next": "Next",
+    "continue": "Continue",
+    "tryAgain": "Try Again",
+    "loading": "Loading...",
+    "error": "Error",
+    "close": "Close",
+    "view": "View",
+    "download": "Download",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
+  },
+  "navigation": {
+    "step": "Step {{current}} of {{total}}"
+  },
+  "productSelection": {
+    "title": "Let's Open Your Account!",
+    "subtitle": "Select the account types you'd like to open. You can choose multiple options.",
+    "selectedProducts": "Selected Products:"
+  },
+  "customerInfo": {
+    "title": "Personal Information",
+    "subtitle": "Please provide your contact information and addresses for your new account(s).",
+    "personalDetails": "Personal Details",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "mailingAddress": "Mailing Address",
+    "billingAddress": "Billing Address",
+    "streetAddress": "Street Address",
+    "city": "City",
+    "state": "State",
+    "zipCode": "ZIP Code",
+    "useSameAddress": "Use same address for billing",
+    "placeholders": {
+      "email": "name@example.com",
+      "phone": "(555) 123-4567",
+      "zipCode": "12345"
+    }
+  },
+  "identificationInfo": {
+    "title": "Identity Verification",
+    "subtitle": "Please provide your identification details for account verification.",
+    "identificationDocument": "Identification Document",
+    "identificationType": "Identification Type",
+    "passportNumber": "Passport Number",
+    "driversLicenseNumber": "Driver's License Number",
+    "stateIdNumber": "State ID Number",
+    "militaryIdNumber": "Military ID Number",
+    "issuingState": "Issuing State",
+    "issuingCountry": "Issuing Country",
+    "dateOfBirth": "Date of Birth",
+    "socialSecurityInformation": "Social Security Information",
+    "socialSecurityNumber": "Social Security Number",
+    "noSSN": "I don't have a Social Security Number"
+  },
+  "documentAcceptance": {
+    "title": "Review Required Documents",
+    "subtitle": "Please review and accept the following documents to continue with your account opening.",
+    "loading": "Loading document requirements...",
+    "noDocumentsRequired": "No additional documents are required for your selected products.",
+    "acceptAllDocuments": "Accept All Documents",
+    "allDocumentsAccepted": "All Documents Accepted",
+    "viewDocument": "View Document",
+    "view": "View",
+    "downloadDocument": "Download Document",
+    "download": "Download",
+    "acceptText": "I have read and accept the {{documentName}}",
+    "close": "Close",
+    "errors": {
+      "failedToLoad": "Failed to load document requirements",
+      "unableToOpen": "Unable to open document. Please try again.",
+      "unableToDownload": "Unable to download document. Please try again."
+    }
+  },
+  "confirmationScreen": {
+    "submitting": {
+      "title": "Submitting Your Application",
+      "message": "Please wait while we process your information..."
+    },
+    "error": {
+      "title": "Submission Failed",
+      "tryAgain": "Try Again"
+    },
+    "success": {
+      "title": "Application Submitted Successfully!",
+      "message": "Thank you for choosing {{bankName}}. Your application has been received and is being processed.",
+      "applicationDetails": "Application Details",
+      "applicationId": "Application ID",
+      "submitted": "Submitted",
+      "selectedProducts": "Selected Products",
+      "verificationRequired": "Additional Verification Required",
+      "verificationMessage": "A bank representative will contact you within 1-2 business days to complete your account opening process.",
+      "emailSent": "Confirmation Email Sent",
+      "emailMessage": "A confirmation email has been sent to <strong>{{email}}</strong> with your application details.",
+      "whatsNext": "What's Next?",
+      "nextStepsVerification": "A representative will contact you within 1-2 business days to complete the verification process and finalize your account opening.",
+      "nextStepsReview": "We'll review your application within 1-2 business days. You may be contacted for additional information if needed.",
+      "needHelp": "Need help?",
+      "contactTeam": "Contact our customer service team",
+      "phone": "Phone",
+      "email": "Email",
+      "hours": "Hours"
+    },
+    "email": {
+      "subject": "Your Bank Account Application Confirmation - {{appId}}",
+      "greeting": "Dear {{firstName}},",
+      "defaultGreeting": "Valued Customer",
+      "thankYou": "Thank you for choosing {{bankName}}! We have received your application for the following accounts:",
+      "account": "Account",
+      "applicationDetails": "Application Details",
+      "applicationId": "Application ID",
+      "submitted": "Submitted",
+      "status": "Status",
+      "underReview": "Under Review",
+      "whatNext": "What happens next?",
+      "reviewTime": "We will review your application within 1-2 business days",
+      "mayContact": "You may be contacted for additional information if needed",
+      "onceApproved": "Once approved, you will receive your account details and materials",
+      "checkStatus": "You can check your application status at any time by visiting our website or calling customer service.",
+      "bestRegards": "Best regards",
+      "team": "Team"
+    },
+    "errors": {
+      "submitFailed": "Failed to submit application. Please try again."
+    }
+  },
+  "bankInfo": {
+    "defaultName": "Cool Bank",
+    "defaultPhone": "1-800-COOLBNK (1-800-XXX-XXXX)",
+    "defaultEmail": "support@coolbank.com",
+    "defaultHours": "Monday - Friday 8:00 AM - 8:00 PM EST"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "invalidSSN": "Please enter a valid Social Security Number",
+    "selectAtLeastOneProduct": "Please select at least one product"
+  }
+}

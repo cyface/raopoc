@@ -1,0 +1,143 @@
+{
+  "common": {
+    "next": "Siguiente",
+    "continue": "Continuar",
+    "tryAgain": "Intentar de nuevo",
+    "loading": "Cargando...",
+    "error": "Error",
+    "close": "Cerrar",
+    "view": "Ver",
+    "download": "Descargar",
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro"
+  },
+  "navigation": {
+    "step": "Paso {{current}} de {{total}}"
+  },
+  "productSelection": {
+    "title": "¡Abramos su cuenta!",
+    "subtitle": "Seleccione los tipos de cuenta que le gustaría abrir. Puede elegir múltiples opciones.",
+    "selectedProducts": "Productos seleccionados:"
+  },
+  "customerInfo": {
+    "title": "Información personal",
+    "subtitle": "Por favor proporcione su información de contacto y direcciones para su(s) nueva(s) cuenta(s).",
+    "personalDetails": "Detalles personales",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "emailAddress": "Dirección de correo electrónico",
+    "phoneNumber": "Número de teléfono",
+    "mailingAddress": "Dirección postal",
+    "billingAddress": "Dirección de facturación",
+    "streetAddress": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado",
+    "zipCode": "Código postal",
+    "useSameAddress": "Usar la misma dirección para facturación",
+    "placeholders": {
+      "email": "nombre@ejemplo.com",
+      "phone": "(555) 123-4567",
+      "zipCode": "12345"
+    }
+  },
+  "identificationInfo": {
+    "title": "Verificación de identidad",
+    "subtitle": "Por favor proporcione sus detalles de identificación para la verificación de la cuenta.",
+    "identificationDocument": "Documento de identificación",
+    "identificationType": "Tipo de identificación",
+    "passportNumber": "Número de pasaporte",
+    "driversLicenseNumber": "Número de licencia de conducir",
+    "stateIdNumber": "Número de identificación estatal",
+    "militaryIdNumber": "Número de identificación militar",
+    "issuingState": "Estado emisor",
+    "issuingCountry": "País emisor",
+    "dateOfBirth": "Fecha de nacimiento",
+    "socialSecurityInformation": "Información del Seguro Social",
+    "socialSecurityNumber": "Número de Seguro Social",
+    "noSSN": "No tengo un Número de Seguro Social"
+  },
+  "documentAcceptance": {
+    "title": "Revisar documentos requeridos",
+    "subtitle": "Por favor revise y acepte los siguientes documentos para continuar con la apertura de su cuenta.",
+    "loading": "Cargando requisitos de documentos...",
+    "noDocumentsRequired": "No se requieren documentos adicionales para los productos seleccionados.",
+    "acceptAllDocuments": "Aceptar todos los documentos",
+    "allDocumentsAccepted": "Todos los documentos aceptados",
+    "viewDocument": "Ver documento",
+    "view": "Ver",
+    "downloadDocument": "Descargar documento",
+    "download": "Descargar",
+    "acceptText": "He leído y acepto {{documentName}}",
+    "close": "Cerrar",
+    "errors": {
+      "failedToLoad": "Error al cargar los requisitos de documentos",
+      "unableToOpen": "No se puede abrir el documento. Por favor, inténtelo de nuevo.",
+      "unableToDownload": "No se puede descargar el documento. Por favor, inténtelo de nuevo."
+    }
+  },
+  "confirmationScreen": {
+    "submitting": {
+      "title": "Enviando su solicitud",
+      "message": "Por favor espere mientras procesamos su información..."
+    },
+    "error": {
+      "title": "Error en el envío",
+      "tryAgain": "Intentar de nuevo"
+    },
+    "success": {
+      "title": "¡Solicitud enviada exitosamente!",
+      "message": "Gracias por elegir {{bankName}}. Su solicitud ha sido recibida y está siendo procesada.",
+      "applicationDetails": "Detalles de la solicitud",
+      "applicationId": "ID de solicitud",
+      "submitted": "Enviado",
+      "selectedProducts": "Productos seleccionados",
+      "verificationRequired": "Se requiere verificación adicional",
+      "verificationMessage": "Un representante del banco se comunicará con usted en 1-2 días hábiles para completar el proceso de apertura de su cuenta.",
+      "emailSent": "Correo de confirmación enviado",
+      "emailMessage": "Se ha enviado un correo de confirmación a <strong>{{email}}</strong> con los detalles de su solicitud.",
+      "whatsNext": "¿Qué sigue?",
+      "nextStepsVerification": "Un representante se comunicará con usted en 1-2 días hábiles para completar el proceso de verificación y finalizar la apertura de su cuenta.",
+      "nextStepsReview": "Revisaremos su solicitud en 1-2 días hábiles. Es posible que se comuniquen con usted si necesitan información adicional.",
+      "needHelp": "¿Necesita ayuda?",
+      "contactTeam": "Contacte a nuestro equipo de servicio al cliente",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "hours": "Horarios"
+    },
+    "email": {
+      "subject": "Confirmación de su solicitud de cuenta bancaria - {{appId}}",
+      "greeting": "Estimado/a {{firstName}},",
+      "defaultGreeting": "Estimado cliente",
+      "thankYou": "¡Gracias por elegir {{bankName}}! Hemos recibido su solicitud para las siguientes cuentas:",
+      "account": "Cuenta",
+      "applicationDetails": "Detalles de la solicitud",
+      "applicationId": "ID de solicitud",
+      "submitted": "Enviado",
+      "status": "Estado",
+      "underReview": "En revisión",
+      "whatNext": "¿Qué sigue?",
+      "reviewTime": "Revisaremos su solicitud en 1-2 días hábiles",
+      "mayContact": "Es posible que se comuniquen con usted si necesitan información adicional",
+      "onceApproved": "Una vez aprobada, recibirá los detalles de su cuenta y los materiales",
+      "checkStatus": "Puede verificar el estado de su solicitud en cualquier momento visitando nuestro sitio web o llamando al servicio al cliente.",
+      "bestRegards": "Saludos cordiales",
+      "team": "Equipo"
+    },
+    "errors": {
+      "submitFailed": "Error al enviar la solicitud. Por favor, inténtelo de nuevo."
+    }
+  },
+  "bankInfo": {
+    "defaultName": "Cool Bank",
+    "defaultPhone": "1-800-COOLBNK (1-800-XXX-XXXX)",
+    "defaultEmail": "soporte@coolbank.com",
+    "defaultHours": "Lunes - Viernes 8:00 AM - 8:00 PM EST"
+  },
+  "validation": {
+    "required": "Este campo es requerido",
+    "invalidEmail": "Por favor ingrese una dirección de correo electrónico válida",
+    "invalidPhone": "Por favor ingrese un número de teléfono válido",
+    "invalidSSN": "Por favor ingrese un Número de Seguro Social válido",
+    "selectAtLeastOneProduct": "Por favor seleccione al menos un producto"
+  }
+}
