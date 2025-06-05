@@ -2,11 +2,13 @@ import { createContext, useContext, useState, ReactNode } from 'react'
 import { type OnboardingData } from '../types/customer'
 import { type ProductType } from '../types/products'
 import { type CustomerInfoData } from '../types/customer'
+import { type IdentificationInfoData } from '../types/identification'
 
 interface OnboardingContextType {
   data: OnboardingData
   setSelectedProducts: (products: ProductType[]) => void
   setCustomerInfo: (customerInfo: CustomerInfoData) => void
+  setIdentificationInfo: (identificationInfo: IdentificationInfoData) => void
   currentStep: number
   setCurrentStep: (step: number) => void
 }
@@ -17,6 +19,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<OnboardingData>({
     selectedProducts: [],
     customerInfo: undefined,
+    identificationInfo: undefined,
   })
   
   const [currentStep, setCurrentStep] = useState(1)
@@ -29,10 +32,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setData(prev => ({ ...prev, customerInfo }))
   }
 
+  const setIdentificationInfo = (identificationInfo: IdentificationInfoData) => {
+    setData(prev => ({ ...prev, identificationInfo }))
+  }
+
   const value = {
     data,
     setSelectedProducts,
     setCustomerInfo,
+    setIdentificationInfo,
     currentStep,
     setCurrentStep,
   }
