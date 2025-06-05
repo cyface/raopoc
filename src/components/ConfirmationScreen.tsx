@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { useOnboarding } from '../context/OnboardingContext';
 import { configService, type BankInfo } from '../services/configService';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +13,7 @@ interface ConfirmationScreenProps {
 export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
   const { data, creditCheckResult } = useOnboarding();
   const { styles } = useTheme();
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -23,29 +25,29 @@ export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     console.log(`📧 Mock Email Sent to: ${email || 'customer@example.com'}`);
-    console.log(`Subject: Your Bank Account Application Confirmation - ${appId}`);
+    console.log(`Subject: ${t('confirmationScreen.email.subject', { appId })}`);
     console.log(`
-Dear ${data.customerInfo?.firstName || 'Valued Customer'},
+${t('confirmationScreen.email.greeting', { firstName: data.customerInfo?.firstName || t('confirmationScreen.email.defaultGreeting') })}
 
-Thank you for choosing ${bankInfo?.bankName || 'Cool Bank'}! We have received your application for the following accounts:
-${data.selectedProducts.map(product => `• ${product.charAt(0).toUpperCase() + product.slice(1)} Account`).join('\n')}
+${t('confirmationScreen.email.thankYou', { bankName: bankInfo?.bankName || t('bankInfo.defaultName') })}
+${data.selectedProducts.map(product => `• ${product.charAt(0).toUpperCase() + product.slice(1)} ${t('confirmationScreen.email.account')}`).join('\n')}
 
-Application Details:
-- Application ID: ${appId}
-- Submitted: ${new Date().toLocaleString()}
-- Status: Under Review
+${t('confirmationScreen.email.applicationDetails')}:
+- ${t('confirmationScreen.email.applicationId')}: ${appId}
+- ${t('confirmationScreen.email.submitted')}: ${new Date().toLocaleString()}
+- ${t('confirmationScreen.email.status')}: ${t('confirmationScreen.email.underReview')}
 
-What happens next?
-1. We will review your application within 1-2 business days
-2. You may be contacted for additional information if needed
-3. Once approved, you will receive your account details and materials
+${t('confirmationScreen.email.whatNext')}:
+1. ${t('confirmationScreen.email.reviewTime')}
+2. ${t('confirmationScreen.email.mayContact')}
+3. ${t('confirmationScreen.email.onceApproved')}
 
-You can check your application status at any time by visiting our website or calling customer service.
+${t('confirmationScreen.email.checkStatus')}
 
-Best regards,
-${bankInfo?.bankName || 'Cool Bank'} Team
+${t('confirmationScreen.email.bestRegards')},
+${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email.team')}
     `);
-  }, [data.customerInfo?.firstName, data.selectedProducts, bankInfo?.bankName]);
+  }, [data.customerInfo?.firstName, data.selectedProducts, bankInfo?.bankName, t]);
 
   const handleSubmitApplication = useCallback(async () => {
     if (isSubmitting || isSubmitted) return;
@@ -76,11 +78,11 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
       setIsSubmitted(true);
     } catch (error) {
       console.error('Error submitting application:', error);
-      setSubmissionError('Failed to submit application. Please try again.');
+      setSubmissionError(t('confirmationScreen.errors.submitFailed'));
     } finally {
       setIsSubmitting(false);
     }
-  }, [isSubmitting, isSubmitted, data, mockSendConfirmationEmail]);
+  }, [isSubmitting, isSubmitted, data, mockSendConfirmationEmail, t]);
 
   useEffect(() => {
     const loadBankInfo = async () => {
@@ -103,7 +105,7 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
       <div className={styles.container}>
         <div className={styles.header}>
           <BuildingOffice2Icon className={styles.bankIcon} />
-          <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
+          <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
         </div>
         
         <div style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -117,10 +119,10 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
             margin: '0 auto 2rem'
           }} />
           <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem' }}>
-            Submitting Your Application
+            {t('confirmationScreen.submitting.title')}
           </h2>
           <p style={{ color: '#6b7280' }}>
-            Please wait while we process your information...
+            {t('confirmationScreen.submitting.message')}
           </p>
         </div>
       </div>
@@ -132,7 +134,7 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
       <div className={styles.container}>
         <div className={styles.header}>
           <BuildingOffice2Icon className={styles.bankIcon} />
-          <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
+          <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
         </div>
         
         <div style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -150,7 +152,7 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
           </div>
           
           <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#dc2626' }}>
-            Submission Failed
+            {t('confirmationScreen.error.title')}
           </h2>
           <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
             {submissionError}
@@ -162,7 +164,7 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
             className={styles.button}
             style={{ backgroundColor: '#3b82f6', color: 'white' }}
           >
-            Try Again
+            {t('confirmationScreen.error.tryAgain')}
           </button>
         </div>
       </div>
@@ -190,9 +192,9 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
           <CheckCircleIcon style={{ width: '40px', height: '40px', color: '#059669' }} />
         </div>
         
-        <h1 className={styles.heading}>Application Submitted Successfully!</h1>
+        <h1 className={styles.heading}>{t('confirmationScreen.success.title')}</h1>
         <p className={styles.subheading}>
-          Thank you for choosing {bankInfo?.bankName || 'Cool Bank'}. Your application has been received and is being processed.
+          {t('confirmationScreen.success.message', { bankName: bankInfo?.bankName || t('bankInfo.defaultName') })}
         </p>
 
         {finalApplicationId && (
@@ -205,19 +207,19 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
             textAlign: 'left'
           }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
-              Application Details
+              {t('confirmationScreen.success.applicationDetails')}
             </h3>
             <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.875rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>Application ID:</span>
+                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.applicationId')}:</span>
                 <span style={{ fontFamily: 'monospace', color: '#3b82f6' }}>{finalApplicationId}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>Submitted:</span>
+                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.submitted')}:</span>
                 <span>{new Date().toLocaleString()}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>Selected Products:</span>
+                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.selectedProducts')}:</span>
                 <span>{data.selectedProducts.join(', ')}</span>
               </div>
             </div>
@@ -249,10 +251,10 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
               </div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: '#92400e' }}>
-                  Additional Verification Required
+                  {t('confirmationScreen.success.verificationRequired')}
                 </h4>
                 <p style={{ fontSize: '0.875rem', color: '#92400e', margin: 0 }}>
-                  A bank representative will contact you within 1-2 business days to complete your account opening process.
+                  {t('confirmationScreen.success.verificationMessage')}
                 </p>
               </div>
             </div>
@@ -270,10 +272,10 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
             <EnvelopeIcon style={{ width: '24px', height: '24px', color: '#ca8a04', flexShrink: 0 }} />
             <div style={{ textAlign: 'left' }}>
               <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                Confirmation Email Sent
+                {t('confirmationScreen.success.emailSent')}
               </h4>
               <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-                A confirmation email has been sent to <strong>{data.customerInfo?.email}</strong> with your application details.
+                {t('confirmationScreen.success.emailMessage', { email: data.customerInfo?.email })}
               </p>
             </div>
           </div>
@@ -290,14 +292,13 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
             <DocumentCheckIcon style={{ width: '24px', height: '24px', color: '#0284c7', flexShrink: 0 }} />
             <div style={{ textAlign: 'left' }}>
               <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                What&apos;s Next?
+                {t('confirmationScreen.success.whatsNext')}
               </h4>
               <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-                {creditCheckResult?.requiresVerification ? (
-                  <>A representative will contact you within 1-2 business days to complete the verification process and finalize your account opening.</>
-                ) : (
-                  <>We&apos;ll review your application within 1-2 business days. You may be contacted for additional information if needed.</>
-                )}
+                {creditCheckResult?.requiresVerification ? 
+                  t('confirmationScreen.success.nextStepsVerification') : 
+                  t('confirmationScreen.success.nextStepsReview')
+                }
               </p>
             </div>
           </div>
@@ -313,16 +314,16 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
           color: '#6b7280'
         }}>
           <p style={{ margin: '0 0 0.5rem 0' }}>
-            <strong>Need help?</strong> Contact our customer service team:
+            <strong>{t('confirmationScreen.success.needHelp')}</strong> {t('confirmationScreen.success.contactTeam')}:
           </p>
           <p style={{ margin: '0 0 0.5rem 0' }}>
-            📞 Phone: {bankInfo?.contact.phoneDisplay || '1-800-COOLBNK (1-800-XXX-XXXX)'}
+            📞 {t('confirmationScreen.success.phone')}: {bankInfo?.contact.phoneDisplay || '1-800-COOLBNK (1-800-XXX-XXXX)'}
           </p>
           <p style={{ margin: '0 0 0.5rem 0' }}>
-            ✉️ Email: {bankInfo?.contact.email || 'support@coolbank.com'}
+            ✉️ {t('confirmationScreen.success.email')}: {bankInfo?.contact.email || 'support@coolbank.com'}
           </p>
           <p style={{ margin: 0 }}>
-            🕒 Hours: {bankInfo?.contact.hours || 'Monday - Friday 8:00 AM - 8:00 PM EST'}
+            🕒 {t('confirmationScreen.success.hours')}: {bankInfo?.contact.hours || 'Monday - Friday 8:00 AM - 8:00 PM EST'}
           </p>
         </div>
       </div>

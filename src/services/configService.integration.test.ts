@@ -1,0 +1,347 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { configService } from './configService'
+
+// Mock fetch globally
+const mockFetch = vi.fn()
+global.fetch = mockFetch
+
+// Mock window.location
+const mockLocation = {
+  href: 'http://localhost:3000',
+  search: '',
+}
+
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+})
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+}
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+  writable: true,
+})
+
+describe('ConfigService Integration Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockLocation.href = 'http://localhost:3000'
+    mockLocation.search = ''
+    mockLocalStorage.getItem.mockReturnValue(null)
+    
+    // Clear service cache
+    configService.clearCache()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('Financial Institution (fi) Parameter', () => {
+    it('loads default config when no fi parameter is present', async () => {
+      const mockProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'Default checking', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('loads bank-specific config when fi parameter is present', async () => {
+      mockLocation.search = '?fi=warmbank'
+      
+      const mockProducts = [
+        { type: 'savings', title: 'Warm Savings', description: 'Warm bank savings', icon: 'PiggyBank' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('clears cache and reloads when fi parameter changes', async () => {
+      // Initial load with default config
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Default Checking', description: 'Default', icon: 'CreditCard' }])
+      })
+
+      const initialProducts = await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      
+      // Change fi parameter
+      mockLocation.search = '?fi=coolbank'
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Cool Checking', description: 'Cool bank', icon: 'CreditCard' }])
+      })
+
+      const newProducts = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/coolbank/products')
+      expect(newProducts[0].title).toBe('Cool Checking')
+    })
+
+    it('loads bank-specific bank info correctly', async () => {
+      mockLocation.search = '?fi=warmbank'
+      
+      const mockBankInfo = {
+        bankName: 'Warm Bank',
+        displayName: 'Warm Banking Solutions',
+        theme: 'greenLight' as const,
+        contact: {
+          phone: '1-800-WARMBNK',
+          phoneDisplay: '1-800-WARMBNK',
+          email: 'support@warmbank.com',
+          hours: 'Always available'
+        },
+        branding: {
+          primaryColor: '#10b981',
+          logoIcon: 'Leaf'
+        }
+      }
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockBankInfo)
+      })
+
+      const bankInfo = await configService.getBankInfo()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/bank-info')
+      expect(bankInfo).toEqual(mockBankInfo)
+    })
+  })
+
+  describe('Language Parameter (lng)', () => {
+    it('loads English config by default', async () => {
+      const mockProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'English description', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('loads Spanish config when lng=es parameter is present', async () => {
+      mockLocation.search = '?lng=es'
+      
+      const mockProducts = [
+        { type: 'checking', title: 'Cuenta Corriente', description: 'Descripción en español', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('loads Spanish config from localStorage when URL has no lng parameter', async () => {
+      mockLocalStorage.getItem.mockImplementation((key) => {
+        if (key === 'i18nextLng') return 'es'
+        return null
+      })
+      
+      const mockProducts = [
+        { type: 'checking', title: 'Cuenta Corriente', description: 'Descripción en español', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('clears cache and reloads when language changes via refreshForLanguageChange', async () => {
+      // Initial load in English
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Checking Account', description: 'English', icon: 'CreditCard' }])
+      })
+
+      const initialProducts = await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      
+      // Change language to Spanish
+      mockLocation.search = '?lng=es'
+      configService.refreshForLanguageChange()
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Cuenta Corriente', description: 'Español', icon: 'CreditCard' }])
+      })
+
+      const spanishProducts = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(spanishProducts[0].title).toBe('Cuenta Corriente')
+    })
+  })
+
+  describe('Combined fi and lng Parameters', () => {
+    it('loads bank-specific Spanish config when both fi=warmbank and lng=es are present', async () => {
+      mockLocation.search = '?fi=warmbank&lng=es'
+      
+      const mockProducts = [
+        { type: 'savings', title: 'Ahorros Cálidos', description: 'Descripción en español', icon: 'PiggyBank' }
+      ]
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const products = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products.es')
+      expect(products).toEqual(mockProducts)
+    })
+
+    it('handles URL parameter changes correctly when both fi and lng change', async () => {
+      // Start with default English config
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Default Checking', description: 'Default', icon: 'CreditCard' }])
+      })
+
+      await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      
+      // Change to warmbank + Spanish
+      mockLocation.search = '?fi=warmbank&lng=es'
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'savings', title: 'Ahorros Cálidos', description: 'Español', icon: 'PiggyBank' }])
+      })
+
+      const newProducts = await configService.getProducts()
+      
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products.es')
+      expect(newProducts[0].title).toBe('Ahorros Cálidos')
+    })
+  })
+
+  describe('Config Caching Behavior', () => {
+    it('respects cache timeout and does not reload within timeout period', async () => {
+      const mockProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'Cached', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      // First call
+      await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      
+      // Second call within cache timeout (should not trigger fetch)
+      await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('reloads config after cache timeout expires', async () => {
+      // Mock a very short cache timeout for testing
+      vi.stubEnv('VITE_CONFIG_CACHE_TIMEOUT', '1')
+      
+      const mockProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'Cached', icon: 'CreditCard' }
+      ]
+      
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      // First call
+      await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      
+      // Wait for cache to expire
+      await new Promise(resolve => setTimeout(resolve, 10))
+      
+      // Second call after cache timeout (should trigger fetch)
+      await configService.getProducts()
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+      
+      vi.unstubAllEnvs()
+    })
+  })
+
+  describe('Error Handling', () => {
+    it('returns cached data when network request fails', async () => {
+      const mockProducts = [
+        { type: 'checking', title: 'Cached Checking', description: 'From cache', icon: 'CreditCard' }
+      ]
+      
+      // First successful call to populate cache
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts)
+      })
+
+      const initialProducts = await configService.getProducts()
+      expect(initialProducts).toEqual(mockProducts)
+      
+      // Clear cache and make network fail
+      configService.clearCache()
+      mockFetch.mockRejectedValueOnce(new Error('Network error'))
+      
+      const productsAfterError = await configService.getProducts()
+      expect(productsAfterError).toEqual([]) // Should return empty array when no cache
+    })
+
+    it('returns default bank info when bank-specific config fails to load', async () => {
+      mockLocation.search = '?fi=nonexistentbank'
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404
+      })
+
+      const bankInfo = await configService.getBankInfo()
+      
+      expect(bankInfo.bankName).toBe('Cool Bank')
+      expect(bankInfo.displayName).toBe('Cool Bank')
+    })
+  })
+})

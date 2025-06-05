@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DocumentTextIcon, ArrowDownTrayIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { Document, DocumentAcceptanceState, DocumentConfig, type DocumentAcceptance } from '../types/documents';
 import { configService, type BankInfo } from '../services/configService';
 import { useOnboarding } from '../context/OnboardingContext';
@@ -22,6 +23,7 @@ export function DocumentAcceptance({
 }: DocumentAcceptanceProps) {
   const { currentStep } = useOnboarding();
   const { styles } = useTheme();
+  const { t } = useTranslation();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [acceptances, setAcceptances] = useState<Record<string, boolean>>({});
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
@@ -65,7 +67,7 @@ export function DocumentAcceptance({
       setAcceptances(initialAcceptances);
 
     } catch (err) {
-      setError('Failed to load document requirements');
+      setError(t('documentAcceptance.errors.failedToLoad'));
       console.error('Error loading documents:', err);
     } finally {
       setLoading(false);
@@ -126,7 +128,7 @@ export function DocumentAcceptance({
       setModalDocument({ document, url });
     } catch (err) {
       console.error('Error viewing document:', err);
-      alert('Unable to open document. Please try again.');
+      alert(t('documentAcceptance.errors.unableToOpen'));
     }
   };
 
@@ -154,14 +156,14 @@ export function DocumentAcceptance({
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       console.error('Error downloading document:', err);
-      alert('Unable to download document. Please try again.');
+      alert(t('documentAcceptance.errors.unableToDownload'));
     }
   };
 
   if (loading) {
     return (
       <div className={styles.container}>
-        <div>Loading document requirements...</div>
+        <div>{t('documentAcceptance.loading')}</div>
       </div>
     );
   }
@@ -180,19 +182,19 @@ export function DocumentAcceptance({
     <div className={styles.container}>
       <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <BuildingOffice2Icon className={styles.bankIcon} />
-        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
       <StepIndicator currentStep={currentStep} totalSteps={5} />
       
-      <h1 className={styles.heading}>Review Required Documents</h1>
+      <h1 className={styles.heading}>{t('documentAcceptance.title')}</h1>
       <p className={styles.subheading}>
-        Please review and accept the following documents to continue with your account opening.
+        {t('documentAcceptance.subtitle')}
       </p>
 
       {documents.length === 0 ? (
         <div style={{ padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '8px', marginBottom: '2rem' }}>
-          No additional documents are required for your selected products.
+          {t('documentAcceptance.noDocumentsRequired')}
         </div>
       ) : (
         <>
@@ -205,7 +207,7 @@ export function DocumentAcceptance({
                 disabled={allAccepted}
                 style={{ opacity: allAccepted ? 0.6 : 1 }}
               >
-                {allAccepted ? 'All Documents Accepted' : 'Accept All Documents'}
+                {allAccepted ? t('documentAcceptance.allDocumentsAccepted') : t('documentAcceptance.acceptAllDocuments')}
               </button>
             </div>
           )}
@@ -227,10 +229,10 @@ export function DocumentAcceptance({
                       onClick={() => handleViewDocument(document)}
                       className={styles.button}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      title="View Document"
+                      title={t('documentAcceptance.viewDocument')}
                     >
                       <DocumentTextIcon style={{ width: '1rem', height: '1rem' }} />
-                      View
+                      {t('documentAcceptance.view')}
                     </button>
                     
                     <button
@@ -238,10 +240,10 @@ export function DocumentAcceptance({
                       onClick={() => handleDownloadDocument(document)}
                       className={styles.button}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      title="Download Document"
+                      title={t('documentAcceptance.downloadDocument')}
                     >
                       <ArrowDownTrayIcon style={{ width: '1rem', height: '1rem' }} />
-                      Download
+                      {t('documentAcceptance.download')}
                     </button>
                   </div>
                 </div>
@@ -255,7 +257,7 @@ export function DocumentAcceptance({
                       style={{ width: '1rem', height: '1rem' }}
                     />
                     <span style={{ fontSize: '0.875rem' }}>
-                      I have read and accept the {document.name}
+                      {t('documentAcceptance.acceptText', { documentName: document.name })}
                       {document.required && <span style={{ color: 'red' }}> *</span>}
                     </span>
                   </label>
@@ -280,7 +282,7 @@ export function DocumentAcceptance({
               cursor: documents.length > 0 && !allAccepted ? 'not-allowed' : 'pointer'
             }}
           >
-            Continue
+            {t('common.continue')}
           </button>
         </div>
       )}
@@ -336,7 +338,7 @@ export function DocumentAcceptance({
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
-                title="Close"
+                title={t('documentAcceptance.close')}
               >
                 <XMarkIcon style={{ width: '1.5rem', height: '1.5rem' }} />
               </button>

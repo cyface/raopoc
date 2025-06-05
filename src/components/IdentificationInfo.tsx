@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Building2, Shield, CreditCard } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { IdentificationInfoSchema, type IdentificationInfoData } from '../types/identification'
 import { configService, type State, type Country, type IdentificationType, type BankInfo } from '../services/configService'
 import { useOnboarding } from '../context/OnboardingContext'
@@ -15,6 +16,7 @@ interface IdentificationInfoProps {
 export default function IdentificationInfo({ onNext }: IdentificationInfoProps) {
   const { currentStep, performCreditCheck } = useOnboarding()
   const { styles } = useTheme()
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<IdentificationInfoData>({
     identificationType: 'drivers-license',
     identificationNumber: '',
@@ -145,24 +147,24 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
     <div className={styles.container}>
       <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <Building2 className={styles.bankIcon} />
-        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
       <StepIndicator currentStep={currentStep} totalSteps={5} />
       
-      <h1 className={styles.heading}>Identity Verification</h1>
+      <h1 className={styles.heading}>{t('identificationInfo.title')}</h1>
       <p className={styles.subheading}>
-        Please provide your identification details for account verification.
+        {t('identificationInfo.subtitle')}
       </p>
 
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <div className={styles.sectionTitle}>
           <Shield className={styles.sectionIcon} />
-          Identification Document
+          {t('identificationInfo.identificationDocument')}
         </div>
 
         <div className={styles.formField}>
-          <label className={styles.label} htmlFor="identificationType">Identification Type</label>
+          <label className={styles.label} htmlFor="identificationType">{t('identificationInfo.identificationType')}</label>
           <select
             id="identificationType"
             className={styles.select}
@@ -182,10 +184,10 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
         <div className={styles.formRow}>
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="identificationNumber">
-              {formData.identificationType === 'passport' ? 'Passport Number' :
-               formData.identificationType === 'drivers-license' ? 'Driver\'s License Number' :
-               formData.identificationType === 'state-id' ? 'State ID Number' :
-               'Military ID Number'}
+              {formData.identificationType === 'passport' ? t('identificationInfo.passportNumber') :
+               formData.identificationType === 'drivers-license' ? t('identificationInfo.driversLicenseNumber') :
+               formData.identificationType === 'state-id' ? t('identificationInfo.stateIdNumber') :
+               t('identificationInfo.militaryIdNumber')}
             </label>
             <input
               id="identificationNumber"
@@ -201,7 +203,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
           {identificationTypes.find(type => type.value === formData.identificationType)?.requiresState && (
             <StateSelect
               id="state"
-              label={formData.identificationType === 'drivers-license' ? 'Issuing State' : 'Issuing State'}
+              label={t('identificationInfo.issuingState')}
               value={formData.state || ''}
               onChange={(value) => handleInputChange('state', value)}
               states={states}
@@ -213,7 +215,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
           {formData.identificationType === 'passport' && (
             <CountrySelect
               id="country"
-              label="Issuing Country"
+              label={t('identificationInfo.issuingCountry')}
               value={formData.country || ''}
               onChange={(value) => handleInputChange('country', value)}
               countries={countries}
@@ -224,7 +226,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
         </div>
 
         <div className={styles.formField}>
-          <label className={styles.label} htmlFor="dateOfBirth">Date of Birth</label>
+          <label className={styles.label} htmlFor="dateOfBirth">{t('identificationInfo.dateOfBirth')}</label>
           <input
             id="dateOfBirth"
             type="date"
@@ -239,11 +241,11 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
 
         <div className={styles.sectionTitle}>
           <CreditCard className={styles.sectionIcon} />
-          Social Security Information
+          {t('identificationInfo.socialSecurityInformation')}
         </div>
 
         <div className={styles.formField}>
-          <label className={styles.label} htmlFor="socialSecurityNumber">Social Security Number</label>
+          <label className={styles.label} htmlFor="socialSecurityNumber">{t('identificationInfo.socialSecurityNumber')}</label>
           <input
             id="socialSecurityNumber"
             type="text"
@@ -272,13 +274,13 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             <div className={styles.toggleHandle} />
           </div>
           <label style={{ cursor: 'pointer' }} onClick={() => handleInputChange('noSSN', !formData.noSSN)}>
-            I don&apos;t have a Social Security Number
+            {t('identificationInfo.noSSN')}
           </label>
         </div>
 
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.primaryButton}>
-            Next
+            {t('common.next')}
           </button>
         </div>
       </form>

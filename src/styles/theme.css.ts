@@ -404,6 +404,10 @@ export const themeToggleLabel = style({
   fontWeight: '500',
 })
 
+export const themeToggleIcon = style({
+  color: vars.color.textSecondary,
+})
+
 // Selected products section styles
 export const selectedProductsContainer = style({
   marginBottom: '1.5rem',
@@ -438,3 +442,63 @@ export const productTag = style({
     backgroundColor: vars.color.primaryHover,
   },
 })
+
+export const languageSwitcher = style({
+  position: 'absolute',
+  top: '1rem',
+  left: '1rem',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.5rem',
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: '0.5rem',
+  fontSize: '0.875rem',
+  transition: 'all 0.2s',
+  ':hover': {
+    backgroundColor: vars.color.surfaceHover,
+  },
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const languageIcon = style({
+  width: '1rem',
+  height: '1rem',
+  color: vars.color.textSecondary,
+})
+
+export const languageLinks = style({
+  display: 'flex',
+  gap: '0.5rem',
+})
+
+export const languageLink = style({
+  border: 'none',
+  backgroundColor: 'transparent',
+  fontSize: '0.875rem',
+  color: vars.color.textSecondary,
+  fontWeight: '500',
+  cursor: 'pointer',
+  outline: 'none',
+  padding: '0.25rem 0.5rem',
+  borderRadius: '0.25rem',
+  transition: 'all 0.2s',
+  ':hover': {
+    backgroundColor: vars.color.surfaceHover,
+    color: vars.color.textPrimary,
+  },
+})
+
+export const languageLinkActive = style({
+  backgroundColor: vars.color.primary,
+  color: vars.color.white,
+  ':hover': {
+    backgroundColor: vars.color.primaryHover,
+  },
+})
+

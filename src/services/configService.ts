@@ -73,6 +73,7 @@ class ConfigService {
   private lastDocumentsLoad = 0
   private lastBankInfoLoad = 0
   private currentFinancialInstitution: string | null = null
+  private currentLanguage: string | null = null
   private readonly cacheTimeout: number
   private readonly apiBaseUrl: string
 
@@ -139,17 +140,22 @@ class ConfigService {
   }
 
   /**
-   * Update the current financial institution from URL parameters
+   * Update the current financial institution and language from URL parameters
    */
   private updateFinancialInstitution(): void {
     if (typeof window === 'undefined') return
     
     const urlParams = new URLSearchParams(window.location.search)
     const newFi = urlParams.get('fi')
+    const newLanguage = this.getCurrentLanguage()
     
-    // If FI changed, clear all caches to force reload with new bank configs
-    if (newFi !== this.currentFinancialInstitution) {
+    // Check if either FI or language changed
+    const fiChanged = newFi !== this.currentFinancialInstitution
+    const languageChanged = newLanguage !== this.currentLanguage
+    
+    if (fiChanged || languageChanged) {
       this.currentFinancialInstitution = newFi
+      this.currentLanguage = newLanguage
       this.clearAllCaches()
     }
   }
@@ -181,16 +187,44 @@ class ConfigService {
   }
 
   /**
-   * Build config URL with bank-specific path support
+   * Get current language from URL parameters, localStorage, or default
+   */
+  private getCurrentLanguage(): string {
+    // First priority: URL parameters
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const langParam = urlParams.get('lng')
+      if (langParam && ['en', 'es'].includes(langParam)) {
+        return langParam
+      }
+    }
+    
+    // Second priority: localStorage (i18next cache)
+    if (typeof window !== 'undefined') {
+      const storedLang = localStorage.getItem('i18nextLng')
+      if (storedLang && ['en', 'es'].includes(storedLang)) {
+        return storedLang
+      }
+    }
+    
+    // Default to English
+    return 'en'
+  }
+
+  /**
+   * Build config URL with bank-specific and language-specific path support
    */
   private buildConfigUrl(configName: string): string {
     this.updateFinancialInstitution()
     
+    const language = this.getCurrentLanguage()
+    const localizedConfigName = language === 'en' ? configName : `${configName}.${language}`
+    
     if (this.currentFinancialInstitution) {
-      return `${this.apiBaseUrl}/config/${this.currentFinancialInstitution}/${configName}`
+      return `${this.apiBaseUrl}/config/${this.currentFinancialInstitution}/${localizedConfigName}`
     }
     
-    return `${this.apiBaseUrl}/config/${configName}`
+    return `${this.apiBaseUrl}/config/${localizedConfigName}`
   }
 
   async getStates(): Promise<State[]> {
@@ -346,6 +380,15 @@ class ConfigService {
     this.lastProductsLoad = 0
     this.lastDocumentsLoad = 0
     this.lastBankInfoLoad = 0
+  }
+
+  /**
+   * Refresh configs when language changes
+   */
+  refreshForLanguageChange(): void {
+    // Update the current language to the new one
+    this.currentLanguage = this.getCurrentLanguage()
+    this.clearAllCaches()
   }
 
   // Helper method to get identification types that require state

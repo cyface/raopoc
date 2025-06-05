@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Building2, User, Mail, Phone, MapPin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { CustomerInfoSchema, type CustomerInfoData, type AddressData } from '../types/customer'
 import { type ProductType } from '../types/products'
 import { configService, type State, type BankInfo } from '../services/configService'
@@ -16,6 +17,7 @@ interface CustomerInfoProps {
 export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoProps) {
   const { currentStep } = useOnboarding()
   const { styles } = useTheme()
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<CustomerInfoData>({
     firstName: '',
     lastName: '',
@@ -138,19 +140,19 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
     <div className={styles.container}>
       <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <Building2 className={styles.bankIcon} />
-        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
       <StepIndicator currentStep={currentStep} totalSteps={5} />
       
-      <h1 className={styles.heading}>Personal Information</h1>
+      <h1 className={styles.heading}>{t('customerInfo.title')}</h1>
       <p className={styles.subheading}>
-        Please provide your contact information and addresses for your new account(s).
+        {t('customerInfo.subtitle')}
       </p>
 
       <div className={styles.selectedProductsContainer}>
         <div className={styles.selectedProductsContent}>
-          <h3 className={styles.selectedProductsTitle}>Selected Products:</h3>
+          <h3 className={styles.selectedProductsTitle}>{t('productSelection.selectedProducts')}</h3>
           {selectedProducts.map(product => (
             <span key={product} className={styles.productTag}>
               {product.replace('-', ' ')}
@@ -162,12 +164,12 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <div className={styles.sectionTitle}>
           <User className={styles.sectionIcon} />
-          Personal Details
+          {t('customerInfo.personalDetails')}
         </div>
 
         <div className={styles.formRow}>
           <div className={styles.formField}>
-            <label className={styles.label} htmlFor="firstName">First Name</label>
+            <label className={styles.label} htmlFor="firstName">{t('customerInfo.firstName')}</label>
             <input
               id="firstName"
               type="text"
@@ -180,7 +182,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
           </div>
 
           <div className={styles.formField}>
-            <label className={styles.label} htmlFor="lastName">Last Name</label>
+            <label className={styles.label} htmlFor="lastName">{t('customerInfo.lastName')}</label>
             <input
               id="lastName"
               type="text"
@@ -197,13 +199,13 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="email">
               <Mail className={styles.labelIcon} />
-              Email Address
+              {t('customerInfo.emailAddress')}
             </label>
             <input
               id="email"
               type="email"
               className={styles.input}
-              placeholder="name@example.com"
+              placeholder={t('customerInfo.placeholders.email')}
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               autoComplete="email"
@@ -214,13 +216,13 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="phoneNumber">
               <Phone className={styles.labelIcon} />
-              Phone Number
+              {t('customerInfo.phoneNumber')}
             </label>
             <input
               id="phoneNumber"
               type="tel"
               className={styles.input}
-              placeholder="(555) 123-4567"
+              placeholder={t('customerInfo.placeholders.phone')}
               value={formData.phoneNumber}
               onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               autoComplete="tel"
@@ -231,11 +233,11 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
         <div className={styles.sectionTitle}>
           <MapPin className={styles.sectionIcon} />
-          Mailing Address
+          {t('customerInfo.mailingAddress')}
         </div>
 
         <div className={styles.formField}>
-          <label className={styles.label} htmlFor="mailingStreet">Street Address</label>
+          <label className={styles.label} htmlFor="mailingStreet">{t('customerInfo.streetAddress')}</label>
           <input
             id="mailingStreet"
             type="text"
@@ -249,7 +251,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
         <div className={styles.formRow}>
           <div className={styles.formField}>
-            <label className={styles.label} htmlFor="mailingCity">City</label>
+            <label className={styles.label} htmlFor="mailingCity">{t('customerInfo.city')}</label>
             <input
               id="mailingCity"
               type="text"
@@ -263,7 +265,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
           <StateSelect
             id="mailingState"
-            label="State"
+            label={t('customerInfo.state')}
             value={formData.mailingAddress.state}
             onChange={(value) => handleAddressChange('mailingAddress', 'state', value)}
             states={states}
@@ -272,12 +274,12 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
           />
 
           <div className={styles.formField}>
-            <label className={styles.label} htmlFor="mailingZip">ZIP Code</label>
+            <label className={styles.label} htmlFor="mailingZip">{t('customerInfo.zipCode')}</label>
             <input
               id="mailingZip"
               type="text"
               className={styles.input}
-              placeholder="12345"
+              placeholder={t('customerInfo.placeholders.zipCode')}
               value={formData.mailingAddress.zipCode}
               onChange={(e) => handleAddressChange('mailingAddress', 'zipCode', e.target.value)}
               autoComplete="postal-code"
@@ -295,7 +297,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
             <div className={styles.toggleHandle} />
           </div>
           <label style={{ cursor: 'pointer' }} onClick={handleToggleAddress}>
-            Use same address for billing
+            {t('customerInfo.useSameAddress')}
           </label>
         </div>
 
@@ -303,11 +305,11 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
           <>
             <div className={styles.sectionTitle}>
               <MapPin style={{ display: 'inline', marginRight: '0.5rem', width: '1.25rem', height: '1.25rem' }} />
-              Billing Address
+              {t('customerInfo.billingAddress')}
             </div>
 
             <div className={styles.formField}>
-              <label className={styles.label} htmlFor="billingStreet">Street Address</label>
+              <label className={styles.label} htmlFor="billingStreet">{t('customerInfo.streetAddress')}</label>
               <input
                 id="billingStreet"
                 type="text"
@@ -321,7 +323,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
             <div className={styles.formRow}>
               <div className={styles.formField}>
-                <label className={styles.label} htmlFor="billingCity">City</label>
+                <label className={styles.label} htmlFor="billingCity">{t('customerInfo.city')}</label>
                 <input
                   id="billingCity"
                   type="text"
@@ -335,7 +337,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
               <StateSelect
                 id="billingState"
-                label="State"
+                label={t('customerInfo.state')}
                 value={formData.billingAddress?.state || ''}
                 onChange={(value) => handleAddressChange('billingAddress', 'state', value)}
                 states={states}
@@ -344,12 +346,12 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
               />
 
               <div className={styles.formField}>
-                <label className={styles.label} htmlFor="billingZip">ZIP Code</label>
+                <label className={styles.label} htmlFor="billingZip">{t('customerInfo.zipCode')}</label>
                 <input
                   id="billingZip"
                   type="text"
                   className={styles.input}
-                  placeholder="12345"
+                  placeholder={t('customerInfo.placeholders.zipCode')}
                   value={formData.billingAddress?.zipCode || ''}
                   onChange={(e) => handleAddressChange('billingAddress', 'zipCode', e.target.value)}
                   autoComplete="billing postal-code"
@@ -362,7 +364,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.primaryButton}>
-            Next
+            {t('common.next')}
           </button>
         </div>
       </form>
