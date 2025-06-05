@@ -148,18 +148,11 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
         Please provide your contact information and addresses for your new account(s).
       </p>
 
-      <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#eff6ff', borderRadius: '0.5rem', border: '1px solid #bfdbfe' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <h3 style={{ margin: '0', color: '#1e40af', fontWeight: '600' }}>Selected Products:</h3>
+      <div className={styles.selectedProductsContainer}>
+        <div className={styles.selectedProductsContent}>
+          <h3 className={styles.selectedProductsTitle}>Selected Products:</h3>
           {selectedProducts.map(product => (
-            <span key={product} style={{ 
-              padding: '0.25rem 0.75rem', 
-              backgroundColor: '#3b82f6', 
-              color: 'white', 
-              borderRadius: '1rem', 
-              fontSize: '0.875rem',
-              textTransform: 'capitalize'
-            }}>
+            <span key={product} className={styles.productTag}>
               {product.replace('-', ' ')}
             </span>
           ))}
