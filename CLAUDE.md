@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- Build the project: `npm run build`
+- Install dependencies: `pnpm install`
+- Build the project: `pnpm run build`
+- Run tests: `pnpm test`
+- Run development server: `pnpm run dev`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
 
 ## Project Structure
