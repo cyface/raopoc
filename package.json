@@ -23,6 +23,7 @@
     "@vanilla-extract/recipes": "^0.5.5",
     "@vanilla-extract/vite-plugin": "^4.0.17",
     "chokidar": "^3.6.0",
+    "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "lucide-react": "^0.468.0",
