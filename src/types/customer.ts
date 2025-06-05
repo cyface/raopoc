@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { IdentificationInfoSchema } from './identification'
+import { DocumentAcceptanceSchema } from './documents'
 
 export const AddressSchema = z.object({
   street: z.string().min(1, 'Street address is required'),
@@ -42,8 +44,11 @@ export type CustomerInfoData = z.infer<typeof CustomerInfoSchema>
 export const OnboardingDataSchema = z.object({
   selectedProducts: z.array(z.enum(['checking', 'savings', 'money-market'])).min(1),
   customerInfo: CustomerInfoSchema.optional(),
-  identificationInfo: z.any().optional(), // Will import proper type later
-  documentAcceptance: z.any().optional(), // Will import proper type later
+  identificationInfo: IdentificationInfoSchema.optional(),
+  documentAcceptance: z.object({
+    acceptances: z.record(z.string(), DocumentAcceptanceSchema),
+    allAccepted: z.boolean()
+  }).optional(),
 })
 
 export type OnboardingData = z.infer<typeof OnboardingDataSchema>

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
-import { Document, DocumentAcceptanceState, DocumentConfig } from '../types/documents';
+import { Document, DocumentAcceptanceState, DocumentConfig, type DocumentAcceptance } from '../types/documents';
 import { configService, type BankInfo } from '../services/configService';
 import * as styles from '../styles/theme.css';
 
@@ -25,36 +25,7 @@ export function DocumentAcceptance({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadApplicableDocuments();
-    loadBankInfo();
-  }, [selectedProducts, hasNoSSN]);
-
-  const loadBankInfo = async () => {
-    try {
-      const bankInfoData = await configService.getBankInfo();
-      setBankInfo(bankInfoData);
-    } catch (error) {
-      console.error('Failed to load bank info:', error);
-    }
-  };
-
-  useEffect(() => {
-    const allAccepted = documents.length > 0 && documents.every(doc => acceptances[doc.id]);
-    onAcceptanceChange({
-      acceptances: Object.entries(acceptances).reduce((acc, [docId, accepted]) => {
-        acc[docId] = {
-          documentId: docId,
-          accepted,
-          acceptedAt: accepted ? new Date().toISOString() : undefined,
-        };
-        return acc;
-      }, {} as Record<string, any>),
-      allAccepted,
-    });
-  }, [acceptances, documents, onAcceptanceChange]);
-
-  const loadApplicableDocuments = async () => {
+  const loadApplicableDocuments = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -94,7 +65,36 @@ export function DocumentAcceptance({
     } finally {
       setLoading(false);
     }
+  }, [selectedProducts, hasNoSSN]);
+
+  const loadBankInfo = async () => {
+    try {
+      const bankInfoData = await configService.getBankInfo();
+      setBankInfo(bankInfoData);
+    } catch (error) {
+      console.error('Failed to load bank info:', error);
+    }
   };
+
+  useEffect(() => {
+    loadApplicableDocuments();
+    loadBankInfo();
+  }, [loadApplicableDocuments]);
+
+  useEffect(() => {
+    const allAccepted = documents.length > 0 && documents.every(doc => acceptances[doc.id]);
+    onAcceptanceChange({
+      acceptances: Object.entries(acceptances).reduce((acc, [docId, accepted]) => {
+        acc[docId] = {
+          documentId: docId,
+          accepted,
+          acceptedAt: accepted ? new Date().toISOString() : undefined,
+        };
+        return acc;
+      }, {} as Record<string, DocumentAcceptance>),
+      allAccepted,
+    });
+  }, [acceptances, documents, onAcceptanceChange]);
 
   const handleDocumentAcceptance = (documentId: string, accepted: boolean) => {
     setAcceptances(prev => ({
@@ -113,7 +113,7 @@ export function DocumentAcceptance({
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}`);
       if (!response.ok) throw new Error('Failed to fetch document');
       
       const blob = await response.blob();
@@ -129,7 +129,7 @@ export function DocumentAcceptance({
 
   const handleDownloadDocument = async (document: Document) => {
     try {
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}/download`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}/download`);
       if (!response.ok) throw new Error('Failed to download document');
       
       const blob = await response.blob();

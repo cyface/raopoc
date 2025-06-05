@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useOnboarding } from '../context/OnboardingContext';
@@ -17,58 +17,7 @@ export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
   const [finalApplicationId, setFinalApplicationId] = useState<string | null>(applicationId || null);
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
 
-  useEffect(() => {
-    const loadBankInfo = async () => {
-      try {
-        const bankInfoData = await configService.getBankInfo();
-        setBankInfo(bankInfoData);
-      } catch (error) {
-        console.error('Failed to load bank info:', error);
-      }
-    };
-    loadBankInfo();
-
-    if (!applicationId && !isSubmitted && !isSubmitting) {
-      handleSubmitApplication();
-    }
-  }, [applicationId, isSubmitted, isSubmitting]);
-
-  const handleSubmitApplication = async () => {
-    if (isSubmitting || isSubmitted) return;
-
-    setIsSubmitting(true);
-    setSubmissionError(null);
-
-    try {
-      // Submit application to API
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/applications`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to submit application: ${response.status}`);
-      }
-
-      const result = await response.json();
-      setFinalApplicationId(result.applicationId);
-
-      // Mock sending confirmation email
-      await mockSendConfirmationEmail(result.applicationId, data.customerInfo?.email);
-
-      setIsSubmitted(true);
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      setSubmissionError('Failed to submit application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const mockSendConfirmationEmail = async (appId: string, email?: string) => {
+  const mockSendConfirmationEmail = useCallback(async (appId: string, email?: string) => {
     // Mock email sending with a delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -95,7 +44,58 @@ You can check your application status at any time by visiting our website or cal
 Best regards,
 ${bankInfo?.bankName || 'Cool Bank'} Team
     `);
-  };
+  }, [data.customerInfo?.firstName, data.selectedProducts, bankInfo?.bankName]);
+
+  const handleSubmitApplication = useCallback(async () => {
+    if (isSubmitting || isSubmitted) return;
+
+    setIsSubmitting(true);
+    setSubmissionError(null);
+
+    try {
+      // Submit application to API
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/applications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to submit application: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setFinalApplicationId(result.applicationId);
+
+      // Mock sending confirmation email
+      await mockSendConfirmationEmail(result.applicationId, data.customerInfo?.email);
+
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      setSubmissionError('Failed to submit application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [isSubmitting, isSubmitted, data, mockSendConfirmationEmail]);
+
+  useEffect(() => {
+    const loadBankInfo = async () => {
+      try {
+        const bankInfoData = await configService.getBankInfo();
+        setBankInfo(bankInfoData);
+      } catch (error) {
+        console.error('Failed to load bank info:', error);
+      }
+    };
+    loadBankInfo();
+
+    if (!applicationId && !isSubmitted && !isSubmitting) {
+      handleSubmitApplication();
+    }
+  }, [applicationId, isSubmitted, isSubmitting, handleSubmitApplication]);
 
   if (isSubmitting) {
     return (

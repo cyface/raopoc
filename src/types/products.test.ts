@@ -42,7 +42,7 @@ describe('Product Types and Validation', () => {
 
     it('rejects invalid product types in selection', () => {
       const invalidData = {
-        selectedProducts: ['checking', 'invalid'] as any
+        selectedProducts: ['checking', 'invalid' as const] as string[]
       }
       
       expect(() => ProductSelectionSchema.parse(invalidData)).toThrow()

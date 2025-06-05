@@ -114,13 +114,16 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
     try {
       const validatedData = CustomerInfoSchema.parse(formData)
       onNext(validatedData)
-    } catch (error: any) {
+    } catch (error) {
       const fieldErrors: Record<string, string> = {}
       
-      error.errors?.forEach((err: any) => {
-        const path = err.path.join('.')
-        fieldErrors[path] = err.message
-      })
+      if (error instanceof Error && 'errors' in error) {
+        const zodError = error as { errors: Array<{ path: string[]; message: string }> }
+        zodError.errors?.forEach((err) => {
+          const path = err.path.join('.')
+          fieldErrors[path] = err.message
+        })
+      }
       
       setErrors(fieldErrors)
     }

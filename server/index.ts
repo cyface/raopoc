@@ -17,7 +17,70 @@ app.use(cors())
 app.use(express.json())
 
 // Cache for config files
-const configCache: Record<string, any> = {}
+interface State {
+  code: string
+  name: string
+}
+
+interface IdentificationType {
+  value: string
+  label: string
+  requiresState: boolean
+}
+
+interface Product {
+  type: string
+  title: string
+  description: string
+  icon: string
+}
+
+interface Document {
+  id: string
+  name: string
+  description?: string
+  url: string
+  required: boolean
+  category: string
+}
+
+interface DocumentRule {
+  productTypes?: string[]
+  hasSSN?: boolean
+  noSSN?: boolean
+  documentIds: string[]
+}
+
+interface DocumentConfig {
+  showAcceptAllButton: boolean
+  documents: Document[]
+  rules: DocumentRule[]
+}
+
+interface BankInfo {
+  bankName: string
+  displayName: string
+  contact: {
+    phone: string
+    phoneDisplay: string
+    email: string
+    hours: string
+  }
+  branding: {
+    primaryColor: string
+    logoIcon: string
+  }
+}
+
+interface ConfigCache {
+  states?: State[]
+  identificationTypes?: IdentificationType[]
+  products?: Product[]
+  documents?: DocumentConfig
+  bankInfo?: BankInfo
+}
+
+const configCache: ConfigCache = {}
 
 // Function to load config file
 async function loadConfigFile(filename: string) {
@@ -122,7 +185,7 @@ app.get('/api/documents/:documentId', async (req, res) => {
       return res.status(500).json({ error: 'Documents configuration not loaded' })
     }
     
-    const document = documentsConfig.documents.find((doc: any) => doc.id === documentId)
+    const document = documentsConfig.documents.find((doc: { id: string; name: string }) => doc.id === documentId)
     if (!document) {
       return res.status(404).json({ error: 'Document not found' })
     }
@@ -157,7 +220,7 @@ app.get('/api/documents/:documentId/download', async (req, res) => {
       return res.status(500).json({ error: 'Documents configuration not loaded' })
     }
     
-    const document = documentsConfig.documents.find((doc: any) => doc.id === documentId)
+    const document = documentsConfig.documents.find((doc: { id: string; name: string }) => doc.id === documentId)
     if (!document) {
       return res.status(404).json({ error: 'Document not found' })
     }

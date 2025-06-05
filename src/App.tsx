@@ -4,16 +4,18 @@ import IdentificationInfo from './components/IdentificationInfo'
 import { DocumentAcceptance } from './components/DocumentAcceptance'
 import { ConfirmationScreen } from './components/ConfirmationScreen'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
+import type { CustomerInfoData } from './types/customer'
+import type { IdentificationInfoData } from './types/identification'
 
 function OnboardingFlow() {
   const { currentStep, data, setCustomerInfo, setIdentificationInfo, setDocumentAcceptance, setCurrentStep } = useOnboarding()
 
-  const handleCustomerInfoNext = (customerInfo: any) => {
+  const handleCustomerInfoNext = (customerInfo: CustomerInfoData) => {
     setCustomerInfo(customerInfo)
     setCurrentStep(3)
   }
 
-  const handleIdentificationInfoNext = (identificationInfo: any) => {
+  const handleIdentificationInfoNext = (identificationInfo: IdentificationInfoData) => {
     setIdentificationInfo(identificationInfo)
     setCurrentStep(4)
   }

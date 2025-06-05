@@ -104,13 +104,16 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
       
       const validatedData = IdentificationInfoSchema.parse(cleanedData)
       onNext(validatedData)
-    } catch (error: any) {
+    } catch (error) {
       const fieldErrors: Record<string, string> = {}
       
-      error.errors?.forEach((err: any) => {
-        const path = err.path.join('.')
-        fieldErrors[path] = err.message
-      })
+      if (error instanceof Error && 'errors' in error) {
+        const zodError = error as { errors: Array<{ path: string[]; message: string }> }
+        zodError.errors?.forEach((err) => {
+          const path = err.path.join('.')
+          fieldErrors[path] = err.message
+        })
+      }
       
       setErrors(fieldErrors)
     }
@@ -140,7 +143,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             id="identificationType"
             className={styles.input}
             value={formData.identificationType}
-            onChange={(e) => handleInputChange('identificationType', e.target.value as any)}
+            onChange={(e) => handleInputChange('identificationType', e.target.value)}
             autoComplete="off"
           >
             {identificationTypes.map(type => (
