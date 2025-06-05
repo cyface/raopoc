@@ -77,7 +77,7 @@ describe('LanguageSwitcher', () => {
       expect(mockReplaceState).toHaveBeenCalledWith(
         {},
         '',
-        'http://localhost:3000?lng=es'
+        'http://localhost:3000/?lng=es'
       )
     })
     
@@ -86,7 +86,7 @@ describe('LanguageSwitcher', () => {
 
   it('changes language to English and removes lng parameter', async () => {
     // Start with Spanish in URL
-    mockLocation.href = 'http://localhost:3000?lng=es'
+    mockLocation.href = 'http://localhost:3000/?lng=es'
     mockLocation.search = '?lng=es'
     
     renderLanguageSwitcher()
@@ -98,7 +98,7 @@ describe('LanguageSwitcher', () => {
       expect(mockReplaceState).toHaveBeenCalledWith(
         {},
         '',
-        'http://localhost:3000'
+        'http://localhost:3000/'
       )
     })
     
@@ -106,7 +106,7 @@ describe('LanguageSwitcher', () => {
   })
 
   it('preserves fi parameter when changing language', async () => {
-    mockLocation.href = 'http://localhost:3000?fi=warmbank'
+    mockLocation.href = 'http://localhost:3000/?fi=warmbank'
     mockLocation.search = '?fi=warmbank'
     
     renderLanguageSwitcher()
@@ -118,13 +118,13 @@ describe('LanguageSwitcher', () => {
       expect(mockReplaceState).toHaveBeenCalledWith(
         {},
         '',
-        'http://localhost:3000?fi=warmbank&lng=es'
+        'http://localhost:3000/?fi=warmbank&lng=es'
       )
     })
   })
 
   it('preserves multiple URL parameters when changing language', async () => {
-    mockLocation.href = 'http://localhost:3000?fi=warmbank&dark=1&other=test'
+    mockLocation.href = 'http://localhost:3000/?fi=warmbank&dark=1&other=test'
     mockLocation.search = '?fi=warmbank&dark=1&other=test'
     
     renderLanguageSwitcher()
