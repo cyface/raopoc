@@ -127,3 +127,101 @@ export const bankName = style({
   fontWeight: '700',
   color: '#1f2937',
 })
+
+export const formContainer = style({
+  display: 'grid',
+  gap: '1.5rem',
+  marginBottom: '2rem',
+})
+
+export const formRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '1rem',
+  '@media': {
+    '(max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+})
+
+export const formField = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+})
+
+export const label = style({
+  fontSize: '0.875rem',
+  fontWeight: '600',
+  color: '#374151',
+})
+
+export const input = style({
+  padding: '0.75rem',
+  border: '1px solid #d1d5db',
+  borderRadius: '0.375rem',
+  fontSize: '1rem',
+  transition: 'border-color 0.2s',
+  ':focus': {
+    outline: 'none',
+    borderColor: '#3b82f6',
+    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+  },
+})
+
+export const errorText = style({
+  color: '#dc2626',
+  fontSize: '0.875rem',
+})
+
+export const toggle = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  padding: '1rem',
+  backgroundColor: '#f9fafb',
+  border: '1px solid #e5e7eb',
+  borderRadius: '0.5rem',
+  marginBottom: '1rem',
+})
+
+export const toggleSwitch = style({
+  position: 'relative',
+  width: '3rem',
+  height: '1.5rem',
+  backgroundColor: '#d1d5db',
+  borderRadius: '0.75rem',
+  cursor: 'pointer',
+  transition: 'background-color 0.2s',
+  selectors: {
+    '&[data-enabled="true"]': {
+      backgroundColor: '#3b82f6',
+    },
+  },
+})
+
+export const toggleHandle = style({
+  position: 'absolute',
+  top: '0.125rem',
+  left: '0.125rem',
+  width: '1.25rem',
+  height: '1.25rem',
+  backgroundColor: '#ffffff',
+  borderRadius: '50%',
+  transition: 'transform 0.2s',
+  selectors: {
+    '[data-enabled="true"] &': {
+      transform: 'translateX(1.5rem)',
+    },
+  },
+})
+
+export const sectionTitle = style({
+  fontSize: '1.25rem',
+  fontWeight: '600',
+  color: '#1f2937',
+  marginBottom: '1rem',
+  paddingBottom: '0.5rem',
+  borderBottom: '1px solid #e5e7eb',
+})

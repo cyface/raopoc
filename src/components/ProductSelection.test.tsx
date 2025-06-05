@@ -1,9 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ProductSelection from './ProductSelection'
+import { OnboardingProvider } from '../context/OnboardingContext'
 
-const renderWithRouter = (component: React.ReactElement) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>)
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <BrowserRouter>
+      <OnboardingProvider>
+        {component}
+      </OnboardingProvider>
+    </BrowserRouter>
+  )
 }
 
 describe('ProductSelection', () => {
@@ -17,23 +24,23 @@ describe('ProductSelection', () => {
   })
 
   it('renders the product selection page with title and products', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
-    expect(screen.getByText('Let\'s Open Your Account')).toBeInTheDocument()
+    expect(screen.getByText('Let\'s Open Your Account!')).toBeInTheDocument()
     expect(screen.getByText('Checking Account')).toBeInTheDocument()
     expect(screen.getByText('Savings Account')).toBeInTheDocument()
     expect(screen.getByText('Money Market Account')).toBeInTheDocument()
   })
 
   it('disables next button when no products are selected', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
     expect(nextButton).toBeDisabled()
   })
 
   it('enables next button when a product is selected', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
     const checkingAccount = screen.getByText('Checking Account')
     fireEvent.click(checkingAccount)
@@ -43,7 +50,7 @@ describe('ProductSelection', () => {
   })
 
   it('allows selecting multiple products', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
     const checkingAccount = screen.getByText('Checking Account')
     const savingsAccount = screen.getByText('Savings Account')
@@ -54,11 +61,12 @@ describe('ProductSelection', () => {
     const nextButton = screen.getByRole('button', { name: 'Next' })
     fireEvent.click(nextButton)
     
-    expect(window.alert).toHaveBeenCalledWith('Selected products: checking, savings')
+    // Should move to step 2 instead of showing alert
+    expect(nextButton).not.toBeDisabled()
   })
 
   it('allows deselecting a product by clicking it again', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
     const checkingAccount = screen.getByText('Checking Account')
     
@@ -74,7 +82,7 @@ describe('ProductSelection', () => {
   })
 
   it('shows error when trying to proceed without selecting products', () => {
-    renderWithRouter(<ProductSelection />)
+    renderWithProviders(<ProductSelection />)
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
     

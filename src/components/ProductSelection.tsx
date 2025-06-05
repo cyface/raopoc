@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PiggyBank, CreditCard, TrendingUp, Building2 } from 'lucide-react'
 import { ProductType, ProductSelectionSchema, type ProductSelectionData } from '../types/products'
+import { useOnboarding } from '../context/OnboardingContext'
 import * as styles from '../styles/theme.css'
 
 const PRODUCTS = [
@@ -25,6 +26,7 @@ const PRODUCTS = [
 ]
 
 export default function ProductSelection() {
+  const { setSelectedProducts: setGlobalProducts, setCurrentStep } = useOnboarding()
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
   const [error, setError] = useState<string>('')
 
@@ -44,9 +46,8 @@ export default function ProductSelection() {
       const data: ProductSelectionData = { selectedProducts }
       ProductSelectionSchema.parse(data)
       
-      // TODO: Navigate to next step or save data
-      console.log('Selected products:', selectedProducts)
-      alert(`Selected products: ${selectedProducts.join(', ')}`)
+      setGlobalProducts(selectedProducts)
+      setCurrentStep(2)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
