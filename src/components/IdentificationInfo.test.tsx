@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import IdentificationInfo from './IdentificationInfo'
@@ -22,12 +22,14 @@ vi.mock('../services/configService', () => {
   }
 })
 
-const renderWithProvider = (component: React.ReactElement) => {
-  return render(
-    <OnboardingProvider>
-      {component}
-    </OnboardingProvider>
-  )
+const renderWithProvider = async (component: React.ReactElement) => {
+  await act(async () => {
+    render(
+      <OnboardingProvider>
+        {component}
+      </OnboardingProvider>
+    )
+  })
 }
 
 const waitForConfigLoad = async () => {
@@ -80,7 +82,7 @@ describe('IdentificationInfo', () => {
   })
 
   it('renders the identification form with all required fields', async () => {
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitFor(() => {
       expect(screen.getByText('Identity Verification')).toBeInTheDocument()
@@ -95,7 +97,7 @@ describe('IdentificationInfo', () => {
 
   it('shows state dropdown when driver\'s license is selected', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -108,7 +110,7 @@ describe('IdentificationInfo', () => {
 
   it('shows state dropdown when state ID is selected', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -121,7 +123,7 @@ describe('IdentificationInfo', () => {
 
   it('hides state dropdown for passport and military ID types', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -138,7 +140,7 @@ describe('IdentificationInfo', () => {
 
   it('updates field labels based on identification type', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -160,7 +162,7 @@ describe('IdentificationInfo', () => {
 
   it('disables SSN field when "no SSN" checkbox is checked', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     const noSSNCheckbox = screen.getByText('I don\'t have a Social Security Number')
     await user.click(noSSNCheckbox)
@@ -172,7 +174,7 @@ describe('IdentificationInfo', () => {
 
   it('enables SSN field when "no SSN" checkbox is unchecked', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Check and then uncheck
     const noSSNCheckbox = screen.getByText('I don\'t have a Social Security Number')
@@ -186,7 +188,7 @@ describe('IdentificationInfo', () => {
 
   it('clears SSN value when "no SSN" checkbox is checked', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     const ssnInput = screen.getByLabelText('Social Security Number')
     const noSSNCheckbox = screen.getByText('I don\'t have a Social Security Number')
@@ -203,7 +205,7 @@ describe('IdentificationInfo', () => {
 
   it('formats SSN as user types', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     const ssnInput = screen.getByLabelText('Social Security Number')
     
@@ -213,7 +215,7 @@ describe('IdentificationInfo', () => {
 
   it('validates required fields on submit', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
     await user.click(nextButton)
@@ -227,7 +229,7 @@ describe('IdentificationInfo', () => {
 
   it('validates state is required for driver\'s license', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -251,7 +253,7 @@ describe('IdentificationInfo', () => {
 
   it('validates state is required for state ID', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -275,7 +277,7 @@ describe('IdentificationInfo', () => {
 
   it('validates SSN is required when "no SSN" is not checked', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Fill identification number and date of birth
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
@@ -293,7 +295,7 @@ describe('IdentificationInfo', () => {
 
   it('submits form with valid passport data', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Fill out the form
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
@@ -316,7 +318,7 @@ describe('IdentificationInfo', () => {
 
   it('submits form with valid state ID data', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -347,7 +349,7 @@ describe('IdentificationInfo', () => {
 
   it('submits form with valid driver\'s license data', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     await waitForConfigLoad()
     
@@ -378,7 +380,7 @@ describe('IdentificationInfo', () => {
 
   it('submits form with empty SSN when "no SSN" is checked', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Fill identification number and date of birth
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
@@ -404,7 +406,7 @@ describe('IdentificationInfo', () => {
 
   it('validates SSN format', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Fill with invalid SSN
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
@@ -423,7 +425,7 @@ describe('IdentificationInfo', () => {
 
   it('validates date of birth is required', async () => {
     const user = userEvent.setup()
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     // Fill identification number and SSN but not date of birth
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
@@ -439,8 +441,8 @@ describe('IdentificationInfo', () => {
     expect(mockOnNext).not.toHaveBeenCalled()
   })
 
-  it('renders date of birth field', () => {
-    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+  it('renders date of birth field', async () => {
+    await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
     expect(screen.getByLabelText('Date of Birth')).toBeInTheDocument()
     expect(screen.getByLabelText('Date of Birth')).toHaveAttribute('type', 'date')

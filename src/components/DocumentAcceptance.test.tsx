@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { DocumentAcceptance } from './DocumentAcceptance'
 import { configService } from '../services/configService'
 
@@ -20,14 +20,36 @@ const mockFetch = vi.mocked(fetch)
 // Mock URL.createObjectURL and window.open
 global.URL.createObjectURL = vi.fn(() => 'mock-blob-url')
 global.URL.revokeObjectURL = vi.fn()
+const mockWindowOpen = vi.fn()
 Object.defineProperty(window, 'open', {
   writable: true,
-  value: vi.fn(),
+  value: mockWindowOpen,
+})
+
+// Mock the navigation to prevent jsdom errors
+mockWindowOpen.mockImplementation(() => {
+  return {
+    location: { href: '' },
+    focus: vi.fn(),
+    close: vi.fn()
+  }
 })
 
 describe('DocumentAcceptance', () => {
   const mockOnAcceptanceChange = vi.fn()
   const mockOnNext = vi.fn()
+
+  // Helper function to render component wrapped in act
+  const renderDocumentAcceptance = async (props: {
+    selectedProducts: string[]
+    hasNoSSN: boolean
+    onAcceptanceChange: typeof mockOnAcceptanceChange
+    onNext?: typeof mockOnNext
+  }) => {
+    await act(async () => {
+      render(<DocumentAcceptance {...props} />)
+    })
+  }
 
   const mockDocumentConfig = {
     documents: [
@@ -94,26 +116,34 @@ describe('DocumentAcceptance', () => {
     } as Response)
   })
 
-  it('renders loading state initially', () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+  it('renders loading state initially', async () => {
+    // Delay the mock resolution to see loading state
+    let resolveMock: (value: typeof mockDocumentConfig) => void
+    const mockPromise = new Promise<typeof mockDocumentConfig>((resolve) => {
+      resolveMock = resolve
+    })
+    mockConfigService.getDocuments.mockReturnValue(mockPromise)
+
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     expect(screen.getByText('Loading document requirements...')).toBeInTheDocument()
+    
+    // Resolve the promise to continue
+    await act(async () => {
+      resolveMock!(mockDocumentConfig)
+    })
   })
 
   it('renders documents based on selected products', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Terms of Service')).toBeInTheDocument()
@@ -123,13 +153,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('renders ITIN disclosure when hasNoSSN is true', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={true}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: true,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Terms of Service')).toBeInTheDocument()
@@ -139,13 +167,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('calls onAcceptanceChange when document is accepted', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Terms of Service')).toBeInTheDocument()
@@ -167,13 +193,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('shows accept all button by default', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Accept All Documents')).toBeInTheDocument()
@@ -181,13 +205,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('accepts all documents when accept all button is clicked', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Accept All Documents')).toBeInTheDocument()
@@ -214,13 +236,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('opens document in new window when view button is clicked', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Terms of Service')).toBeInTheDocument()
@@ -238,13 +258,11 @@ describe('DocumentAcceptance', () => {
   })
 
   it('downloads document when download button is clicked', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Terms of Service')).toBeInTheDocument()
@@ -261,14 +279,12 @@ describe('DocumentAcceptance', () => {
   })
 
   it('shows continue button when onNext is provided', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-        onNext={mockOnNext}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+      onNext: mockOnNext,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Continue')).toBeInTheDocument()
@@ -276,14 +292,12 @@ describe('DocumentAcceptance', () => {
   })
 
   it('disables continue button when not all documents are accepted', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-        onNext={mockOnNext}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+      onNext: mockOnNext,
+    })
 
     await waitFor(() => {
       const continueButton = screen.getByText('Continue')
@@ -292,14 +306,12 @@ describe('DocumentAcceptance', () => {
   })
 
   it('enables continue button when all documents are accepted', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-        onNext={mockOnNext}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+      onNext: mockOnNext,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Accept All Documents')).toBeInTheDocument()
@@ -315,14 +327,12 @@ describe('DocumentAcceptance', () => {
   })
 
   it('calls onNext when continue button is clicked and all documents accepted', async () => {
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-        onNext={mockOnNext}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+      onNext: mockOnNext,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Accept All Documents')).toBeInTheDocument()
@@ -348,13 +358,11 @@ describe('DocumentAcceptance', () => {
       rules: [],
     })
 
-    render(
-      <DocumentAcceptance
-        selectedProducts={[]}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: [],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('No additional documents are required for your selected products.')).toBeInTheDocument()
@@ -364,13 +372,11 @@ describe('DocumentAcceptance', () => {
   it('handles API error gracefully', async () => {
     mockConfigService.getDocuments.mockRejectedValue(new Error('API Error'))
 
-    render(
-      <DocumentAcceptance
-        selectedProducts={['checking']}
-        hasNoSSN={false}
-        onAcceptanceChange={mockOnAcceptanceChange}
-      />
-    )
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load document requirements')).toBeInTheDocument()
