@@ -34,10 +34,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Maximum allowed value: `3600000` (1 hour)
   - Invalid values will fall back to the default 5 seconds with a console warning
 
-- `VITE_SHOW_ACCEPT_ALL`: Controls whether the "Accept All Documents" button is shown. Defaults to `true`.
-  - Example: `VITE_SHOW_ACCEPT_ALL=false` hides the accept all button
-  - Set to `false` to hide the button and require individual document acceptance
-  - Any other value (including undefined) will show the button
+## Configuration Files
+
+The application uses JSON configuration files in the `config/` directory:
+
+- **Documents Configuration** (`config/documents.json`):
+  - `showAcceptAllButton`: Controls whether the "Accept All Documents" button is shown in the document acceptance step. Defaults to `true`.
+  - `documents`: Array of available documents with their metadata
+  - `rules`: Array of rules that determine which documents are required based on selected products and customer attributes
 
 ## Project Structure
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
-import { Document, DocumentAcceptanceState } from '../types/documents';
+import { Document, DocumentAcceptanceState, DocumentConfig } from '../types/documents';
 import { configService, type BankInfo } from '../services/configService';
 import * as styles from '../styles/theme.css';
 
@@ -21,10 +21,9 @@ export function DocumentAcceptance({
   const [documents, setDocuments] = useState<Document[]>([]);
   const [acceptances, setAcceptances] = useState<Record<string, boolean>>({});
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
+  const [documentConfig, setDocumentConfig] = useState<DocumentConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const showAcceptAllButton = (import.meta as any).env?.VITE_SHOW_ACCEPT_ALL !== 'false';
 
   useEffect(() => {
     loadApplicableDocuments();
@@ -61,6 +60,8 @@ export function DocumentAcceptance({
       setError(null);
       
       const config = await configService.getDocuments();
+      setDocumentConfig(config);
+      
       const applicableDocumentIds = new Set<string>();
 
       config.rules.forEach(rule => {
@@ -183,7 +184,7 @@ export function DocumentAcceptance({
         </div>
       ) : (
         <>
-          {showAcceptAllButton && (
+          {documentConfig?.showAcceptAllButton && (
             <div style={{ marginBottom: '2rem' }}>
               <button
                 type="button"

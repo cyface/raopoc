@@ -17,6 +17,7 @@ export const DocumentRuleSchema = z.object({
 });
 
 export const DocumentConfigSchema = z.object({
+  showAcceptAllButton: z.boolean().default(true),
   documents: z.array(DocumentSchema),
   rules: z.array(DocumentRuleSchema),
 });

@@ -52,6 +52,7 @@ describe('DocumentAcceptance', () => {
   }
 
   const mockDocumentConfig = {
+    showAcceptAllButton: true,
     documents: [
       {
         id: 'terms-of-service',
@@ -204,6 +205,27 @@ describe('DocumentAcceptance', () => {
     })
   })
 
+  it('hides accept all button when showAcceptAllButton is false', async () => {
+    // Override the mock to return false for showAcceptAllButton
+    const configWithoutAcceptAll = {
+      ...mockDocumentConfig,
+      showAcceptAllButton: false,
+    }
+    mockConfigService.getDocuments.mockResolvedValue(configWithoutAcceptAll)
+
+    await renderDocumentAcceptance({
+      selectedProducts: ['checking'],
+      hasNoSSN: false,
+      onAcceptanceChange: mockOnAcceptanceChange,
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Terms of Service')).toBeInTheDocument()
+    })
+    
+    expect(screen.queryByText('Accept All Documents')).not.toBeInTheDocument()
+  })
+
   it('accepts all documents when accept all button is clicked', async () => {
     await renderDocumentAcceptance({
       selectedProducts: ['checking'],
@@ -354,6 +376,7 @@ describe('DocumentAcceptance', () => {
 
   it('shows no documents message when no documents are required', async () => {
     mockConfigService.getDocuments.mockResolvedValue({
+      showAcceptAllButton: true,
       documents: [],
       rules: [],
     })

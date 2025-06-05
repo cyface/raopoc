@@ -33,6 +33,7 @@ export interface DocumentRule {
 }
 
 export interface DocumentConfig {
+  showAcceptAllButton: boolean
   documents: Document[]
   rules: DocumentRule[]
 }
@@ -191,10 +192,10 @@ class ConfigService {
       } catch (error) {
         console.error('Failed to load documents configuration:', error)
         // Return cached data if available, otherwise empty config
-        return this.documentsCache || { documents: [], rules: [] }
+        return this.documentsCache || { showAcceptAllButton: true, documents: [], rules: [] }
       }
     }
-    return this.documentsCache || { documents: [], rules: [] }
+    return this.documentsCache || { showAcceptAllButton: true, documents: [], rules: [] }
   }
 
   async getBankInfo(): Promise<BankInfo> {
