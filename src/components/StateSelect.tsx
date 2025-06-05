@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import type { State } from '../services/configService';
 
@@ -21,9 +22,12 @@ export const StateSelect: React.FC<StateSelectProps> = ({
   states,
   error,
   autoComplete = "address-level1",
-  placeholder = "Select a state"
+  placeholder
 }) => {
+  const { t } = useTranslation();
   const { styles } = useTheme();
+  
+  const defaultPlaceholder = placeholder || t('customerInfo.placeholders.selectState');
 
   return (
     <div className={styles.formField}>
@@ -37,7 +41,7 @@ export const StateSelect: React.FC<StateSelectProps> = ({
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
       >
-        <option value="">{placeholder}</option>
+        <option value="">{defaultPlaceholder}</option>
         {states.map(state => (
           <option key={state.code} value={state.code}>
             {state.name}

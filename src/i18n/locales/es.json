@@ -37,7 +37,8 @@
     "placeholders": {
       "email": "nombre@ejemplo.com",
       "phone": "(555) 123-4567",
-      "zipCode": "12345"
+      "zipCode": "12345",
+      "selectState": "Seleccionar un estado"
     }
   },
   "identificationInfo": {
