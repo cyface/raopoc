@@ -2,6 +2,7 @@ import ProductSelection from './components/ProductSelection'
 import CustomerInfo from './components/CustomerInfo'
 import IdentificationInfo from './components/IdentificationInfo'
 import { DocumentAcceptance } from './components/DocumentAcceptance'
+import { ConfirmationScreen } from './components/ConfirmationScreen'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
 
 function OnboardingFlow() {
@@ -46,6 +47,8 @@ function OnboardingFlow() {
           onNext={handleDocumentAcceptanceNext}
         />
       )
+    case 5:
+      return <ConfirmationScreen />
     default:
       return (
         <div style={{ padding: '2rem', textAlign: 'center' }}>

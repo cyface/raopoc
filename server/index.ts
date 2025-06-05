@@ -4,6 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import chokidar from 'chokidar'
+import { randomUUID } from 'crypto'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -169,6 +170,85 @@ app.get('/api/documents/:documentId/download', async (req, res) => {
   } catch (error) {
     console.error('Error downloading document:', error)
     res.status(500).json({ error: 'Failed to download document' })
+  }
+})
+
+// Application submission endpoint
+app.post('/api/applications', async (req, res) => {
+  try {
+    const applicationData = req.body
+    
+    // Generate unique application ID
+    const applicationId = randomUUID()
+    
+    // Extract last name for filename
+    const lastName = applicationData.customerInfo?.lastName || 'Unknown'
+    const sanitizedLastName = lastName.replace(/[^a-zA-Z0-9]/g, '')
+    const filename = `${applicationId}-${sanitizedLastName}.json`
+    
+    // Create application record with metadata
+    const application = {
+      id: applicationId,
+      submittedAt: new Date().toISOString(),
+      status: 'submitted',
+      data: applicationData,
+      metadata: {
+        userAgent: req.headers['user-agent'],
+        ipAddress: req.ip || req.socket.remoteAddress,
+        submissionSource: 'web-onboarding'
+      }
+    }
+    
+    // Ensure applications directory exists
+    const applicationsDir = path.join(__dirname, '..', 'applications')
+    await fs.mkdir(applicationsDir, { recursive: true })
+    
+    // Save application to file
+    const filePath = path.join(applicationsDir, filename)
+    await fs.writeFile(filePath, JSON.stringify(application, null, 2))
+    
+    console.log(`✅ Application saved: ${filename}`)
+    console.log(`📧 Mock confirmation email sent to: ${applicationData.customerInfo?.email}`)
+    
+    res.status(201).json({
+      applicationId,
+      status: 'submitted',
+      message: 'Application submitted successfully',
+      filename
+    })
+    
+  } catch (error) {
+    console.error('Error saving application:', error)
+    res.status(500).json({ 
+      error: 'Failed to save application',
+      message: 'Please try again later'
+    })
+  }
+})
+
+// Get application by ID endpoint
+app.get('/api/applications/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const applicationsDir = path.join(__dirname, '..', 'applications')
+    
+    // Find file that starts with the application ID
+    const files = await fs.readdir(applicationsDir)
+    const applicationFile = files.find(file => file.startsWith(id))
+    
+    if (!applicationFile) {
+      return res.status(404).json({ error: 'Application not found' })
+    }
+    
+    const filePath = path.join(applicationsDir, applicationFile)
+    const applicationData = await fs.readFile(filePath, 'utf-8')
+    const application = JSON.parse(applicationData)
+    
+    res.json(application)
+    
+  } catch (error) {
+    console.error('Error retrieving application:', error)
+    res.status(500).json({ error: 'Failed to retrieve application' })
   }
 })
 
