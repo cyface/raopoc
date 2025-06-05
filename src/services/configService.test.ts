@@ -55,6 +55,21 @@ const mockProducts = [
   }
 ]
 
+const mockBankInfo = {
+  "bankName": "Cool Bank",
+  "displayName": "Cool Bank",
+  "contact": {
+    "phone": "1-800-COOLBNK",
+    "phoneDisplay": "1-800-COOLBNK (1-800-XXX-XXXX)",
+    "email": "support@coolbank.com",
+    "hours": "Monday - Friday 8:00 AM - 8:00 PM EST"
+  },
+  "branding": {
+    "primaryColor": "#3b82f6",
+    "logoIcon": "Building2"
+  }
+}
+
 // Mock fetch
 const mockFetch = vi.fn()
 global.fetch = mockFetch
@@ -298,6 +313,58 @@ describe('configService', () => {
       
       const firstCall = await configService.getProducts()
       const secondCall = await configService.getProducts()
+      
+      // Should return the same reference (cached)
+      expect(firstCall).toBe(secondCall)
+      // Fetch should only be called once due to caching
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('getBankInfo', () => {
+    it('returns bank info with required properties', async () => {
+      // Mock successful fetch
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockBankInfo)
+      })
+      
+      const bankInfo = await configService.getBankInfo()
+      
+      expect(bankInfo).toHaveProperty('bankName')
+      expect(bankInfo).toHaveProperty('displayName')
+      expect(bankInfo).toHaveProperty('contact')
+      expect(bankInfo).toHaveProperty('branding')
+      
+      expect(bankInfo.contact).toHaveProperty('phone')
+      expect(bankInfo.contact).toHaveProperty('phoneDisplay')
+      expect(bankInfo.contact).toHaveProperty('email')
+      expect(bankInfo.contact).toHaveProperty('hours')
+      
+      expect(bankInfo.branding).toHaveProperty('primaryColor')
+      expect(bankInfo.branding).toHaveProperty('logoIcon')
+    })
+
+    it('returns default bank info when fetch fails', async () => {
+      // Mock failed fetch
+      mockFetch.mockRejectedValueOnce(new Error('Network error'))
+      
+      const bankInfo = await configService.getBankInfo()
+      
+      expect(bankInfo.bankName).toBe('Cool Bank')
+      expect(bankInfo.contact.email).toBe('support@coolbank.com')
+      expect(bankInfo.contact.phone).toBe('1-800-COOLBNK')
+    })
+
+    it('caches results on subsequent calls', async () => {
+      // Mock successful fetch for first call
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockBankInfo)
+      })
+      
+      const firstCall = await configService.getBankInfo()
+      const secondCall = await configService.getBankInfo()
       
       // Should return the same reference (cached)
       expect(firstCall).toBe(secondCall)
