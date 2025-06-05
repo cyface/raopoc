@@ -226,7 +226,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             <div className={styles.toggleHandle} />
           </div>
           <label style={{ cursor: 'pointer' }} onClick={() => handleInputChange('noSSN', !formData.noSSN)}>
-            I don't have a Social Security Number
+            I don&apos;t have a Social Security Number
           </label>
         </div>
 

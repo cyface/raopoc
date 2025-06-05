@@ -62,9 +62,9 @@ export default function ProductSelection() {
         <h1 className={styles.bankName}>Premier Bank</h1>
       </div>
       
-      <h1 className={styles.heading}>Let's Open Your Account!</h1>
+      <h1 className={styles.heading}>Let&apos;s Open Your Account!</h1>
       <p className={styles.subheading}>
-        Select the account types you'd like to open. You can choose multiple options.
+        Select the account types you&apos;d like to open. You can choose multiple options.
       </p>
 
       {error && <div className={styles.errorMessage}>{error}</div>}
