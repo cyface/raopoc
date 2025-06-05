@@ -1,0 +1,15 @@
+{
+  "bankName": "Cold Bank",
+  "displayName": "Cold Bank",
+  "theme": "light",
+  "contact": {
+    "phone": "1-800-COLDBNK",
+    "phoneDisplay": "1-800-COLDBNK (1-800-XXX-XXXX)",
+    "email": "soporte@coldbank.com",
+    "hours": "Lunes - Viernes 8:00 AM - 8:00 PM EST"
+  },
+  "branding": {
+    "primaryColor": "#3b82f6",
+    "logoIcon": "Building"
+  }
+}

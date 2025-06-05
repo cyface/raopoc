@@ -1,0 +1,20 @@
+[
+  {
+    "type": "checking",
+    "title": "Cuenta Corriente Verde",
+    "description": "Banca diaria ecológica con estados de cuenta sin papel y transacciones carbono neutrales.",
+    "icon": "CreditCard"
+  },
+  {
+    "type": "savings", 
+    "title": "Cuenta de Ahorros Tierra",
+    "description": "Haga crecer su dinero mientras apoya iniciativas ambientales a través de nuestro programa de banca verde.",
+    "icon": "PiggyBank"
+  },
+  {
+    "type": "money-market",
+    "title": "Mercado Monetario Sostenible",
+    "description": "Tasas de interés más altas en depósitos invertidos en energía renovable y proyectos sostenibles.",
+    "icon": "TrendingUp"
+  }
+]

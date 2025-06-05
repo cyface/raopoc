@@ -1,0 +1,122 @@
+[
+  {
+    "code": "US",
+    "name": "Estados Unidos"
+  },
+  {
+    "code": "CA",
+    "name": "Canadá"
+  },
+  {
+    "code": "MX",
+    "name": "México"
+  },
+  {
+    "code": "GB",
+    "name": "Reino Unido"
+  },
+  {
+    "code": "FR",
+    "name": "Francia"
+  },
+  {
+    "code": "DE",
+    "name": "Alemania"
+  },
+  {
+    "code": "IT",
+    "name": "Italia"
+  },
+  {
+    "code": "ES",
+    "name": "España"
+  },
+  {
+    "code": "NL",
+    "name": "Países Bajos"
+  },
+  {
+    "code": "BE",
+    "name": "Bélgica"
+  },
+  {
+    "code": "CH",
+    "name": "Suiza"
+  },
+  {
+    "code": "AT",
+    "name": "Austria"
+  },
+  {
+    "code": "IE",
+    "name": "Irlanda"
+  },
+  {
+    "code": "AU",
+    "name": "Australia"
+  },
+  {
+    "code": "NZ",
+    "name": "Nueva Zelanda"
+  },
+  {
+    "code": "JP",
+    "name": "Japón"
+  },
+  {
+    "code": "KR",
+    "name": "Corea del Sur"
+  },
+  {
+    "code": "CN",
+    "name": "China"
+  },
+  {
+    "code": "IN",
+    "name": "India"
+  },
+  {
+    "code": "BR",
+    "name": "Brasil"
+  },
+  {
+    "code": "AR",
+    "name": "Argentina"
+  },
+  {
+    "code": "CL",
+    "name": "Chile"
+  },
+  {
+    "code": "PE",
+    "name": "Perú"
+  },
+  {
+    "code": "CO",
+    "name": "Colombia"
+  },
+  {
+    "code": "ZA",
+    "name": "Sudáfrica"
+  },
+  {
+    "code": "EG",
+    "name": "Egipto"
+  },
+  {
+    "code": "NG",
+    "name": "Nigeria"
+  },
+  {
+    "code": "KE",
+    "name": "Kenia"
+  },
+  {
+    "code": "GH",
+    "name": "Ghana"
+  },
+  {
+    "code": "MA",
+    "name": "Marruecos"
+  }
+]

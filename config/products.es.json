@@ -1,0 +1,20 @@
+[
+  {
+    "type": "checking",
+    "title": "Cuenta corriente",
+    "description": "Banca diaria con fácil acceso a su dinero a través de cajeros automáticos, banca en línea y aplicaciones móviles.",
+    "icon": "CreditCard"
+  },
+  {
+    "type": "savings", 
+    "title": "Cuenta de ahorros",
+    "description": "Gane intereses en sus depósitos mientras mantiene su dinero seguro y accesible.",
+    "icon": "PiggyBank"
+  },
+  {
+    "type": "money-market",
+    "title": "Cuenta de mercado monetario", 
+    "description": "Tasas de interés más altas con transacciones mensuales limitadas y requisitos de saldo mínimo más altos.",
+    "icon": "TrendingUp"
+  }
+]

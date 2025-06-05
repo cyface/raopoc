@@ -1,0 +1,22 @@
+[
+  { 
+    "value": "passport", 
+    "label": "Pasaporte", 
+    "requiresState": false 
+  },
+  { 
+    "value": "drivers-license", 
+    "label": "Licencia de conducir", 
+    "requiresState": true 
+  },
+  { 
+    "value": "state-id", 
+    "label": "Identificación estatal", 
+    "requiresState": true 
+  },
+  { 
+    "value": "military-id", 
+    "label": "Identificación militar", 
+    "requiresState": false 
+  }
+]

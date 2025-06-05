@@ -1,0 +1,20 @@
+[
+  {
+    "type": "checking",
+    "title": "Green Checking Account",
+    "description": "Eco-friendly everyday banking with paperless statements and carbon-neutral transactions.",
+    "icon": "CreditCard"
+  },
+  {
+    "type": "savings", 
+    "title": "Earth Savings Account",
+    "description": "Grow your money while supporting environmental initiatives through our green banking program.",
+    "icon": "PiggyBank"
+  },
+  {
+    "type": "money-market",
+    "title": "Sustainable Money Market",
+    "description": "Higher interest rates on deposits invested in renewable energy and sustainable projects.",
+    "icon": "TrendingUp"
+  }
+]
