@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import CustomerInfo from './CustomerInfo'
 import { OnboardingProvider } from '../context/OnboardingContext'
+import { ThemeProvider } from '../context/ThemeContext'
 import { type ProductType } from '../types/products'
 import { configService } from '../services/configService'
 
@@ -25,9 +26,11 @@ vi.mock('../services/configService', () => {
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
-    <OnboardingProvider>
-      {component}
-    </OnboardingProvider>
+    <ThemeProvider>
+      <OnboardingProvider>
+        {component}
+      </OnboardingProvider>
+    </ThemeProvider>
   )
 }
 
@@ -71,7 +74,7 @@ describe('CustomerInfo', () => {
     
     // Wait for states to load
     await waitFor(() => {
-      expect(screen.getByText('Personal Information')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Personal Information' })).toBeInTheDocument()
     })
     
     expect(screen.getByLabelText('First Name')).toBeInTheDocument()

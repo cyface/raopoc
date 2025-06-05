@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import ProductSelection from './ProductSelection'
 import { OnboardingProvider } from '../context/OnboardingContext'
+import { ThemeProvider } from '../context/ThemeContext'
 import { configService } from '../services/configService'
 
 // Mock the config service
@@ -26,9 +27,11 @@ vi.mock('../services/configService', () => {
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <BrowserRouter>
-      <OnboardingProvider>
-        {component}
-      </OnboardingProvider>
+      <ThemeProvider>
+        <OnboardingProvider>
+          {component}
+        </OnboardingProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { DocumentAcceptance } from './DocumentAcceptance'
+import { ThemeProvider } from '../context/ThemeContext'
+import { OnboardingProvider } from '../context/OnboardingContext'
 import { configService } from '../services/configService'
 
 // Mock the configService
@@ -47,7 +49,13 @@ describe('DocumentAcceptance', () => {
     onNext?: typeof mockOnNext
   }) => {
     await act(async () => {
-      render(<DocumentAcceptance {...props} />)
+      render(
+        <ThemeProvider>
+          <OnboardingProvider>
+            <DocumentAcceptance {...props} />
+          </OnboardingProvider>
+        </ThemeProvider>
+      )
     })
   }
 
@@ -257,7 +265,7 @@ describe('DocumentAcceptance', () => {
     })
   })
 
-  it('opens document in new window when view button is clicked', async () => {
+  it('opens document in modal when view button is clicked', async () => {
     await renderDocumentAcceptance({
       selectedProducts: ['checking'],
       hasNoSSN: false,
@@ -275,7 +283,8 @@ describe('DocumentAcceptance', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/documents/terms-of-service')
       )
-      expect(window.open).toHaveBeenCalledWith('mock-blob-url', '_blank')
+      // Check that modal with iframe is opened
+      expect(screen.getByTitle('Terms of Service')).toBeInTheDocument()
     })
   })
 

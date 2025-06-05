@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import IdentificationInfo from './IdentificationInfo'
 import { OnboardingProvider } from '../context/OnboardingContext'
+import { ThemeProvider } from '../context/ThemeContext'
 import { configService } from '../services/configService'
 
 // Mock the config service
@@ -11,6 +12,7 @@ vi.mock('../services/configService', () => {
     configService: {
       getProducts: vi.fn(),
       getStates: vi.fn(),
+      getCountries: vi.fn(),
       getIdentificationTypes: vi.fn(),
       getIdentificationTypesThatRequireState: vi.fn(),
       getBankInfo: vi.fn(),
@@ -25,9 +27,11 @@ vi.mock('../services/configService', () => {
 const renderWithProvider = async (component: React.ReactElement) => {
   await act(async () => {
     render(
-      <OnboardingProvider>
-        {component}
-      </OnboardingProvider>
+      <ThemeProvider>
+        <OnboardingProvider>
+          {component}
+        </OnboardingProvider>
+      </ThemeProvider>
     )
   })
 }
@@ -63,6 +67,12 @@ describe('IdentificationInfo', () => {
       { value: 'military-id', label: 'Military ID', requiresState: false },
     ])
     
+    vi.mocked(configService.getCountries).mockResolvedValue([
+      { code: 'US', name: 'United States' },
+      { code: 'CA', name: 'Canada' },
+      { code: 'MX', name: 'Mexico' },
+    ])
+    
     vi.mocked(configService.getIdentificationTypesThatRequireState).mockResolvedValue(['drivers-license', 'state-id'])
     
     vi.mocked(configService.getBankInfo).mockResolvedValue({
@@ -89,7 +99,7 @@ describe('IdentificationInfo', () => {
     })
     
     expect(screen.getByLabelText('Identification Type')).toBeInTheDocument()
-    expect(screen.getByLabelText('Passport Number')).toBeInTheDocument()
+    expect(screen.getByLabelText('Driver\'s License Number')).toBeInTheDocument()
     expect(screen.getByText('Social Security Information')).toBeInTheDocument()
     expect(screen.getByLabelText('Social Security Number')).toBeInTheDocument()
     expect(screen.getByText('I don\'t have a Social Security Number')).toBeInTheDocument()
@@ -127,11 +137,13 @@ describe('IdentificationInfo', () => {
     
     await waitForConfigLoad()
     
-    // Default is passport
+    // Switch to passport first to test that state is hidden
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
+    
     expect(screen.queryByLabelText('Issuing State')).not.toBeInTheDocument()
     
     // Switch to military ID
-    const identificationSelect = screen.getByLabelText('Identification Type')
     await user.selectOptions(identificationSelect, 'military-id')
     
     expect(screen.getByLabelText('Military ID Number')).toBeInTheDocument()
@@ -279,8 +291,11 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill identification number and date of birth
+    // Switch to passport and fill identification number and date of birth
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.selectOptions(screen.getByLabelText('Issuing Country'), 'US')
     await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
@@ -297,8 +312,11 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill out the form
+    // Switch to passport and fill out the form
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.selectOptions(screen.getByLabelText('Issuing Country'), 'US')
     await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
     
@@ -309,6 +327,7 @@ describe('IdentificationInfo', () => {
       expect(mockOnNext).toHaveBeenCalledWith({
         identificationType: 'passport',
         identificationNumber: 'A12345678',
+        country: 'US',
         dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
@@ -340,6 +359,7 @@ describe('IdentificationInfo', () => {
         identificationType: 'state-id',
         identificationNumber: 'S1234567',
         state: 'NY',
+        country: '',
         dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
@@ -371,6 +391,7 @@ describe('IdentificationInfo', () => {
         identificationType: 'drivers-license',
         identificationNumber: 'D1234567',
         state: 'CA',
+        country: '',
         dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
@@ -382,8 +403,11 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill identification number and date of birth
+    // Switch to passport and fill identification number and date of birth
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.selectOptions(screen.getByLabelText('Issuing Country'), 'US')
     await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     
     // Check "no SSN"
@@ -397,6 +421,7 @@ describe('IdentificationInfo', () => {
       expect(mockOnNext).toHaveBeenCalledWith({
         identificationType: 'passport',
         identificationNumber: 'A12345678',
+        country: 'US',
         dateOfBirth: '1990-01-01',
         socialSecurityNumber: '',
         noSSN: true,
@@ -408,8 +433,11 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill with invalid SSN
+    // Switch to passport and fill with invalid SSN
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.selectOptions(screen.getByLabelText('Issuing Country'), 'US')
     await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-678') // Too short
     
@@ -427,8 +455,11 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     await renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill identification number and SSN but not date of birth
+    // Switch to passport and fill identification number and SSN but not date of birth
+    const identificationSelect = screen.getByLabelText('Identification Type')
+    await user.selectOptions(identificationSelect, 'passport')
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.selectOptions(screen.getByLabelText('Issuing Country'), 'US')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
