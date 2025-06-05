@@ -10,6 +10,18 @@ import { configService } from '../services/configService'
 vi.mock('../services/configService', () => {
   return {
     configService: {
+      // New API methods
+      getProductsFor: vi.fn(),
+      getBankInfoFor: vi.fn(),
+      getStatesFor: vi.fn(),
+      getCountriesFor: vi.fn(),
+      getIdentificationTypesFor: vi.fn(),
+      getDocumentsFor: vi.fn(),
+      preloadLanguages: vi.fn(),
+      preloadConfiguration: vi.fn(),
+      clearAllCaches: vi.fn(),
+      getCacheStats: vi.fn(),
+      // Backwards compatibility methods
       getProducts: vi.fn(),
       getStates: vi.fn(),
       getIdentificationTypes: vi.fn(),
@@ -47,8 +59,7 @@ describe('ProductSelection', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(window, 'alert').mockImplementation(() => {})
     
-    // Set up the mock implementation
-    vi.mocked(configService.getProducts).mockResolvedValue([
+    const mockProducts = [
       {
         type: 'checking',
         title: 'Checking Account',
@@ -67,9 +78,9 @@ describe('ProductSelection', () => {
         description: 'Higher interest rates with limited monthly transactions and higher minimum balance requirements.',
         icon: 'TrendingUp'
       }
-    ])
+    ]
     
-    vi.mocked(configService.getBankInfo).mockResolvedValue({
+    const mockBankInfo = {
       bankName: 'Cool Bank',
       displayName: 'Cool Bank',
       contact: {
@@ -82,7 +93,13 @@ describe('ProductSelection', () => {
         primaryColor: '#3b82f6',
         logoIcon: 'Building2',
       },
-    })
+    }
+    
+    // Set up the mock implementation for both old and new APIs
+    vi.mocked(configService.getProducts).mockResolvedValue(mockProducts)
+    vi.mocked(configService.getBankInfo).mockResolvedValue(mockBankInfo)
+    vi.mocked(configService.getProductsFor).mockResolvedValue(mockProducts)
+    vi.mocked(configService.getBankInfoFor).mockResolvedValue(mockBankInfo)
   })
 
   afterEach(() => {
