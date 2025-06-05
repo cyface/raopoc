@@ -1,462 +1,330 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { configService } from './configService'
+import { createCacheKey } from '../hooks/useUrlParams'
 
-// Mock data matching actual config files
-const mockStates = [
-  { "code": "AL", "name": "Alabama" },
-  { "code": "AK", "name": "Alaska" },
-  { "code": "CA", "name": "California" },
-  { "code": "FL", "name": "Florida" },
-  { "code": "NY", "name": "New York" },
-  { "code": "TX", "name": "Texas" }
-]
-
-const mockIdentificationTypes = [
-  { 
-    "value": "passport", 
-    "label": "Passport", 
-    "requiresState": false 
-  },
-  { 
-    "value": "drivers-license", 
-    "label": "Driver's License", 
-    "requiresState": true 
-  },
-  { 
-    "value": "state-id", 
-    "label": "State ID", 
-    "requiresState": true 
-  },
-  { 
-    "value": "military-id", 
-    "label": "Military ID", 
-    "requiresState": false 
-  }
-]
-
-const mockProducts = [
-  {
-    "type": "checking",
-    "title": "Checking Account",
-    "description": "Everyday banking with easy access to your money through ATMs, online banking, and mobile apps.",
-    "icon": "CreditCard"
-  },
-  {
-    "type": "savings", 
-    "title": "Savings Account",
-    "description": "Earn interest on your deposits while keeping your money safe and accessible.",
-    "icon": "PiggyBank"
-  },
-  {
-    "type": "money-market",
-    "title": "Money Market Account", 
-    "description": "Higher interest rates with limited monthly transactions and higher minimum balance requirements.",
-    "icon": "TrendingUp"
-  }
-]
-
-const mockBankInfo = {
-  "bankName": "Cool Bank",
-  "displayName": "Cool Bank",
-  "contact": {
-    "phone": "1-800-COOLBNK",
-    "phoneDisplay": "1-800-COOLBNK (1-800-XXX-XXXX)",
-    "email": "support@coolbank.com",
-    "hours": "Monday - Friday 8:00 AM - 8:00 PM EST"
-  },
-  "branding": {
-    "primaryColor": "#3b82f6",
-    "logoIcon": "Building2"
-  }
-}
-
-// Mock fetch
+// Mock fetch globally
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
-describe('configService', () => {
+// Mock window.location
+const mockLocation = {
+  href: 'http://localhost:3000',
+  search: '',
+}
+
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+})
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+}
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+  writable: true,
+})
+
+describe('ConfigService V2 - Multi-Dimensional Caching', () => {
   beforeEach(() => {
-    // Clear cache before each test
-    configService.clearCache()
-    // Reset fetch mock
-    mockFetch.mockClear()
+    vi.clearAllMocks()
+    mockLocation.href = 'http://localhost:3000'
+    mockLocation.search = ''
+    mockLocalStorage.getItem.mockReturnValue(null)
+    
+    // Clear service cache
+    configService.clearAllCaches()
   })
 
-  describe('getStates', () => {
-    it('returns an array of states with code and name', async () => {
-      // Mock successful fetch
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('Cache Key Generation', () => {
+    it('creates correct cache keys for different combinations', () => {
+      expect(createCacheKey(null, 'en')).toBe('default-en')
+      expect(createCacheKey('warmbank', 'en')).toBe('warmbank-en')
+      expect(createCacheKey('warmbank', 'es')).toBe('warmbank-es')
+      expect(createCacheKey('coolbank', 'es')).toBe('coolbank-es')
+    })
+  })
+
+  describe('Multi-Language Caching', () => {
+    it('caches English and Spanish products separately', async () => {
+      const englishProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'English description', icon: 'CreditCard' }
+      ]
+      const spanishProducts = [
+        { type: 'checking', title: 'Cuenta Corriente', description: 'Descripción en español', icon: 'CreditCard' }
+      ]
+
+      // Mock English response
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockStates)
+        json: () => Promise.resolve(englishProducts)
       })
-      
-      const states = await configService.getStates()
-      
-      expect(Array.isArray(states)).toBe(true)
-      expect(states.length).toBeGreaterThan(0)
-      
-      // Check that each state has the required properties
-      states.forEach(state => {
-        expect(state).toHaveProperty('code')
-        expect(state).toHaveProperty('name')
-        expect(typeof state.code).toBe('string')
-        expect(typeof state.name).toBe('string')
+
+      // Mock Spanish response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(spanishProducts)
       })
-      
-      // Verify the correct URL was fetched (default API path)
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/states')
+
+      // Load English products
+      const englishResult = await configService.getProductsFor(null, 'en')
+      expect(englishResult).toEqual(englishProducts)
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
+
+      // Load Spanish products
+      const spanishResult = await configService.getProductsFor(null, 'es')
+      expect(spanishResult).toEqual(spanishProducts)
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products.es')
+
+      expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
-    it('includes expected states', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockStates)
-      })
-      
-      const states = await configService.getStates()
-      
-      // Check for some well-known states
-      const stateCodes = states.map(state => state.code)
-      expect(stateCodes).toContain('CA')
-      expect(stateCodes).toContain('NY')
-      expect(stateCodes).toContain('TX')
-      expect(stateCodes).toContain('FL')
-      
-      // Check specific state details
-      const california = states.find(state => state.code === 'CA')
-      expect(california?.name).toBe('California')
-    })
+    it('returns cached data instantly on subsequent requests', async () => {
+      const englishProducts = [
+        { type: 'checking', title: 'Checking Account', description: 'English description', icon: 'CreditCard' }
+      ]
 
-    it('caches results on subsequent calls', async () => {
-      // Mock successful fetch for first call
+      // Initial fetch
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockStates)
+        json: () => Promise.resolve(englishProducts)
       })
-      
-      const firstCall = await configService.getStates()
-      const secondCall = await configService.getStates()
-      
-      // Should return the same reference (cached)
-      expect(firstCall).toBe(secondCall)
-      // Fetch should only be called once due to caching
+
+      // First call - should fetch
+      const firstResult = await configService.getProductsFor(null, 'en')
+      expect(firstResult).toEqual(englishProducts)
       expect(mockFetch).toHaveBeenCalledTimes(1)
+
+      // Second call - should use cache (no fetch)
+      const secondResult = await configService.getProductsFor(null, 'en')
+      expect(secondResult).toEqual(englishProducts)
+      expect(mockFetch).toHaveBeenCalledTimes(1) // No additional fetch
+
+      // Third call with different language - should fetch again
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{ type: 'checking', title: 'Cuenta Corriente', description: 'Spanish', icon: 'CreditCard' }])
+      })
+
+      await configService.getProductsFor(null, 'es')
+      expect(mockFetch).toHaveBeenCalledTimes(2) // One additional fetch
     })
   })
 
-  describe('getIdentificationTypes', () => {
-    it('returns an array of identification types with required properties', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockIdentificationTypes)
-      })
-      
-      const types = await configService.getIdentificationTypes()
-      
-      expect(Array.isArray(types)).toBe(true)
-      expect(types.length).toBeGreaterThan(0)
-      
-      // Check that each type has the required properties
-      types.forEach(type => {
-        expect(type).toHaveProperty('value')
-        expect(type).toHaveProperty('label')
-        expect(type).toHaveProperty('requiresState')
-        expect(typeof type.value).toBe('string')
-        expect(typeof type.label).toBe('string')
-        expect(typeof type.requiresState).toBe('boolean')
-      })
-    })
+  describe('Multi-Bank Caching', () => {
+    it('caches configurations for different banks separately', async () => {
+      const defaultBankInfo = {
+        bankName: 'Default Bank',
+        displayName: 'Default Bank',
+        contact: { phone: '1-800-DEFAULT', phoneDisplay: '1-800-DEFAULT', email: 'default@bank.com', hours: '24/7' },
+        branding: { primaryColor: '#000', logoIcon: 'Building2' }
+      }
 
-    it('includes expected identification types', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockIdentificationTypes)
-      })
-      
-      const types = await configService.getIdentificationTypes()
-      
-      const typeValues = types.map(type => type.value)
-      expect(typeValues).toContain('passport')
-      expect(typeValues).toContain('drivers-license')
-      expect(typeValues).toContain('state-id')
-      expect(typeValues).toContain('military-id')
-    })
+      const warmBankInfo = {
+        bankName: 'Warm Bank',
+        displayName: 'Warm Banking Solutions',
+        contact: { phone: '1-800-WARM', phoneDisplay: '1-800-WARM', email: 'warm@bank.com', hours: 'Always' },
+        branding: { primaryColor: '#10b981', logoIcon: 'Leaf' }
+      }
 
-    it('correctly marks which types require state', async () => {
-      // Mock successful fetch
+      // Mock responses
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockIdentificationTypes)
+        json: () => Promise.resolve(defaultBankInfo)
       })
-      
-      const types = await configService.getIdentificationTypes()
-      
-      const passport = types.find(type => type.value === 'passport')
-      const driversLicense = types.find(type => type.value === 'drivers-license')
-      const stateId = types.find(type => type.value === 'state-id')
-      const militaryId = types.find(type => type.value === 'military-id')
-      
-      expect(passport?.requiresState).toBe(false)
-      expect(driversLicense?.requiresState).toBe(true)
-      expect(stateId?.requiresState).toBe(true)
-      expect(militaryId?.requiresState).toBe(false)
-    })
 
-    it('caches results on subsequent calls', async () => {
-      // Mock successful fetch for first call
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockIdentificationTypes)
+        json: () => Promise.resolve(warmBankInfo)
       })
+
+      // Load default bank info
+      const defaultResult = await configService.getBankInfoFor(null, 'en')
+      expect(defaultResult).toEqual(defaultBankInfo)
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/bank-info')
+
+      // Load warm bank info
+      const warmResult = await configService.getBankInfoFor('warmbank', 'en')
+      expect(warmResult).toEqual(warmBankInfo)
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info')
+
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+
+      // Subsequent calls should use cache
+      const cachedDefaultResult = await configService.getBankInfoFor(null, 'en')
+      const cachedWarmResult = await configService.getBankInfoFor('warmbank', 'en')
       
-      const firstCall = await configService.getIdentificationTypes()
-      const secondCall = await configService.getIdentificationTypes()
-      
-      // Should return the same reference (cached)
-      expect(firstCall).toBe(secondCall)
-      // Fetch should only be called once due to caching
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(cachedDefaultResult).toEqual(defaultBankInfo)
+      expect(cachedWarmResult).toEqual(warmBankInfo)
+      expect(mockFetch).toHaveBeenCalledTimes(2) // No additional fetches
     })
   })
 
-  describe('getIdentificationTypesThatRequireState', () => {
-    it('returns only identification types that require state', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockIdentificationTypes)
+  describe('Combined Bank and Language Caching', () => {
+    it('caches all four combinations separately: default/warm × en/es', async () => {
+      const combinations = [
+        { fi: null, lng: 'en', expectedUrl: 'http://127.0.0.1:3001/api/config/products' },
+        { fi: null, lng: 'es', expectedUrl: 'http://127.0.0.1:3001/api/config/products.es' },
+        { fi: 'warmbank', lng: 'en', expectedUrl: 'http://127.0.0.1:3001/api/config/warmbank/products' },
+        { fi: 'warmbank', lng: 'es', expectedUrl: 'http://127.0.0.1:3001/api/config/warmbank/products.es' }
+      ]
+
+      // Mock responses for each combination
+      for (let i = 0; i < combinations.length; i++) {
+        const combo = combinations[i]
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve([
+            { type: 'checking', title: `${combo.fi || 'default'}-${combo.lng}`, description: 'test', icon: 'CreditCard' }
+          ])
+        })
+      }
+
+      // Load all combinations
+      const results = []
+      for (const combo of combinations) {
+        results.push(await configService.getProductsFor(combo.fi, combo.lng))
+      }
+
+      // Verify correct URLs were called
+      expect(mockFetch).toHaveBeenCalledTimes(4)
+      combinations.forEach((combo, index) => {
+        expect(mockFetch).toHaveBeenNthCalledWith(index + 1, combo.expectedUrl)
       })
-      
-      const requireStateTypes = await configService.getIdentificationTypesThatRequireState()
-      
-      expect(Array.isArray(requireStateTypes)).toBe(true)
-      expect(requireStateTypes).toContain('drivers-license')
-      expect(requireStateTypes).toContain('state-id')
-      expect(requireStateTypes).not.toContain('passport')
-      expect(requireStateTypes).not.toContain('military-id')
+
+      // Verify different data was cached for each combination
+      expect(results[0][0].title).toBe('default-en')
+      expect(results[1][0].title).toBe('default-es')
+      expect(results[2][0].title).toBe('warmbank-en')
+      expect(results[3][0].title).toBe('warmbank-es')
+
+      // Verify subsequent calls use cache
+      const cachedResult = await configService.getProductsFor('warmbank', 'es')
+      expect(cachedResult[0].title).toBe('warmbank-es')
+      expect(mockFetch).toHaveBeenCalledTimes(4) // No additional fetch
     })
   })
 
-  describe('getProducts', () => {
-    it('returns an array of products with required properties', async () => {
-      // Mock successful fetch
+  describe('Preloading', () => {
+    it('preloads both languages for a bank', async () => {
+      // Mock responses for both languages
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([])
+      })
+
+      await configService.preloadLanguages('warmbank')
+
+      // Should have called 12 endpoints (6 config types × 2 languages)
+      expect(mockFetch).toHaveBeenCalledTimes(12)
+      
+      // Check some specific calls
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info.es')
+    })
+
+    it('makes subsequent access instant after preloading', async () => {
+      // Mock responses
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([
+          { type: 'checking', title: 'Preloaded', description: 'test', icon: 'CreditCard' }
+        ])
+      })
+
+      // Preload configuration
+      await configService.preloadConfiguration('warmbank', 'es')
+      expect(mockFetch).toHaveBeenCalledTimes(6) // 6 config types
+
+      vi.clearAllMocks()
+
+      // Access preloaded data - should be instant (no fetch)
+      const products = await configService.getProductsFor('warmbank', 'es')
+      expect(products[0].title).toBe('Preloaded')
+      expect(mockFetch).toHaveBeenCalledTimes(0) // No additional fetches
+    })
+  })
+
+  describe('Cache Statistics', () => {
+    it('tracks cache entries correctly', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([])
+      })
+
+      // Load some configurations
+      await configService.getProductsFor(null, 'en')
+      await configService.getProductsFor('warmbank', 'es')
+      await configService.getBankInfoFor(null, 'en')
+
+      const stats = configService.getCacheStats()
+      expect(stats.productsEntries).toBe(2) // default-en, warmbank-es
+      expect(stats.bankInfoEntries).toBe(1) // default-en
+      expect(stats.statesEntries).toBe(0) // Not loaded yet
+    })
+  })
+
+  describe('Backwards Compatibility', () => {
+    it('maintains backwards compatibility with old API', async () => {
+      mockLocation.search = '?fi=warmbank&lng=es'
+      
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockProducts)
+        json: () => Promise.resolve([
+          { type: 'checking', title: 'Backward Compatible', description: 'test', icon: 'CreditCard' }
+        ])
       })
-      
+
+      // Old API should still work
       const products = await configService.getProducts()
-      
-      expect(Array.isArray(products)).toBe(true)
-      expect(products.length).toBeGreaterThan(0)
-      
-      // Check that each product has the required properties
-      products.forEach(product => {
-        expect(product).toHaveProperty('type')
-        expect(product).toHaveProperty('title')
-        expect(product).toHaveProperty('description')
-        expect(product).toHaveProperty('icon')
-        expect(typeof product.type).toBe('string')
-        expect(typeof product.title).toBe('string')
-        expect(typeof product.description).toBe('string')
-        expect(typeof product.icon).toBe('string')
-      })
-    })
-
-    it('includes expected product types', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockProducts)
-      })
-      
-      const products = await configService.getProducts()
-      
-      const productTypes = products.map(product => product.type)
-      expect(productTypes).toContain('checking')
-      expect(productTypes).toContain('savings')
-      expect(productTypes).toContain('money-market')
-    })
-
-    it('includes expected product details', async () => {
-      // Mock successful fetch
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockProducts)
-      })
-      
-      const products = await configService.getProducts()
-      
-      const checking = products.find(product => product.type === 'checking')
-      const savings = products.find(product => product.type === 'savings')
-      const moneyMarket = products.find(product => product.type === 'money-market')
-      
-      expect(checking?.title).toBe('Checking Account')
-      expect(checking?.icon).toBe('CreditCard')
-      
-      expect(savings?.title).toBe('Savings Account')
-      expect(savings?.icon).toBe('PiggyBank')
-      
-      expect(moneyMarket?.title).toBe('Money Market Account')
-      expect(moneyMarket?.icon).toBe('TrendingUp')
-    })
-
-    it('caches results on subsequent calls', async () => {
-      // Mock successful fetch for first call
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockProducts)
-      })
-      
-      const firstCall = await configService.getProducts()
-      const secondCall = await configService.getProducts()
-      
-      // Should return the same reference (cached)
-      expect(firstCall).toBe(secondCall)
-      // Fetch should only be called once due to caching
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(products[0].title).toBe('Backward Compatible')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
     })
   })
 
-  describe('getBankInfo', () => {
-    it('returns bank info with required properties', async () => {
-      // Mock successful fetch
+  describe('Performance Benefits', () => {
+    it('demonstrates instant switching between cached configurations', async () => {
+      const englishProducts = [{ type: 'checking', title: 'English', description: 'test', icon: 'CreditCard' }]
+      const spanishProducts = [{ type: 'checking', title: 'Spanish', description: 'test', icon: 'CreditCard' }]
+
+      // Initial loads (will make network calls)
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockBankInfo)
+        json: () => Promise.resolve(englishProducts)
       })
-      
-      const bankInfo = await configService.getBankInfo()
-      
-      expect(bankInfo).toHaveProperty('bankName')
-      expect(bankInfo).toHaveProperty('displayName')
-      expect(bankInfo).toHaveProperty('contact')
-      expect(bankInfo).toHaveProperty('branding')
-      
-      expect(bankInfo.contact).toHaveProperty('phone')
-      expect(bankInfo.contact).toHaveProperty('phoneDisplay')
-      expect(bankInfo.contact).toHaveProperty('email')
-      expect(bankInfo.contact).toHaveProperty('hours')
-      
-      expect(bankInfo.branding).toHaveProperty('primaryColor')
-      expect(bankInfo.branding).toHaveProperty('logoIcon')
-    })
-
-    it('returns default bank info when fetch fails', async () => {
-      // Mock failed fetch
-      mockFetch.mockRejectedValueOnce(new Error('Network error'))
-      
-      const bankInfo = await configService.getBankInfo()
-      
-      expect(bankInfo.bankName).toBe('Cool Bank')
-      expect(bankInfo.contact.email).toBe('support@coolbank.com')
-      expect(bankInfo.contact.phone).toBe('1-800-COOLBNK')
-    })
-
-    it('caches results on subsequent calls', async () => {
-      // Mock successful fetch for first call
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockBankInfo)
+        json: () => Promise.resolve(spanishProducts)
       })
-      
-      const firstCall = await configService.getBankInfo()
-      const secondCall = await configService.getBankInfo()
-      
-      // Should return the same reference (cached)
-      expect(firstCall).toBe(secondCall)
-      // Fetch should only be called once due to caching
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
-  })
 
-  describe('clearCache', () => {
-    it('forces reload on next call', async () => {
-      // Mock fetch for initial loads
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockStates)
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockIdentificationTypes)
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockProducts)
-        })
-      
-      // Load data to populate cache
-      const firstStates = await configService.getStates()
-      const firstTypes = await configService.getIdentificationTypes()
-      const firstProducts = await configService.getProducts()
-      
-      // Clear cache
-      configService.clearCache()
-      
-      // Mock fetch for reload after cache clear
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockStates)
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockIdentificationTypes)
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockProducts)
-        })
-      
-      // Next calls should reload (though return same data)
-      const secondStates = await configService.getStates()
-      const secondTypes = await configService.getIdentificationTypes()
-      const secondProducts = await configService.getProducts()
-      
-      // Data should be equal but not the same reference
-      expect(firstStates).toEqual(secondStates)
-      expect(firstTypes).toEqual(secondTypes)
-      expect(firstProducts).toEqual(secondProducts)
-      
-      // Verify that fetch was called 6 times total (3 initial + 3 after cache clear)
-      expect(mockFetch).toHaveBeenCalledTimes(6)
-    })
-  })
+      await configService.getProductsFor('warmbank', 'en')
+      await configService.getProductsFor('warmbank', 'es')
+      expect(mockFetch).toHaveBeenCalledTimes(2)
 
-  describe('cache timeout configuration', () => {
-    it('should use default cache timeout when no environment variable is set', async () => {
-      // Mock successful fetch for states
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockStates)
-      })
-      
-      const states = await configService.getStates()
-      expect(states).toEqual(mockStates)
-      
-      // Clear the mock to see if cache is used
-      mockFetch.mockClear()
-      
-      // Call again immediately - should use cache (no new fetch call)
-      const cachedStates = await configService.getStates()
-      expect(cachedStates).toEqual(mockStates)
-      expect(mockFetch).not.toHaveBeenCalled()
-    })
+      // Clear mock to verify no more calls
+      vi.clearAllMocks()
 
-    it('should handle invalid cache timeout values gracefully', () => {
-      // Create a spy on console.warn to verify warnings
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      
-      // Test the validation method directly
-      // Note: We're testing the logic, but can't easily test different env vars with singleton
-      // In a real scenario, you might want to make configService factory-based for better testability
-      
-      consoleSpy.mockRestore()
+      // Simulate rapid language switching - should be instant
+      for (let i = 0; i < 10; i++) {
+        const lng = i % 2 === 0 ? 'en' : 'es'
+        const expectedTitle = lng === 'en' ? 'English' : 'Spanish'
+        
+        const result = await configService.getProductsFor('warmbank', lng)
+        expect(result[0].title).toBe(expectedTitle)
+      }
+
+      // No additional network calls should have been made
+      expect(mockFetch).toHaveBeenCalledTimes(0)
     })
   })
 })

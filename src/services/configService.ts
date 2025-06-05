@@ -1,3 +1,5 @@
+import { createCacheKey } from '../hooks/useUrlParams'
+
 export interface State {
   code: string
   name: string
@@ -59,34 +61,34 @@ export interface BankInfo {
   }
 }
 
+interface CacheEntry<T> {
+  data: T
+  timestamp: number
+}
+
+/**
+ * ConfigService with multi-dimensional caching
+ * Caches configurations by (bank, language) combinations for instant switching
+ */
 class ConfigService {
-  private statesCache: State[] | null = null
-  private countriesCache: Country[] | null = null
-  private identificationTypesCache: IdentificationType[] | null = null
-  private productsCache: Product[] | null = null
-  private documentsCache: DocumentConfig | null = null
-  private bankInfoCache: BankInfo | null = null
-  private lastStatesLoad = 0
-  private lastCountriesLoad = 0
-  private lastIdentificationTypesLoad = 0
-  private lastProductsLoad = 0
-  private lastDocumentsLoad = 0
-  private lastBankInfoLoad = 0
-  private currentFinancialInstitution: string | null = null
-  private currentLanguage: string | null = null
+  // Multi-dimensional cache maps keyed by "bank-language" (e.g., "warmbank-es", "default-en")
+  private statesCache = new Map<string, CacheEntry<State[]>>()
+  private countriesCache = new Map<string, CacheEntry<Country[]>>()
+  private identificationTypesCache = new Map<string, CacheEntry<IdentificationType[]>>()
+  private productsCache = new Map<string, CacheEntry<Product[]>>()
+  private documentsCache = new Map<string, CacheEntry<DocumentConfig>>()
+  private bankInfoCache = new Map<string, CacheEntry<BankInfo>>()
+  
   private readonly cacheTimeout: number
   private readonly apiBaseUrl: string
 
   constructor() {
     // Get API base URL from environment variable, default to local development server
-    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api'
     
     // Get cache timeout from environment variable, default to 5000ms (5 seconds)
     const envCacheTimeout = import.meta.env.VITE_CONFIG_CACHE_TIMEOUT
     this.cacheTimeout = this.parseAndValidateCacheTimeout(envCacheTimeout)
-    
-    // Initialize financial institution from URL
-    this.updateFinancialInstitution()
   }
 
   private parseAndValidateCacheTimeout(value: string | undefined): number {
@@ -115,286 +117,315 @@ class ConfigService {
     return parsed
   }
 
-  private shouldReloadStates(): boolean {
-    return this.statesCache === null || (Date.now() - this.lastStatesLoad) > this.cacheTimeout
+  private isCacheEntryValid<T>(entry: CacheEntry<T> | undefined): boolean {
+    if (!entry) return false
+    return (Date.now() - entry.timestamp) <= this.cacheTimeout
   }
 
-  private shouldReloadCountries(): boolean {
-    return this.countriesCache === null || (Date.now() - this.lastCountriesLoad) > this.cacheTimeout
-  }
-
-  private shouldReloadIdentificationTypes(): boolean {
-    return this.identificationTypesCache === null || (Date.now() - this.lastIdentificationTypesLoad) > this.cacheTimeout
-  }
-
-  private shouldReloadProducts(): boolean {
-    return this.productsCache === null || (Date.now() - this.lastProductsLoad) > this.cacheTimeout
-  }
-
-  private shouldReloadDocuments(): boolean {
-    return this.documentsCache === null || (Date.now() - this.lastDocumentsLoad) > this.cacheTimeout
-  }
-
-  private shouldReloadBankInfo(): boolean {
-    return this.bankInfoCache === null || (Date.now() - this.lastBankInfoLoad) > this.cacheTimeout
-  }
-
-  /**
-   * Update the current financial institution and language from URL parameters
-   */
-  private updateFinancialInstitution(): void {
-    if (typeof window === 'undefined') return
+  private buildConfigUrl(configName: string, fi: string | null, lng: string): string {
+    const localizedConfigName = lng === 'en' ? configName : `${configName}.${lng}`
     
-    const urlParams = new URLSearchParams(window.location.search)
-    const newFi = urlParams.get('fi')
-    const newLanguage = this.getCurrentLanguage()
-    
-    // Check if either FI or language changed
-    const fiChanged = newFi !== this.currentFinancialInstitution
-    const languageChanged = newLanguage !== this.currentLanguage
-    
-    if (fiChanged || languageChanged) {
-      this.currentFinancialInstitution = newFi
-      this.currentLanguage = newLanguage
-      this.clearAllCaches()
-    }
-  }
-
-  /**
-   * Clear all caches to force reload
-   */
-  private clearAllCaches(): void {
-    this.statesCache = null
-    this.countriesCache = null
-    this.identificationTypesCache = null
-    this.productsCache = null
-    this.documentsCache = null
-    this.bankInfoCache = null
-    this.lastStatesLoad = 0
-    this.lastCountriesLoad = 0
-    this.lastIdentificationTypesLoad = 0
-    this.lastProductsLoad = 0
-    this.lastDocumentsLoad = 0
-    this.lastBankInfoLoad = 0
-  }
-
-  /**
-   * Get the current financial institution slug
-   */
-  public getCurrentFinancialInstitution(): string | null {
-    this.updateFinancialInstitution()
-    return this.currentFinancialInstitution
-  }
-
-  /**
-   * Get current language from URL parameters, localStorage, or default
-   */
-  private getCurrentLanguage(): string {
-    // First priority: URL parameters
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const langParam = urlParams.get('lng')
-      if (langParam && ['en', 'es'].includes(langParam)) {
-        return langParam
-      }
-    }
-    
-    // Second priority: localStorage (i18next cache)
-    if (typeof window !== 'undefined') {
-      const storedLang = localStorage.getItem('i18nextLng')
-      if (storedLang && ['en', 'es'].includes(storedLang)) {
-        return storedLang
-      }
-    }
-    
-    // Default to English
-    return 'en'
-  }
-
-  /**
-   * Build config URL with bank-specific and language-specific path support
-   */
-  private buildConfigUrl(configName: string): string {
-    this.updateFinancialInstitution()
-    
-    const language = this.getCurrentLanguage()
-    const localizedConfigName = language === 'en' ? configName : `${configName}.${language}`
-    
-    if (this.currentFinancialInstitution) {
-      return `${this.apiBaseUrl}/config/${this.currentFinancialInstitution}/${localizedConfigName}`
+    if (fi) {
+      return `${this.apiBaseUrl}/config/${fi}/${localizedConfigName}`
     }
     
     return `${this.apiBaseUrl}/config/${localizedConfigName}`
   }
 
-  async getStates(): Promise<State[]> {
-    if (this.shouldReloadStates()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('states'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch states: ${response.status}`)
-        }
-        const data = await response.json()
-        this.statesCache = data as State[]
-        this.lastStatesLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load states configuration:', error)
-        // Return cached data if available, otherwise empty array
-        return this.statesCache || []
-      }
+  /**
+   * Generic method to get cached data or fetch if not available/expired
+   */
+  private async getCachedData<T>(
+    cache: Map<string, CacheEntry<T>>,
+    cacheKey: string,
+    fetchFn: () => Promise<T>,
+    fallbackData: T
+  ): Promise<T> {
+    const cached = cache.get(cacheKey)
+    
+    if (this.isCacheEntryValid(cached)) {
+      return cached!.data
     }
-    return this.statesCache || []
-  }
 
-  async getCountries(): Promise<Country[]> {
-    if (this.shouldReloadCountries()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('countries'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch countries: ${response.status}`)
-        }
-        const data = await response.json()
-        this.countriesCache = data as Country[]
-        this.lastCountriesLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load countries configuration:', error)
-        // Return cached data if available, otherwise empty array
-        return this.countriesCache || []
-      }
+    try {
+      const data = await fetchFn()
+      cache.set(cacheKey, {
+        data,
+        timestamp: Date.now()
+      })
+      return data
+    } catch (error) {
+      console.error('Failed to load configuration:', error)
+      // Return cached data if available, otherwise fallback
+      return cached?.data || fallbackData
     }
-    return this.countriesCache || []
-  }
-
-  async getIdentificationTypes(): Promise<IdentificationType[]> {
-    if (this.shouldReloadIdentificationTypes()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('identification-types'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch identification types: ${response.status}`)
-        }
-        const data = await response.json()
-        this.identificationTypesCache = data as IdentificationType[]
-        this.lastIdentificationTypesLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load identification types configuration:', error)
-        // Return cached data if available, otherwise empty array
-        return this.identificationTypesCache || []
-      }
-    }
-    return this.identificationTypesCache || []
-  }
-
-  async getProducts(): Promise<Product[]> {
-    if (this.shouldReloadProducts()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('products'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch products: ${response.status}`)
-        }
-        const data = await response.json()
-        this.productsCache = data as Product[]
-        this.lastProductsLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load products configuration:', error)
-        // Return cached data if available, otherwise empty array
-        return this.productsCache || []
-      }
-    }
-    return this.productsCache || []
-  }
-
-  async getDocuments(): Promise<DocumentConfig> {
-    if (this.shouldReloadDocuments()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('documents'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch documents: ${response.status}`)
-        }
-        const data = await response.json()
-        this.documentsCache = data as DocumentConfig
-        this.lastDocumentsLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load documents configuration:', error)
-        // Return cached data if available, otherwise empty config
-        return this.documentsCache || { showAcceptAllButton: true, documents: [], rules: [] }
-      }
-    }
-    return this.documentsCache || { showAcceptAllButton: true, documents: [], rules: [] }
-  }
-
-  async getBankInfo(): Promise<BankInfo> {
-    if (this.shouldReloadBankInfo()) {
-      try {
-        const response = await fetch(this.buildConfigUrl('bank-info'))
-        if (!response.ok) {
-          throw new Error(`Failed to fetch bank info: ${response.status}`)
-        }
-        const data = await response.json()
-        this.bankInfoCache = data as BankInfo
-        this.lastBankInfoLoad = Date.now()
-      } catch (error) {
-        console.error('Failed to load bank info configuration:', error)
-        // Return cached data if available, otherwise default bank info
-        return this.bankInfoCache || {
-          bankName: "Cool Bank",
-          displayName: "Cool Bank",
-          contact: {
-            phone: "1-800-COOLBNK",
-            phoneDisplay: "1-800-COOLBNK (1-800-XXX-XXXX)",
-            email: "support@coolbank.com",
-            hours: "Monday - Friday 8:00 AM - 8:00 PM EST"
-          },
-          branding: {
-            primaryColor: "#3b82f6",
-            logoIcon: "Building2"
-          }
-        }
-      }
-    }
-    return this.bankInfoCache || {
-      bankName: "Cool Bank",
-      displayName: "Cool Bank",
-      contact: {
-        phone: "1-800-COOLBNK",
-        phoneDisplay: "1-800-COOLBNK (1-800-XXX-XXXX)",
-        email: "support@coolbank.com",
-        hours: "Monday - Friday 8:00 AM - 8:00 PM EST"
-      },
-      branding: {
-        primaryColor: "#3b82f6",
-        logoIcon: "Building2"
-      }
-    }
-  }
-
-  clearCache(): void {
-    this.statesCache = null
-    this.countriesCache = null
-    this.identificationTypesCache = null
-    this.productsCache = null
-    this.documentsCache = null
-    this.bankInfoCache = null
-    this.lastStatesLoad = 0
-    this.lastCountriesLoad = 0
-    this.lastIdentificationTypesLoad = 0
-    this.lastProductsLoad = 0
-    this.lastDocumentsLoad = 0
-    this.lastBankInfoLoad = 0
   }
 
   /**
-   * Refresh configs when language changes
+   * Get states for specific bank/language combination
    */
-  refreshForLanguageChange(): void {
-    // Update the current language to the new one
-    this.currentLanguage = this.getCurrentLanguage()
-    this.clearAllCaches()
+  async getStatesFor(fi: string | null, lng: string): Promise<State[]> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.statesCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('states', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch states: ${response.status}`)
+        }
+        return await response.json() as State[]
+      },
+      []
+    )
+  }
+
+  /**
+   * Get countries for specific bank/language combination
+   */
+  async getCountriesFor(fi: string | null, lng: string): Promise<Country[]> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.countriesCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('countries', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch countries: ${response.status}`)
+        }
+        return await response.json() as Country[]
+      },
+      []
+    )
+  }
+
+  /**
+   * Get identification types for specific bank/language combination
+   */
+  async getIdentificationTypesFor(fi: string | null, lng: string): Promise<IdentificationType[]> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.identificationTypesCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('identification-types', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch identification types: ${response.status}`)
+        }
+        return await response.json() as IdentificationType[]
+      },
+      []
+    )
+  }
+
+  /**
+   * Get products for specific bank/language combination
+   */
+  async getProductsFor(fi: string | null, lng: string): Promise<Product[]> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.productsCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('products', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products: ${response.status}`)
+        }
+        return await response.json() as Product[]
+      },
+      []
+    )
+  }
+
+  /**
+   * Get documents for specific bank/language combination
+   */
+  async getDocumentsFor(fi: string | null, lng: string): Promise<DocumentConfig> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.documentsCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('documents', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch documents: ${response.status}`)
+        }
+        return await response.json() as DocumentConfig
+      },
+      { showAcceptAllButton: true, documents: [], rules: [] }
+    )
+  }
+
+  /**
+   * Get bank info for specific bank/language combination
+   */
+  async getBankInfoFor(fi: string | null, lng: string): Promise<BankInfo> {
+    const cacheKey = createCacheKey(fi, lng)
+    
+    return this.getCachedData(
+      this.bankInfoCache,
+      cacheKey,
+      async () => {
+        const response = await fetch(this.buildConfigUrl('bank-info', fi, lng))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bank info: ${response.status}`)
+        }
+        return await response.json() as BankInfo
+      },
+      {
+        bankName: "Cool Bank",
+        displayName: "Cool Bank",
+        contact: {
+          phone: "1-800-COOLBNK",
+          phoneDisplay: "1-800-COOLBNK (1-800-XXX-XXXX)",
+          email: "support@coolbank.com",
+          hours: "Monday - Friday 8:00 AM - 8:00 PM EST"
+        },
+        branding: {
+          primaryColor: "#3b82f6",
+          logoIcon: "Building2"
+        }
+      }
+    )
+  }
+
+  // Backwards-compatible methods that get current URL parameters
+  private getCurrentUrlParams(): { fi: string | null, lng: string } {
+    if (typeof window === 'undefined') {
+      return { fi: null, lng: 'en' }
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search)
+    const fi = urlParams.get('fi')
+    
+    // Priority: URL param > localStorage > default
+    let lng = urlParams.get('lng')
+    if (!lng && typeof window !== 'undefined') {
+      lng = localStorage.getItem('i18nextLng') || 'en'
+    }
+    lng = lng || 'en'
+    
+    return { fi, lng }
+  }
+
+  async getStates(): Promise<State[]> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getStatesFor(fi, lng)
+  }
+
+  async getCountries(): Promise<Country[]> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getCountriesFor(fi, lng)
+  }
+
+  async getIdentificationTypes(): Promise<IdentificationType[]> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getIdentificationTypesFor(fi, lng)
+  }
+
+  async getProducts(): Promise<Product[]> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getProductsFor(fi, lng)
+  }
+
+  async getDocuments(): Promise<DocumentConfig> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getDocumentsFor(fi, lng)
+  }
+
+  async getBankInfo(): Promise<BankInfo> {
+    const { fi, lng } = this.getCurrentUrlParams()
+    return this.getBankInfoFor(fi, lng)
+  }
+
+  /**
+   * Preload configurations for specific combinations
+   * Useful for preloading common language/bank combinations
+   */
+  async preloadConfiguration(fi: string | null, lng: string): Promise<void> {
+    await Promise.all([
+      this.getProductsFor(fi, lng),
+      this.getBankInfoFor(fi, lng),
+      this.getStatesFor(fi, lng),
+      this.getCountriesFor(fi, lng),
+      this.getIdentificationTypesFor(fi, lng),
+      this.getDocumentsFor(fi, lng)
+    ])
+  }
+
+  /**
+   * Preload both English and Spanish for current bank
+   */
+  async preloadLanguages(fi: string | null): Promise<void> {
+    await Promise.all([
+      this.preloadConfiguration(fi, 'en'),
+      this.preloadConfiguration(fi, 'es')
+    ])
+  }
+
+  /**
+   * Clear all caches (for testing or manual refresh)
+   */
+  clearAllCaches(): void {
+    this.statesCache.clear()
+    this.countriesCache.clear()
+    this.identificationTypesCache.clear()
+    this.productsCache.clear()
+    this.documentsCache.clear()
+    this.bankInfoCache.clear()
+  }
+
+  /**
+   * Clear cache for specific combination
+   */
+  clearCacheFor(fi: string | null, lng: string): void {
+    const cacheKey = createCacheKey(fi, lng)
+    this.statesCache.delete(cacheKey)
+    this.countriesCache.delete(cacheKey)
+    this.identificationTypesCache.delete(cacheKey)
+    this.productsCache.delete(cacheKey)
+    this.documentsCache.delete(cacheKey)
+    this.bankInfoCache.delete(cacheKey)
+  }
+
+  /**
+   * Get cache statistics for debugging
+   */
+  getCacheStats(): Record<string, number> {
+    return {
+      statesEntries: this.statesCache.size,
+      countriesEntries: this.countriesCache.size,
+      identificationTypesEntries: this.identificationTypesCache.size,
+      productsEntries: this.productsCache.size,
+      documentsEntries: this.documentsCache.size,
+      bankInfoEntries: this.bankInfoCache.size,
+    }
   }
 
   // Helper method to get identification types that require state
   async getIdentificationTypesThatRequireState(): Promise<string[]> {
     const types = await this.getIdentificationTypes()
     return types.filter(type => type.requiresState).map(type => type.value)
+  }
+
+  // DEPRECATED: kept for backwards compatibility, but no longer needed
+  refreshForLanguageChange(): void {
+    console.warn('refreshForLanguageChange() is deprecated - use reactive URL parameter approach instead')
+  }
+
+  getCurrentFinancialInstitution(): string | null {
+    const { fi } = this.getCurrentUrlParams()
+    return fi
+  }
+
+  clearCache(): void {
+    console.warn('clearCache() is deprecated - use clearAllCaches() instead')
+    this.clearAllCaches()
   }
 }
 
