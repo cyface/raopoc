@@ -1,0 +1,89 @@
+{
+  "documents": [
+    {
+      "id": "terms-of-service",
+      "name": "Terms of Service",
+      "description": "General terms and conditions for all bank services",
+      "url": "/documents/terms-of-service.pdf",
+      "required": true,
+      "category": "terms"
+    },
+    {
+      "id": "privacy-policy",
+      "name": "Privacy Policy",
+      "description": "How we collect, use, and protect your personal information",
+      "url": "/documents/privacy-policy.pdf",
+      "required": true,
+      "category": "privacy"
+    },
+    {
+      "id": "checking-account-agreement",
+      "name": "Checking Account Agreement",
+      "description": "Terms specific to checking account services",
+      "url": "/documents/checking-account-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "savings-account-agreement",
+      "name": "Savings Account Agreement",
+      "description": "Terms specific to savings account services",
+      "url": "/documents/savings-account-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "money-market-agreement",
+      "name": "Money Market Account Agreement",
+      "description": "Terms specific to money market account services",
+      "url": "/documents/money-market-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "fee-schedule",
+      "name": "Fee Schedule",
+      "description": "Schedule of fees for all banking services",
+      "url": "/documents/fee-schedule.pdf",
+      "required": true,
+      "category": "disclosure"
+    },
+    {
+      "id": "patriot-act-notice",
+      "name": "USA PATRIOT Act Notice",
+      "description": "Important information about procedures for opening new accounts",
+      "url": "/documents/patriot-act-notice.pdf",
+      "required": true,
+      "category": "notice"
+    },
+    {
+      "id": "itin-disclosure",
+      "name": "Individual Taxpayer Identification Number (ITIN) Disclosure",
+      "description": "Important information for customers without Social Security Numbers",
+      "url": "/documents/itin-disclosure.pdf",
+      "required": true,
+      "category": "disclosure"
+    }
+  ],
+  "rules": [
+    {
+      "documentIds": ["terms-of-service", "privacy-policy", "fee-schedule", "patriot-act-notice"]
+    },
+    {
+      "productTypes": ["checking"],
+      "documentIds": ["checking-account-agreement"]
+    },
+    {
+      "productTypes": ["savings"],
+      "documentIds": ["savings-account-agreement"]
+    },
+    {
+      "productTypes": ["money_market"],
+      "documentIds": ["money-market-agreement"]
+    },
+    {
+      "noSSN": true,
+      "documentIds": ["itin-disclosure"]
+    }
+  ]
+}

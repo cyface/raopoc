@@ -43,6 +43,7 @@ export const OnboardingDataSchema = z.object({
   selectedProducts: z.array(z.enum(['checking', 'savings', 'money-market'])).min(1),
   customerInfo: CustomerInfoSchema.optional(),
   identificationInfo: z.any().optional(), // Will import proper type later
+  documentAcceptance: z.any().optional(), // Will import proper type later
 })
 
 export type OnboardingData = z.infer<typeof OnboardingDataSchema>

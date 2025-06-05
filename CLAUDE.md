@@ -32,6 +32,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Maximum allowed value: `3600000` (1 hour)
   - Invalid values will fall back to the default 5 seconds with a console warning
 
+- `VITE_SHOW_ACCEPT_ALL`: Controls whether the "Accept All Documents" button is shown. Defaults to `true`.
+  - Example: `VITE_SHOW_ACCEPT_ALL=false` hides the accept all button
+  - Set to `false` to hide the button and require individual document acceptance
+  - Any other value (including undefined) will show the button
+
 ## Project Structure
 
 This is a minimal TypeScript project with:

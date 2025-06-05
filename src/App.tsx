@@ -1,10 +1,11 @@
 import ProductSelection from './components/ProductSelection'
 import CustomerInfo from './components/CustomerInfo'
 import IdentificationInfo from './components/IdentificationInfo'
+import { DocumentAcceptance } from './components/DocumentAcceptance'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
 
 function OnboardingFlow() {
-  const { currentStep, data, setCustomerInfo, setIdentificationInfo, setCurrentStep } = useOnboarding()
+  const { currentStep, data, setCustomerInfo, setIdentificationInfo, setDocumentAcceptance, setCurrentStep } = useOnboarding()
 
   const handleCustomerInfoNext = (customerInfo: any) => {
     setCustomerInfo(customerInfo)
@@ -14,6 +15,10 @@ function OnboardingFlow() {
   const handleIdentificationInfoNext = (identificationInfo: any) => {
     setIdentificationInfo(identificationInfo)
     setCurrentStep(4)
+  }
+
+  const handleDocumentAcceptanceNext = () => {
+    setCurrentStep(5)
   }
 
   switch (currentStep) {
@@ -30,6 +35,15 @@ function OnboardingFlow() {
       return (
         <IdentificationInfo 
           onNext={handleIdentificationInfoNext}
+        />
+      )
+    case 4:
+      return (
+        <DocumentAcceptance
+          selectedProducts={data.selectedProducts}
+          hasNoSSN={data.identificationInfo?.noSSN || false}
+          onAcceptanceChange={setDocumentAcceptance}
+          onNext={handleDocumentAcceptanceNext}
         />
       )
     default:

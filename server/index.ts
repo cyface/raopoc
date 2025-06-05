@@ -36,6 +36,7 @@ async function loadAllConfigs() {
     configCache.states = await loadConfigFile('states.json')
     configCache.identificationTypes = await loadConfigFile('identification-types.json')
     configCache.products = await loadConfigFile('products.json')
+    configCache.documents = await loadConfigFile('documents.json')
     console.log('All config files loaded successfully')
   } catch (error) {
     console.error('Error loading config files:', error)
@@ -61,6 +62,8 @@ if (process.env.NODE_ENV !== 'production') {
         configCache.identificationTypes = await loadConfigFile(filename)
       } else if (filename === 'products.json') {
         configCache.products = await loadConfigFile(filename)
+      } else if (filename === 'documents.json') {
+        configCache.documents = await loadConfigFile(filename)
       }
       console.log(`Successfully reloaded ${filename}`)
     } catch (error) {
@@ -91,6 +94,84 @@ app.get('/api/config/products', (_req, res) => {
   res.json(configCache.products)
 })
 
+app.get('/api/config/documents', (_req, res) => {
+  if (!configCache.documents) {
+    return res.status(500).json({ error: 'Documents configuration not loaded' })
+  }
+  res.json(configCache.documents)
+})
+
+// Document endpoints
+app.get('/api/documents/:documentId', async (req, res) => {
+  try {
+    const { documentId } = req.params
+    const documentsConfig = configCache.documents
+    
+    if (!documentsConfig) {
+      return res.status(500).json({ error: 'Documents configuration not loaded' })
+    }
+    
+    const document = documentsConfig.documents.find((doc: any) => doc.id === documentId)
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' })
+    }
+    
+    // In a real implementation, you would serve the actual PDF file
+    // For now, we'll return a mock PDF response
+    const mockPdfPath = path.join(__dirname, '..', 'public', 'mock-document.pdf')
+    
+    try {
+      await fs.access(mockPdfPath)
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader('Content-Disposition', `inline; filename="${document.name}.pdf"`)
+      const pdfBuffer = await fs.readFile(mockPdfPath)
+      res.send(pdfBuffer)
+    } catch {
+      // If mock PDF doesn't exist, return a simple text response
+      res.setHeader('Content-Type', 'text/plain')
+      res.send(`Mock document content for: ${document.name}\n\nThis is where the actual document content would be displayed.`)
+    }
+  } catch (error) {
+    console.error('Error serving document:', error)
+    res.status(500).json({ error: 'Failed to serve document' })
+  }
+})
+
+app.get('/api/documents/:documentId/download', async (req, res) => {
+  try {
+    const { documentId } = req.params
+    const documentsConfig = configCache.documents
+    
+    if (!documentsConfig) {
+      return res.status(500).json({ error: 'Documents configuration not loaded' })
+    }
+    
+    const document = documentsConfig.documents.find((doc: any) => doc.id === documentId)
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' })
+    }
+    
+    // In a real implementation, you would serve the actual PDF file for download
+    const mockPdfPath = path.join(__dirname, '..', 'public', 'mock-document.pdf')
+    
+    try {
+      await fs.access(mockPdfPath)
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader('Content-Disposition', `attachment; filename="${document.name}.pdf"`)
+      const pdfBuffer = await fs.readFile(mockPdfPath)
+      res.send(pdfBuffer)
+    } catch {
+      // If mock PDF doesn't exist, return a simple text file
+      res.setHeader('Content-Type', 'text/plain')
+      res.setHeader('Content-Disposition', `attachment; filename="${document.name}.txt"`)
+      res.send(`Mock document content for: ${document.name}\n\nThis is where the actual document content would be displayed.`)
+    }
+  } catch (error) {
+    console.error('Error downloading document:', error)
+    res.status(500).json({ error: 'Failed to download document' })
+  }
+})
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
@@ -106,6 +187,7 @@ async function start() {
     console.log(`  - http://localhost:${PORT}/api/config/states`)
     console.log(`  - http://localhost:${PORT}/api/config/identification-types`)
     console.log(`  - http://localhost:${PORT}/api/config/products`)
+    console.log(`  - http://localhost:${PORT}/api/config/documents`)
   })
 }
 

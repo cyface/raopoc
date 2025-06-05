@@ -16,13 +16,36 @@ export interface Product {
   icon: string
 }
 
+export interface Document {
+  id: string
+  name: string
+  description?: string
+  url: string
+  required: boolean
+  category: 'terms' | 'privacy' | 'disclosure' | 'agreement' | 'notice'
+}
+
+export interface DocumentRule {
+  productTypes?: string[]
+  hasSSN?: boolean
+  noSSN?: boolean
+  documentIds: string[]
+}
+
+export interface DocumentConfig {
+  documents: Document[]
+  rules: DocumentRule[]
+}
+
 class ConfigService {
   private statesCache: State[] | null = null
   private identificationTypesCache: IdentificationType[] | null = null
   private productsCache: Product[] | null = null
+  private documentsCache: DocumentConfig | null = null
   private lastStatesLoad = 0
   private lastIdentificationTypesLoad = 0
   private lastProductsLoad = 0
+  private lastDocumentsLoad = 0
   private readonly cacheTimeout: number
   private readonly apiBaseUrl: string
 
@@ -71,6 +94,10 @@ class ConfigService {
 
   private shouldReloadProducts(): boolean {
     return this.productsCache === null || (Date.now() - this.lastProductsLoad) > this.cacheTimeout
+  }
+
+  private shouldReloadDocuments(): boolean {
+    return this.documentsCache === null || (Date.now() - this.lastDocumentsLoad) > this.cacheTimeout
   }
 
   async getStates(): Promise<State[]> {
@@ -130,13 +157,34 @@ class ConfigService {
     return this.productsCache || []
   }
 
+  async getDocuments(): Promise<DocumentConfig> {
+    if (this.shouldReloadDocuments()) {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/config/documents`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch documents: ${response.status}`)
+        }
+        const data = await response.json()
+        this.documentsCache = data as DocumentConfig
+        this.lastDocumentsLoad = Date.now()
+      } catch (error) {
+        console.error('Failed to load documents configuration:', error)
+        // Return cached data if available, otherwise empty config
+        return this.documentsCache || { documents: [], rules: [] }
+      }
+    }
+    return this.documentsCache || { documents: [], rules: [] }
+  }
+
   clearCache(): void {
     this.statesCache = null
     this.identificationTypesCache = null
     this.productsCache = null
+    this.documentsCache = null
     this.lastStatesLoad = 0
     this.lastIdentificationTypesLoad = 0
     this.lastProductsLoad = 0
+    this.lastDocumentsLoad = 0
   }
 
   // Helper method to get identification types that require state
