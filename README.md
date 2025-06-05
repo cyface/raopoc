@@ -28,8 +28,20 @@ pnpm install
 # Start development server
 pnpm run dev
 
-# Run tests
+# Run tests in watch mode
 pnpm test
+
+# Run tests once (for CI/scripts)
+pnpm test:run
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Run tests with UI
+pnpm test:ui
+
+# Type check without building
+pnpm typecheck
 
 # Build for production
 pnpm run build

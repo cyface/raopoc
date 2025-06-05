@@ -6,8 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Install dependencies: `pnpm install`
 - Build the project: `pnpm run build`
-- Run tests: `pnpm test`
 - Run development server: `pnpm run dev`
+- Run tests (watch mode): `pnpm test`
+- Run tests once: `pnpm test:run`
+- Run tests with coverage: `pnpm test:coverage`
+- Run tests with UI: `pnpm test:ui`
+- TypeScript type checking: `pnpm typecheck`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
 
 ## Project Structure
