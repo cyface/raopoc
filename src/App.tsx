@@ -8,7 +8,6 @@ import { ThemeProvider } from './context/ThemeContext'
 import { useUrlParams } from './hooks/useUrlParams'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
-import { configService } from './services/configService'
 import type { CustomerInfoData } from './types/customer'
 import type { IdentificationInfoData } from './types/identification'
 
@@ -19,9 +18,8 @@ function UrlParamWatcher() {
   useEffect(() => {
     // Update language when URL parameter changes
     if (i18n.language !== lng) {
-      i18n.changeLanguage(lng).then(() => {
-        configService.refreshForLanguageChange()
-      })
+      i18n.changeLanguage(lng)
+      // Note: ConfigServiceV2 automatically handles language changes via reactive hooks
     }
   }, [lng, i18n])
 
