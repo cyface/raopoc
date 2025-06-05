@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PiggyBank, CreditCard, TrendingUp, Building2, LucideIcon } from 'lucide-react'
 import { ProductType, ProductSelectionSchema, type ProductSelectionData } from '../types/products'
 import { useOnboarding } from '../context/OnboardingContext'
-import { configService, type Product } from '../services/configService'
+import { configService, type Product, type BankInfo } from '../services/configService'
 import * as styles from '../styles/theme.css'
 
 // Icon mapping to convert string names to React components
@@ -16,18 +16,23 @@ export default function ProductSelection() {
   const { setSelectedProducts: setGlobalProducts, setCurrentStep } = useOnboarding()
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
   const [error, setError] = useState<string>('')
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadConfigs = async () => {
       try {
-        const productsData = await configService.getProducts()
+        const [productsData, bankInfoData] = await Promise.all([
+          configService.getProducts(),
+          configService.getBankInfo()
+        ])
         setProducts(productsData)
+        setBankInfo(bankInfoData)
       } catch (error) {
-        console.error('Failed to load products:', error)
+        console.error('Failed to load configuration:', error)
       }
     }
-    loadProducts()
+    loadConfigs()
   }, [])
 
   const toggleProduct = (productType: ProductType) => {
@@ -59,7 +64,7 @@ export default function ProductSelection() {
     <div className={styles.container}>
       <div className={styles.header}>
         <Building2 className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Premier Bank</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
       
       <h1 className={styles.heading}>Let&apos;s Open Your Account!</h1>

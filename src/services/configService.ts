@@ -37,15 +37,32 @@ export interface DocumentConfig {
   rules: DocumentRule[]
 }
 
+export interface BankInfo {
+  bankName: string
+  displayName: string
+  contact: {
+    phone: string
+    phoneDisplay: string
+    email: string
+    hours: string
+  }
+  branding: {
+    primaryColor: string
+    logoIcon: string
+  }
+}
+
 class ConfigService {
   private statesCache: State[] | null = null
   private identificationTypesCache: IdentificationType[] | null = null
   private productsCache: Product[] | null = null
   private documentsCache: DocumentConfig | null = null
+  private bankInfoCache: BankInfo | null = null
   private lastStatesLoad = 0
   private lastIdentificationTypesLoad = 0
   private lastProductsLoad = 0
   private lastDocumentsLoad = 0
+  private lastBankInfoLoad = 0
   private readonly cacheTimeout: number
   private readonly apiBaseUrl: string
 
@@ -98,6 +115,10 @@ class ConfigService {
 
   private shouldReloadDocuments(): boolean {
     return this.documentsCache === null || (Date.now() - this.lastDocumentsLoad) > this.cacheTimeout
+  }
+
+  private shouldReloadBankInfo(): boolean {
+    return this.bankInfoCache === null || (Date.now() - this.lastBankInfoLoad) > this.cacheTimeout
   }
 
   async getStates(): Promise<State[]> {
@@ -176,15 +197,62 @@ class ConfigService {
     return this.documentsCache || { documents: [], rules: [] }
   }
 
+  async getBankInfo(): Promise<BankInfo> {
+    if (this.shouldReloadBankInfo()) {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/config/bank-info`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bank info: ${response.status}`)
+        }
+        const data = await response.json()
+        this.bankInfoCache = data as BankInfo
+        this.lastBankInfoLoad = Date.now()
+      } catch (error) {
+        console.error('Failed to load bank info configuration:', error)
+        // Return cached data if available, otherwise default bank info
+        return this.bankInfoCache || {
+          bankName: "Cool Bank",
+          displayName: "Cool Bank",
+          contact: {
+            phone: "1-800-COOLBNK",
+            phoneDisplay: "1-800-COOLBNK (1-800-XXX-XXXX)",
+            email: "support@coolbank.com",
+            hours: "Monday - Friday 8:00 AM - 8:00 PM EST"
+          },
+          branding: {
+            primaryColor: "#3b82f6",
+            logoIcon: "Building2"
+          }
+        }
+      }
+    }
+    return this.bankInfoCache || {
+      bankName: "Cool Bank",
+      displayName: "Cool Bank",
+      contact: {
+        phone: "1-800-COOLBNK",
+        phoneDisplay: "1-800-COOLBNK (1-800-XXX-XXXX)",
+        email: "support@coolbank.com",
+        hours: "Monday - Friday 8:00 AM - 8:00 PM EST"
+      },
+      branding: {
+        primaryColor: "#3b82f6",
+        logoIcon: "Building2"
+      }
+    }
+  }
+
   clearCache(): void {
     this.statesCache = null
     this.identificationTypesCache = null
     this.productsCache = null
     this.documentsCache = null
+    this.bankInfoCache = null
     this.lastStatesLoad = 0
     this.lastIdentificationTypesLoad = 0
     this.lastProductsLoad = 0
     this.lastDocumentsLoad = 0
+    this.lastBankInfoLoad = 0
   }
 
   // Helper method to get identification types that require state

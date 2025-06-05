@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Building2, User, Mail, Phone, MapPin } from 'lucide-react'
 import { CustomerInfoSchema, type CustomerInfoData, type AddressData } from '../types/customer'
 import { type ProductType } from '../types/products'
-import { configService, type State } from '../services/configService'
+import { configService, type State, type BankInfo } from '../services/configService'
 import * as styles from '../styles/theme.css'
 
 interface CustomerInfoProps {
@@ -28,17 +28,22 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
   
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [states, setStates] = useState<State[]>([])
+  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
 
   useEffect(() => {
-    const loadStates = async () => {
+    const loadConfigs = async () => {
       try {
-        const statesData = await configService.getStates()
+        const [statesData, bankInfoData] = await Promise.all([
+          configService.getStates(),
+          configService.getBankInfo()
+        ])
         setStates(statesData)
+        setBankInfo(bankInfoData)
       } catch (error) {
-        console.error('Failed to load states:', error)
+        console.error('Failed to load configuration:', error)
       }
     }
-    loadStates()
+    loadConfigs()
   }, [])
 
   const formatPhoneNumber = (value: string): string => {
@@ -125,7 +130,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
     <div className={styles.container}>
       <div className={styles.header}>
         <Building2 className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Premier Bank</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
       
       <h1 className={styles.heading}>Personal Information</h1>

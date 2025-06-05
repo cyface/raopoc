@@ -5,6 +5,10 @@
 # Config files copied to public at build time
 /public/config
 
+# Application submissions - contains customer data
+/applications/*
+!/applications/.gitkeep
+
 /node_modules
 npm-debug.log*
 yarn-debug.log*

@@ -4,9 +4,9 @@
   "description": "Bank customer onboarding application",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:server\"",
+    "dev:frontend": "vite",
     "dev:server": "tsx watch server/index.ts",
-    "dev:all": "concurrently \"pnpm dev\" \"pnpm dev:server\"",
     "build": "tsc && vite build",
     "build:server": "tsc -p tsconfig.server.json",
     "preview": "vite preview",

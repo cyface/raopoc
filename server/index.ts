@@ -38,6 +38,7 @@ async function loadAllConfigs() {
     configCache.identificationTypes = await loadConfigFile('identification-types.json')
     configCache.products = await loadConfigFile('products.json')
     configCache.documents = await loadConfigFile('documents.json')
+    configCache.bankInfo = await loadConfigFile('bank-info.json')
     console.log('All config files loaded successfully')
   } catch (error) {
     console.error('Error loading config files:', error)
@@ -65,6 +66,8 @@ if (process.env.NODE_ENV !== 'production') {
         configCache.products = await loadConfigFile(filename)
       } else if (filename === 'documents.json') {
         configCache.documents = await loadConfigFile(filename)
+      } else if (filename === 'bank-info.json') {
+        configCache.bankInfo = await loadConfigFile(filename)
       }
       console.log(`Successfully reloaded ${filename}`)
     } catch (error) {
@@ -100,6 +103,13 @@ app.get('/api/config/documents', (_req, res) => {
     return res.status(500).json({ error: 'Documents configuration not loaded' })
   }
   res.json(configCache.documents)
+})
+
+app.get('/api/config/bank-info', (_req, res) => {
+  if (!configCache.bankInfo) {
+    return res.status(500).json({ error: 'Bank info configuration not loaded' })
+  }
+  res.json(configCache.bankInfo)
 })
 
 // Document endpoints
@@ -268,6 +278,7 @@ async function start() {
     console.log(`  - http://localhost:${PORT}/api/config/identification-types`)
     console.log(`  - http://localhost:${PORT}/api/config/products`)
     console.log(`  - http://localhost:${PORT}/api/config/documents`)
+    console.log(`  - http://localhost:${PORT}/api/config/bank-info`)
   })
 }
 

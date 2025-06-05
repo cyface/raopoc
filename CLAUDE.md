@@ -5,14 +5,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - Install dependencies: `pnpm install`
-- Build the project: `pnpm run build`
-- Run frontend dev server only: `pnpm run dev`
+- Run both frontend and backend (recommended): `pnpm run dev`
+- Run frontend dev server only: `pnpm run dev:frontend`
 - Run backend API server only: `pnpm run dev:server`
-- Run both frontend and backend: `pnpm run dev:all`
+- Build the frontend project: `pnpm run build`
+- Build the backend server: `pnpm run build:server`
+- Preview built frontend: `pnpm run preview`
 - Run tests (watch mode): `pnpm test`
 - Run tests once: `pnpm test:run`
-- Run tests with coverage: `pnpm test:coverage`
 - Run tests with UI: `pnpm test:ui`
+- Run tests with coverage: `pnpm test:coverage`
 - TypeScript type checking: `pnpm typecheck`
 - Code linting: `pnpm lint`
 - Code linting with auto-fix: `pnpm lint:fix`

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Building2, Shield, CreditCard } from 'lucide-react'
 import { IdentificationInfoSchema, type IdentificationInfoData } from '../types/identification'
-import { configService, type State, type IdentificationType } from '../services/configService'
+import { configService, type State, type IdentificationType, type BankInfo } from '../services/configService'
 import * as styles from '../styles/theme.css'
 
 interface IdentificationInfoProps {
@@ -21,16 +21,19 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [states, setStates] = useState<State[]>([])
   const [identificationTypes, setIdentificationTypes] = useState<IdentificationType[]>([])
+  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
 
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const [statesData, identificationTypesData] = await Promise.all([
+        const [statesData, identificationTypesData, bankInfoData] = await Promise.all([
           configService.getStates(),
-          configService.getIdentificationTypes()
+          configService.getIdentificationTypes(),
+          configService.getBankInfo()
         ])
         setStates(statesData)
         setIdentificationTypes(identificationTypesData)
+        setBankInfo(bankInfoData)
       } catch (error) {
         console.error('Failed to load configuration:', error)
       }
@@ -117,7 +120,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
     <div className={styles.container}>
       <div className={styles.header}>
         <Building2 className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Premier Bank</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
       
       <h1 className={styles.heading}>Identity Verification</h1>

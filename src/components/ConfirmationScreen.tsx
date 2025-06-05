@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useOnboarding } from '../context/OnboardingContext';
+import { configService, type BankInfo } from '../services/configService';
 import * as styles from '../styles/theme.css';
 
 interface ConfirmationScreenProps {
@@ -14,8 +15,19 @@ export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [finalApplicationId, setFinalApplicationId] = useState<string | null>(applicationId || null);
+  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
 
   useEffect(() => {
+    const loadBankInfo = async () => {
+      try {
+        const bankInfoData = await configService.getBankInfo();
+        setBankInfo(bankInfoData);
+      } catch (error) {
+        console.error('Failed to load bank info:', error);
+      }
+    };
+    loadBankInfo();
+
     if (!applicationId && !isSubmitted && !isSubmitting) {
       handleSubmitApplication();
     }
@@ -65,7 +77,7 @@ export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
     console.log(`
 Dear ${data.customerInfo?.firstName || 'Valued Customer'},
 
-Thank you for choosing Premier Bank! We have received your application for the following accounts:
+Thank you for choosing ${bankInfo?.bankName || 'Cool Bank'}! We have received your application for the following accounts:
 ${data.selectedProducts.map(product => `• ${product.charAt(0).toUpperCase() + product.slice(1)} Account`).join('\n')}
 
 Application Details:
@@ -81,7 +93,7 @@ What happens next?
 You can check your application status at any time by visiting our website or calling customer service.
 
 Best regards,
-Premier Bank Team
+${bankInfo?.bankName || 'Cool Bank'} Team
     `);
   };
 
@@ -90,7 +102,7 @@ Premier Bank Team
       <div className={styles.container}>
         <div className={styles.header}>
           <BuildingOffice2Icon className={styles.bankIcon} />
-          <h1 className={styles.bankName}>Premier Bank</h1>
+          <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
         </div>
         
         <div style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -119,7 +131,7 @@ Premier Bank Team
       <div className={styles.container}>
         <div className={styles.header}>
           <BuildingOffice2Icon className={styles.bankIcon} />
-          <h1 className={styles.bankName}>Premier Bank</h1>
+          <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
         </div>
         
         <div style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -160,7 +172,7 @@ Premier Bank Team
     <div className={styles.container}>
       <div className={styles.header}>
         <BuildingOffice2Icon className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Premier Bank</h1>
+        <h1 className={styles.bankName}>Cool Bank</h1>
       </div>
       
       <div style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -179,7 +191,7 @@ Premier Bank Team
         
         <h1 className={styles.heading}>Application Submitted Successfully!</h1>
         <p className={styles.subheading}>
-          Thank you for choosing Premier Bank. Your application has been received and is being processed.
+          Thank you for choosing {bankInfo?.bankName || 'Cool Bank'}. Your application has been received and is being processed.
         </p>
 
         {finalApplicationId && (
@@ -266,13 +278,13 @@ Premier Bank Team
             <strong>Need help?</strong> Contact our customer service team:
           </p>
           <p style={{ margin: '0 0 0.5rem 0' }}>
-            📞 Phone: 1-800-PREMIER (1-800-773-6437)
+            📞 Phone: {bankInfo?.contact.phoneDisplay || '1-800-COOLBNK (1-800-XXX-XXXX)'}
           </p>
           <p style={{ margin: '0 0 0.5rem 0' }}>
-            ✉️ Email: support@premierbank.com
+            ✉️ Email: {bankInfo?.contact.email || 'support@coolbank.com'}
           </p>
           <p style={{ margin: 0 }}>
-            🕒 Hours: Monday - Friday 8:00 AM - 8:00 PM EST
+            🕒 Hours: {bankInfo?.contact.hours || 'Monday - Friday 8:00 AM - 8:00 PM EST'}
           </p>
         </div>
       </div>

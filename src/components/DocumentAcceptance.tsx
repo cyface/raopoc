@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { Document, DocumentAcceptanceState } from '../types/documents';
-import { configService } from '../services/configService';
+import { configService, type BankInfo } from '../services/configService';
 import * as styles from '../styles/theme.css';
 
 interface DocumentAcceptanceProps {
@@ -20,6 +20,7 @@ export function DocumentAcceptance({
 }: DocumentAcceptanceProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [acceptances, setAcceptances] = useState<Record<string, boolean>>({});
+  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -27,7 +28,17 @@ export function DocumentAcceptance({
 
   useEffect(() => {
     loadApplicableDocuments();
+    loadBankInfo();
   }, [selectedProducts, hasNoSSN]);
+
+  const loadBankInfo = async () => {
+    try {
+      const bankInfoData = await configService.getBankInfo();
+      setBankInfo(bankInfoData);
+    } catch (error) {
+      console.error('Failed to load bank info:', error);
+    }
+  };
 
   useEffect(() => {
     const allAccepted = documents.length > 0 && documents.every(doc => acceptances[doc.id]);
@@ -158,7 +169,7 @@ export function DocumentAcceptance({
     <div className={styles.container}>
       <div className={styles.header}>
         <BuildingOffice2Icon className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Premier Bank</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
       
       <h1 className={styles.heading}>Review Required Documents</h1>
