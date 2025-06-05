@@ -1,14 +1,15 @@
 {
-  "bankName": "Cool Bank",
-  "displayName": "Cool Bank",
+  "bankName": "Cold Bank",
+  "displayName": "Cold Bank",
+  "theme": "light",
   "contact": {
-    "phone": "1-800-COOLBNK",
-    "phoneDisplay": "1-800-COOLBNK (1-800-XXX-XXXX)",
-    "email": "support@coolbank.com",
+    "phone": "1-800-COLDBNK",
+    "phoneDisplay": "1-800-COLDBNK (1-800-XXX-XXXX)",
+    "email": "support@coldbank.com",
     "hours": "Monday - Friday 8:00 AM - 8:00 PM EST"
   },
   "branding": {
     "primaryColor": "#3b82f6",
-    "logoIcon": "Building2"
+    "logoIcon": "Building"
   }
 }

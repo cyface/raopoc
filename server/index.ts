@@ -157,6 +157,28 @@ if (process.env.NODE_ENV !== 'production') {
   })
 }
 
+// Helper function to load config with bank-specific fallback
+async function loadConfigWithFallback(configName: string, bankSlug?: string): Promise<unknown> {
+  const configDir = path.join(__dirname, '..', 'config')
+  
+  // Try bank-specific config first if bank slug is provided
+  if (bankSlug) {
+    const bankSpecificPath = path.join(configDir, bankSlug, `${configName}.json`)
+    try {
+      await fs.access(bankSpecificPath)
+      const content = await fs.readFile(bankSpecificPath, 'utf-8')
+      return JSON.parse(content)
+    } catch {
+      // Bank-specific config not found, fall back to default
+    }
+  }
+  
+  // Fall back to default config
+  const defaultPath = path.join(configDir, `${configName}.json`)
+  const content = await fs.readFile(defaultPath, 'utf-8')
+  return JSON.parse(content)
+}
+
 // API Routes
 app.get('/api/config/states', (_req, res) => {
   if (!configCache.states) {
@@ -165,6 +187,68 @@ app.get('/api/config/states', (_req, res) => {
   res.json(configCache.states)
 })
 
+// Bank-specific config endpoints
+app.get('/api/config/:bankSlug/states', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('states', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific states config:', error)
+    res.status(500).json({ error: 'Failed to load states configuration' })
+  }
+})
+
+app.get('/api/config/:bankSlug/countries', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('countries', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific countries config:', error)
+    res.status(500).json({ error: 'Failed to load countries configuration' })
+  }
+})
+
+app.get('/api/config/:bankSlug/identification-types', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('identification-types', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific identification-types config:', error)
+    res.status(500).json({ error: 'Failed to load identification-types configuration' })
+  }
+})
+
+app.get('/api/config/:bankSlug/products', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('products', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific products config:', error)
+    res.status(500).json({ error: 'Failed to load products configuration' })
+  }
+})
+
+app.get('/api/config/:bankSlug/documents', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('documents', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific documents config:', error)
+    res.status(500).json({ error: 'Failed to load documents configuration' })
+  }
+})
+
+app.get('/api/config/:bankSlug/bank-info', async (req, res) => {
+  try {
+    const config = await loadConfigWithFallback('bank-info', req.params.bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error('Error loading bank-specific bank-info config:', error)
+    res.status(500).json({ error: 'Failed to load bank-info configuration' })
+  }
+})
+
+// Default config endpoints (kept for backward compatibility)
 app.get('/api/config/countries', (_req, res) => {
   if (!configCache.countries) {
     return res.status(500).json({ error: 'Countries configuration not loaded' })

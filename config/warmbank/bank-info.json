@@ -1,0 +1,15 @@
+{
+  "bankName": "Warm Bank",
+  "displayName": "Warm Bank",
+  "theme": "orangeLight",
+  "contact": {
+    "phone": "1-800-WARMBNK",
+    "phoneDisplay": "1-800-WARMBNK (1-800-927-6265)",
+    "email": "support@warmbank.com",
+    "hours": "Monday - Friday 8:00 AM - 8:00 PM EST"
+  },
+  "branding": {
+    "primaryColor": "#ea580c",
+    "logoIcon": "Building2"
+  }
+}

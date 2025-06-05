@@ -46,6 +46,7 @@ export interface DocumentConfig {
 export interface BankInfo {
   bankName: string
   displayName: string
+  theme?: 'light' | 'dark' | 'greenLight' | 'greenDark' | 'orangeLight' | 'orangeDark'
   contact: {
     phone: string
     phoneDisplay: string
@@ -71,6 +72,7 @@ class ConfigService {
   private lastProductsLoad = 0
   private lastDocumentsLoad = 0
   private lastBankInfoLoad = 0
+  private currentFinancialInstitution: string | null = null
   private readonly cacheTimeout: number
   private readonly apiBaseUrl: string
 
@@ -81,6 +83,9 @@ class ConfigService {
     // Get cache timeout from environment variable, default to 5000ms (5 seconds)
     const envCacheTimeout = import.meta.env.VITE_CONFIG_CACHE_TIMEOUT
     this.cacheTimeout = this.parseAndValidateCacheTimeout(envCacheTimeout)
+    
+    // Initialize financial institution from URL
+    this.updateFinancialInstitution()
   }
 
   private parseAndValidateCacheTimeout(value: string | undefined): number {
@@ -133,10 +138,65 @@ class ConfigService {
     return this.bankInfoCache === null || (Date.now() - this.lastBankInfoLoad) > this.cacheTimeout
   }
 
+  /**
+   * Update the current financial institution from URL parameters
+   */
+  private updateFinancialInstitution(): void {
+    if (typeof window === 'undefined') return
+    
+    const urlParams = new URLSearchParams(window.location.search)
+    const newFi = urlParams.get('fi')
+    
+    // If FI changed, clear all caches to force reload with new bank configs
+    if (newFi !== this.currentFinancialInstitution) {
+      this.currentFinancialInstitution = newFi
+      this.clearAllCaches()
+    }
+  }
+
+  /**
+   * Clear all caches to force reload
+   */
+  private clearAllCaches(): void {
+    this.statesCache = null
+    this.countriesCache = null
+    this.identificationTypesCache = null
+    this.productsCache = null
+    this.documentsCache = null
+    this.bankInfoCache = null
+    this.lastStatesLoad = 0
+    this.lastCountriesLoad = 0
+    this.lastIdentificationTypesLoad = 0
+    this.lastProductsLoad = 0
+    this.lastDocumentsLoad = 0
+    this.lastBankInfoLoad = 0
+  }
+
+  /**
+   * Get the current financial institution slug
+   */
+  public getCurrentFinancialInstitution(): string | null {
+    this.updateFinancialInstitution()
+    return this.currentFinancialInstitution
+  }
+
+  /**
+   * Build config URL with bank-specific path support
+   */
+  private buildConfigUrl(configName: string): string {
+    this.updateFinancialInstitution()
+    
+    if (this.currentFinancialInstitution) {
+      return `${this.apiBaseUrl}/config/${this.currentFinancialInstitution}/${configName}`
+    }
+    
+    return `${this.apiBaseUrl}/config/${configName}`
+  }
+
   async getStates(): Promise<State[]> {
     if (this.shouldReloadStates()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/states`)
+        const response = await fetch(this.buildConfigUrl('states'))
         if (!response.ok) {
           throw new Error(`Failed to fetch states: ${response.status}`)
         }
@@ -155,7 +215,7 @@ class ConfigService {
   async getCountries(): Promise<Country[]> {
     if (this.shouldReloadCountries()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/countries`)
+        const response = await fetch(this.buildConfigUrl('countries'))
         if (!response.ok) {
           throw new Error(`Failed to fetch countries: ${response.status}`)
         }
@@ -174,7 +234,7 @@ class ConfigService {
   async getIdentificationTypes(): Promise<IdentificationType[]> {
     if (this.shouldReloadIdentificationTypes()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/identification-types`)
+        const response = await fetch(this.buildConfigUrl('identification-types'))
         if (!response.ok) {
           throw new Error(`Failed to fetch identification types: ${response.status}`)
         }
@@ -193,7 +253,7 @@ class ConfigService {
   async getProducts(): Promise<Product[]> {
     if (this.shouldReloadProducts()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/products`)
+        const response = await fetch(this.buildConfigUrl('products'))
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.status}`)
         }
@@ -212,7 +272,7 @@ class ConfigService {
   async getDocuments(): Promise<DocumentConfig> {
     if (this.shouldReloadDocuments()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/documents`)
+        const response = await fetch(this.buildConfigUrl('documents'))
         if (!response.ok) {
           throw new Error(`Failed to fetch documents: ${response.status}`)
         }
@@ -231,7 +291,7 @@ class ConfigService {
   async getBankInfo(): Promise<BankInfo> {
     if (this.shouldReloadBankInfo()) {
       try {
-        const response = await fetch(`${this.apiBaseUrl}/config/bank-info`)
+        const response = await fetch(this.buildConfigUrl('bank-info'))
         if (!response.ok) {
           throw new Error(`Failed to fetch bank info: ${response.status}`)
         }
