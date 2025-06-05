@@ -14,6 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Run tests with coverage: `pnpm test:coverage`
 - Run tests with UI: `pnpm test:ui`
 - TypeScript type checking: `pnpm typecheck`
+- Code linting: `pnpm lint`
+- Code linting with auto-fix: `pnpm lint:fix`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
 - The backend server files are in `server/`
 

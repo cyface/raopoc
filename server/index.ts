@@ -16,7 +16,7 @@ app.use(cors())
 app.use(express.json())
 
 // Cache for config files
-let configCache: Record<string, any> = {}
+const configCache: Record<string, any> = {}
 
 // Function to load config file
 async function loadConfigFile(filename: string) {
@@ -70,21 +70,21 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // API Routes
-app.get('/api/config/states', (req, res) => {
+app.get('/api/config/states', (_req, res) => {
   if (!configCache.states) {
     return res.status(500).json({ error: 'States configuration not loaded' })
   }
   res.json(configCache.states)
 })
 
-app.get('/api/config/identification-types', (req, res) => {
+app.get('/api/config/identification-types', (_req, res) => {
   if (!configCache.identificationTypes) {
     return res.status(500).json({ error: 'Identification types configuration not loaded' })
   }
   res.json(configCache.identificationTypes)
 })
 
-app.get('/api/config/products', (req, res) => {
+app.get('/api/config/products', (_req, res) => {
   if (!configCache.products) {
     return res.status(500).json({ error: 'Products configuration not loaded' })
   }
@@ -92,7 +92,7 @@ app.get('/api/config/products', (req, res) => {
 })
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
