@@ -14,6 +14,7 @@ vi.mock('../services/configService', () => {
       getStates: vi.fn(),
       getIdentificationTypes: vi.fn(),
       getIdentificationTypesThatRequireState: vi.fn(),
+      getBankInfo: vi.fn(),
       clearCache: vi.fn(),
     },
     State: {},
@@ -48,6 +49,21 @@ describe('CustomerInfo', () => {
       { code: 'NY', name: 'New York' },
       { code: 'TX', name: 'Texas' },
     ])
+    
+    vi.mocked(configService.getBankInfo).mockResolvedValue({
+      bankName: 'Cool Bank',
+      displayName: 'Cool Bank',
+      contact: {
+        phone: '1-800-COOLBNK',
+        phoneDisplay: '1-800-COOLBNK (1-800-XXX-XXXX)',
+        email: 'support@coolbank.com',
+        hours: 'Monday - Friday 8:00 AM - 8:00 PM EST',
+      },
+      branding: {
+        primaryColor: '#3b82f6',
+        logoIcon: 'Building2',
+      },
+    })
   })
 
   it('renders the customer info form with all required fields', async () => {
