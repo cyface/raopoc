@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = Number(process.env.PORT) || 3001
 
 // Enable CORS for development
 app.use(cors())
@@ -157,26 +157,69 @@ if (process.env.NODE_ENV !== 'production') {
   })
 }
 
-// Helper function to load config with bank-specific fallback
+// Helper function to load config with bank-specific and language-specific fallback
 async function loadConfigWithFallback(configName: string, bankSlug?: string): Promise<unknown> {
   const configDir = path.join(__dirname, '..', 'config')
   
+  // Ensure configName has .json extension if it doesn't already
+  const configFileName = configName.endsWith('.json') ? configName : `${configName}.json`
+  
+  // Determine if this is a language-specific request
+  const isLanguageSpecific = configFileName.includes('.es.json')
+  const baseConfigName = isLanguageSpecific ? configFileName.replace('.es.json', '.json') : configFileName
+  
   // Try bank-specific config first if bank slug is provided
   if (bankSlug) {
-    const bankSpecificPath = path.join(configDir, bankSlug, `${configName}.json`)
+    const bankConfigDir = path.join(configDir, bankSlug)
+    
+    // Try bank-specific localized version first
+    const bankSpecificPath = path.join(bankConfigDir, configFileName)
     try {
       await fs.access(bankSpecificPath)
       const content = await fs.readFile(bankSpecificPath, 'utf-8')
       return JSON.parse(content)
     } catch {
-      // Bank-specific config not found, fall back to default
+      // Bank-specific localized config not found
+    }
+    
+    // If language-specific version not found, try bank-specific English version
+    if (isLanguageSpecific) {
+      const bankSpecificEnglishPath = path.join(bankConfigDir, baseConfigName)
+      try {
+        await fs.access(bankSpecificEnglishPath)
+        const content = await fs.readFile(bankSpecificEnglishPath, 'utf-8')
+        console.log(`Warning: Bank-specific localized config ${configFileName} not found for ${bankSlug}, using English version`)
+        return JSON.parse(content)
+      } catch {
+        // Bank-specific English config not found either
+      }
     }
   }
   
-  // Fall back to default config
-  const defaultPath = path.join(configDir, `${configName}.json`)
-  const content = await fs.readFile(defaultPath, 'utf-8')
-  return JSON.parse(content)
+  // Try default localized version
+  const defaultPath = path.join(configDir, configFileName)
+  try {
+    await fs.access(defaultPath)
+    const content = await fs.readFile(defaultPath, 'utf-8')
+    return JSON.parse(content)
+  } catch {
+    // Default localized version not found
+  }
+  
+  // If language-specific version not found, try default English version
+  if (isLanguageSpecific) {
+    const basePath = path.join(configDir, baseConfigName)
+    try {
+      await fs.access(basePath)
+      const content = await fs.readFile(basePath, 'utf-8')
+      console.log(`Warning: Localized config ${configFileName} not found, falling back to English version`)
+      return JSON.parse(content)
+    } catch {
+      throw new Error(`Neither localized config ${configFileName} nor English config ${baseConfigName} found`)
+    }
+  }
+  
+  throw new Error(`Config file ${configFileName} not found`)
 }
 
 // API Routes
@@ -188,9 +231,21 @@ app.get('/api/config/states', (_req, res) => {
 })
 
 // Bank-specific config endpoints
+app.get('/api/config/:bankSlug/:configName', async (req, res) => {
+  try {
+    const { bankSlug, configName } = req.params
+    const config = await loadConfigWithFallback(configName, bankSlug)
+    res.json(config)
+  } catch (error) {
+    console.error(`Error loading bank-specific ${req.params.configName} config:`, error)
+    res.status(500).json({ error: `Failed to load ${req.params.configName} configuration` })
+  }
+})
+
+// Legacy bank-specific routes (keep for backward compatibility)
 app.get('/api/config/:bankSlug/states', async (req, res) => {
   try {
-    const config = await loadConfigWithFallback('states', req.params.bankSlug)
+    const config = await loadConfigWithFallback('states.json', req.params.bankSlug)
     res.json(config)
   } catch (error) {
     console.error('Error loading bank-specific states config:', error)
@@ -248,7 +303,19 @@ app.get('/api/config/:bankSlug/bank-info', async (req, res) => {
   }
 })
 
-// Default config endpoints (kept for backward compatibility)
+// Default config endpoints with localization support
+app.get('/api/config/:configName', async (req, res) => {
+  try {
+    const { configName } = req.params
+    const config = await loadConfigWithFallback(configName)
+    res.json(config)
+  } catch (error) {
+    console.error(`Error loading ${req.params.configName} config:`, error)
+    res.status(500).json({ error: `Failed to load ${req.params.configName} configuration` })
+  }
+})
+
+// Legacy default config endpoints (kept for backward compatibility)
 app.get('/api/config/countries', (_req, res) => {
   if (!configCache.countries) {
     return res.status(500).json({ error: 'Countries configuration not loaded' })
@@ -478,15 +545,19 @@ app.get('/api/health', (_req, res) => {
 async function start() {
   await loadAllConfigs()
   
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`)
+  const server = app.listen(PORT, '127.0.0.1', () => {
+    console.log(`Server running on http://127.0.0.1:${PORT}`)
     console.log('Config endpoints available at:')
-    console.log(`  - http://localhost:${PORT}/api/config/states`)
-    console.log(`  - http://localhost:${PORT}/api/config/countries`)
-    console.log(`  - http://localhost:${PORT}/api/config/identification-types`)
-    console.log(`  - http://localhost:${PORT}/api/config/products`)
-    console.log(`  - http://localhost:${PORT}/api/config/documents`)
-    console.log(`  - http://localhost:${PORT}/api/config/bank-info`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/states`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/countries`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/identification-types`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/products`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/documents`)
+    console.log(`  - http://127.0.0.1:${PORT}/api/config/bank-info`)
+  })
+  
+  server.on('error', (err) => {
+    console.error('Server error:', err)
   })
 }
 

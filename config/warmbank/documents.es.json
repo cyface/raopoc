@@ -1,0 +1,90 @@
+{
+  "showAcceptAllButton": true,
+  "documents": [
+    {
+      "id": "terms-of-service",
+      "name": "Términos de Servicio",
+      "description": "Términos y condiciones generales para todos los servicios bancarios",
+      "url": "/documents/es/terms-of-service.pdf",
+      "required": true,
+      "category": "terms"
+    },
+    {
+      "id": "privacy-policy",
+      "name": "Política de Privacidad",
+      "description": "Cómo recopilamos, usamos y protegemos su información personal",
+      "url": "/documents/es/privacy-policy.pdf",
+      "required": true,
+      "category": "privacy"
+    },
+    {
+      "id": "checking-account-agreement",
+      "name": "Acuerdo de Cuenta Corriente",
+      "description": "Términos específicos para los servicios de cuenta corriente",
+      "url": "/documents/es/checking-account-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "savings-account-agreement",
+      "name": "Acuerdo de Cuenta de Ahorros",
+      "description": "Términos específicos para los servicios de cuenta de ahorros",
+      "url": "/documents/es/savings-account-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "money-market-agreement",
+      "name": "Acuerdo de Cuenta del Mercado Monetario",
+      "description": "Términos específicos para los servicios de cuenta de mercado monetario",
+      "url": "/documents/es/money-market-agreement.pdf",
+      "required": true,
+      "category": "agreement"
+    },
+    {
+      "id": "fee-schedule",
+      "name": "Programa de Tarifas",
+      "description": "Programa de tarifas para todos los servicios bancarios",
+      "url": "/documents/es/fee-schedule.pdf",
+      "required": true,
+      "category": "disclosure"
+    },
+    {
+      "id": "patriot-act-notice",
+      "name": "Aviso de la Ley Patriota de EE.UU.",
+      "description": "Información importante sobre los procedimientos para abrir nuevas cuentas",
+      "url": "/documents/es/patriot-act-notice.pdf",
+      "required": true,
+      "category": "notice"
+    },
+    {
+      "id": "itin-disclosure",
+      "name": "Divulgación del Número de Identificación del Contribuyente Individual (ITIN)",
+      "description": "Información importante para clientes sin Números de Seguro Social",
+      "url": "/documents/es/itin-disclosure.pdf",
+      "required": true,
+      "category": "disclosure"
+    }
+  ],
+  "rules": [
+    {
+      "documentIds": ["terms-of-service", "privacy-policy", "fee-schedule", "patriot-act-notice"]
+    },
+    {
+      "productTypes": ["checking"],
+      "documentIds": ["checking-account-agreement"]
+    },
+    {
+      "productTypes": ["savings"],
+      "documentIds": ["savings-account-agreement"]
+    },
+    {
+      "productTypes": ["money_market"],
+      "documentIds": ["money-market-agreement"]
+    },
+    {
+      "noSSN": true,
+      "documentIds": ["itin-disclosure"]
+    }
+  ]
+}
