@@ -175,7 +175,7 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
     <div className={styles.container}>
       <div className={styles.header}>
         <BuildingOffice2Icon className={styles.bankIcon} />
-        <h1 className={styles.bankName}>Cool Bank</h1>
+        <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
       <div style={{ textAlign: 'center', padding: '3rem 0' }}>
