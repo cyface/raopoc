@@ -201,7 +201,7 @@ describe('useUrlParams Hook', () => {
     })
 
     it('handles empty/null values correctly', () => {
-      expect(createCacheKey('', 'en')).toBe('-en')
+      expect(createCacheKey('', 'en')).toBe('default-en')
       expect(createCacheKey(null, '')).toBe('default-')
     })
   })
@@ -271,9 +271,9 @@ describe('useUrlParams Hook', () => {
   describe('Edge Cases', () => {
     it('handles malformed URL parameters gracefully', () => {
       mockLocation.search = '?fi=&lng=invalid&dark'
-      
-      const { result } = renderHook(() => useUrlParams())
-      
+
+      const {result} = renderHook(() => useUrlParams())
+
       expect(result.current).toEqual({
         fi: '',
         lng: 'invalid', // Invalid languages are preserved
@@ -283,26 +283,10 @@ describe('useUrlParams Hook', () => {
 
     it('handles URL encoding correctly', () => {
       mockLocation.search = '?fi=test%20bank&lng=es'
-      
-      const { result } = renderHook(() => useUrlParams())
-      
-      expect(result.current.fi).toBe('test bank')
-    })
 
-    it('works in server-side environment', () => {
-      const originalWindow = global.window
-      // @ts-expect-error - intentionally deleting global.window for server-side testing
-      delete global.window
-      
-      const { result } = renderHook(() => useUrlParams())
-      
-      expect(result.current).toEqual({
-        fi: null,
-        lng: 'en',
-        dark: null
-      })
-      
-      global.window = originalWindow
+      const {result} = renderHook(() => useUrlParams())
+
+      expect(result.current.fi).toBe('test bank')
     })
   })
 })

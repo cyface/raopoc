@@ -377,8 +377,9 @@ describe('Configuration Hooks', () => {
     it('demonstrates instant switching with cached data', async () => {
       // Simulate cached responses (instant resolution)
       vi.mocked(configService.getProductsFor)
-        .mockResolvedValue(mockEnglishProducts) // Cached English
-        .mockResolvedValue(mockSpanishProducts) // Cached Spanish
+        .mockResolvedValueOnce(mockEnglishProducts) // Cached English
+        .mockResolvedValueOnce(mockSpanishProducts) // Cached Spanish
+        .mockResolvedValueOnce(mockEnglishProducts) // Cached English again
       
       const { result, rerender } = renderHook(() => useProducts())
       

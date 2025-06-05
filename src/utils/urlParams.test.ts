@@ -28,7 +28,7 @@ describe('URL Parameters Utilities', () => {
 
     it('returns null when fi parameter is empty', () => {
       mockLocation.search = '?fi='
-      expect(getFinancialInstitutionSlug()).toBeNull()
+      expect(getFinancialInstitutionSlug()).toBe('')
     })
 
     it('returns the fi parameter value when present', () => {

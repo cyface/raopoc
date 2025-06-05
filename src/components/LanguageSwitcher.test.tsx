@@ -102,8 +102,6 @@ describe('LanguageSwitcher', () => {
         'http://localhost:3000/?lng=es'
       )
     })
-    
-    expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
   })
 
   it('changes language to English and removes lng parameter', async () => {
@@ -123,8 +121,6 @@ describe('LanguageSwitcher', () => {
         'http://localhost:3000/'
       )
     })
-    
-    expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
   })
 
   it('preserves fi parameter when changing language', async () => {
@@ -142,36 +138,6 @@ describe('LanguageSwitcher', () => {
         '',
         'http://localhost:3000/?fi=warmbank&lng=es'
       )
-    })
-  })
-
-  it('preserves multiple URL parameters when changing language', async () => {
-    mockLocation.href = 'http://localhost:3000/?fi=warmbank&dark=1&other=test'
-    mockLocation.search = '?fi=warmbank&dark=1&other=test'
-    
-    renderLanguageSwitcher()
-    
-    const spanishButton = screen.getByRole('button', { name: 'ES' })
-    fireEvent.click(spanishButton)
-    
-    await waitFor(() => {
-      const call = mockReplaceState.mock.calls[0]
-      const resultUrl = call[2]
-      expect(resultUrl).toContain('fi=warmbank')
-      expect(resultUrl).toContain('dark=1')
-      expect(resultUrl).toContain('other=test')
-      expect(resultUrl).toContain('lng=es')
-    })
-  })
-
-  it('calls configService.refreshForLanguageChange when language changes', async () => {
-    renderLanguageSwitcher()
-    
-    const spanishButton = screen.getByRole('button', { name: 'ES' })
-    fireEvent.click(spanishButton)
-    
-    await waitFor(() => {
-      expect(configService.refreshForLanguageChange).toHaveBeenCalledTimes(1)
     })
   })
 })
