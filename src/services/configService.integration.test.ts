@@ -85,7 +85,7 @@ describe('ConfigService Integration Tests', () => {
         json: () => Promise.resolve([{ type: 'checking', title: 'Default Checking', description: 'Default', icon: 'CreditCard' }])
       })
 
-      const initialProducts = await configService.getProducts()
+      await configService.getProducts()
       expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
       
       // Change fi parameter
@@ -196,7 +196,7 @@ describe('ConfigService Integration Tests', () => {
         json: () => Promise.resolve([{ type: 'checking', title: 'Checking Account', description: 'English', icon: 'CreditCard' }])
       })
 
-      const initialProducts = await configService.getProducts()
+      await configService.getProducts()
       expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
       
       // Change language to Spanish
@@ -319,8 +319,8 @@ describe('ConfigService Integration Tests', () => {
         json: () => Promise.resolve(mockProducts)
       })
 
-      const initialProducts = await configService.getProducts()
-      expect(initialProducts).toEqual(mockProducts)
+      const currentProducts = await configService.getProducts()
+      expect(currentProducts).toEqual(mockProducts)
       
       // Clear cache and make network fail
       configService.clearCache()

@@ -20,7 +20,7 @@ export default function ProductSelection() {
   const { t } = useTranslation()
   
   // Use reactive hooks that automatically update when URL parameters change
-  const { products, bankInfo, loading, error: configError } = useProductsAndBankInfo()
+  const { products, bankInfo } = useProductsAndBankInfo()
   
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
   const [error, setError] = useState<string>('')

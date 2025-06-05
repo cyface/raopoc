@@ -1,7 +1,8 @@
-import { renderHook, waitFor, act } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useProducts, useBankInfo, useProductsAndBankInfo } from './useConfig'
 import { configServiceV2 } from '../services/configService.v2'
+import type { Product } from '../services/configService'
 
 // Mock the configService
 vi.mock('../services/configService.v2', () => ({
@@ -214,7 +215,7 @@ describe('Configuration Hooks', () => {
 
     it('cancels previous requests when parameters change quickly', async () => {
       // Mock a slow response
-      const slowResponse = new Promise(resolve => setTimeout(() => resolve(mockEnglishProducts), 100))
+      const slowResponse = new Promise<Product[]>(resolve => setTimeout(() => resolve(mockEnglishProducts), 100))
       const fastResponse = Promise.resolve(mockSpanishProducts)
       
       vi.mocked(configServiceV2.getProductsFor)

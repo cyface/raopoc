@@ -4,6 +4,7 @@ import ProductSelection from './ProductSelection'
 import { OnboardingProvider } from '../context/OnboardingContext'
 import { ThemeProvider } from '../context/ThemeContext'
 import { configService } from '../services/configService'
+import type { Product, BankInfo } from '../services/configService'
 import '../i18n'
 
 // Mock the config service
@@ -167,8 +168,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
 
       // Mock a component that properly watches for URL changes
       const TestComponentWithUrlWatching = () => {
-        const [products, setProducts] = React.useState([])
-        const [bankInfo, setBankInfo] = React.useState(null)
+        const [products, setProducts] = React.useState<Product[]>([])
+        const [bankInfo, setBankInfo] = React.useState<BankInfo | null>(null)
 
         React.useEffect(() => {
           const loadConfigs = async () => {
