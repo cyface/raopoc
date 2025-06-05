@@ -24,11 +24,11 @@ class ConfigService {
   private lastIdentificationTypesLoad = 0
   private lastProductsLoad = 0
   private readonly cacheTimeout: number
-  private readonly configPath: string
+  private readonly apiBaseUrl: string
 
   constructor() {
-    // Get config path from environment variable, default to /config
-    this.configPath = (import.meta as any).env?.VITE_CONFIG_PATH || '/config'
+    // Get API base URL from environment variable, default to local development server
+    this.apiBaseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'
     
     // Get cache timeout from environment variable, default to 5000ms (5 seconds)
     const envCacheTimeout = (import.meta as any).env?.VITE_CONFIG_CACHE_TIMEOUT
@@ -76,7 +76,7 @@ class ConfigService {
   async getStates(): Promise<State[]> {
     if (this.shouldReloadStates()) {
       try {
-        const response = await fetch(`${this.configPath}/states.json`)
+        const response = await fetch(`${this.apiBaseUrl}/config/states`)
         if (!response.ok) {
           throw new Error(`Failed to fetch states: ${response.status}`)
         }
@@ -95,7 +95,7 @@ class ConfigService {
   async getIdentificationTypes(): Promise<IdentificationType[]> {
     if (this.shouldReloadIdentificationTypes()) {
       try {
-        const response = await fetch(`${this.configPath}/identification-types.json`)
+        const response = await fetch(`${this.apiBaseUrl}/config/identification-types`)
         if (!response.ok) {
           throw new Error(`Failed to fetch identification types: ${response.status}`)
         }
@@ -114,7 +114,7 @@ class ConfigService {
   async getProducts(): Promise<Product[]> {
     if (this.shouldReloadProducts()) {
       try {
-        const response = await fetch(`${this.configPath}/products.json`)
+        const response = await fetch(`${this.apiBaseUrl}/config/products`)
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.status}`)
         }

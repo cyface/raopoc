@@ -6,20 +6,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Install dependencies: `pnpm install`
 - Build the project: `pnpm run build`
-- Run development server: `pnpm run dev`
+- Run frontend dev server only: `pnpm run dev`
+- Run backend API server only: `pnpm run dev:server`
+- Run both frontend and backend: `pnpm run dev:all`
 - Run tests (watch mode): `pnpm test`
 - Run tests once: `pnpm test:run`
 - Run tests with coverage: `pnpm test:coverage`
 - Run tests with UI: `pnpm test:ui`
 - TypeScript type checking: `pnpm typecheck`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
+- The backend server files are in `server/`
 
 ## Environment Variables
 
-- `VITE_CONFIG_PATH`: Specifies the path where configuration files are served from. Defaults to `/config`. 
-  - Example: `VITE_CONFIG_PATH=/api/config` would make the app fetch config files from `/api/config/states.json`, etc.
-  - In development: Files are served from `public/config/` (copied from `config/` directory)
-  - In production: Files should be available at the specified path on your web server
+- `VITE_API_URL`: Specifies the base URL for the backend API server. Defaults to `http://localhost:3001/api`. 
+  - Example: `VITE_API_URL=https://api.example.com` would make the app fetch config from `https://api.example.com/config/states`, etc.
+  - In development: The backend server runs on port 3001 by default
+  - In production: Set this to your production API server URL
 
 - `VITE_CONFIG_CACHE_TIMEOUT`: Specifies how long to cache configuration files in milliseconds. Defaults to `5000` (5 seconds).
   - Example: `VITE_CONFIG_CACHE_TIMEOUT=30000` would cache config files for 30 seconds

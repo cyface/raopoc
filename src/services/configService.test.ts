@@ -88,8 +88,8 @@ describe('configService', () => {
         expect(typeof state.name).toBe('string')
       })
       
-      // Verify the correct URL was fetched (default config path)
-      expect(mockFetch).toHaveBeenCalledWith('/config/states.json')
+      // Verify the correct URL was fetched (default API path)
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/states')
     })
 
     it('includes expected states', async () => {
