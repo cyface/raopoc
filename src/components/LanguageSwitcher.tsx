@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
-import { configService } from '../services/configService'
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation()
@@ -35,8 +34,7 @@ export function LanguageSwitcher() {
     // Change language in i18next
     i18n.changeLanguage(languageCode)
     
-    // Refresh config service to load localized config files
-    configService.refreshForLanguageChange()
+    // Note: ConfigServiceV2 automatically handles language changes via reactive hooks
   }
 
   return (
