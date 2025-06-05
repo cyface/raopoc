@@ -10,11 +10,6 @@
     "requiresState": true 
   },
   { 
-    "value": "state-id", 
-    "label": "State ID", 
-    "requiresState": true 
-  },
-  { 
     "value": "military-id", 
     "label": "Military ID", 
     "requiresState": false 

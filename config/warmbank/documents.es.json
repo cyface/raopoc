@@ -2,6 +2,14 @@
   "showAcceptAllButton": true,
   "documents": [
     {
+      "id": "warmbank-special-notice",
+      "name": "Aviso de Compromiso Ambiental de Warm Bank",
+      "description": "Aviso especial sobre nuestras iniciativas de banca verde y compromiso ambiental",
+      "url": "/documents/es/warmbank-special-notice.pdf",
+      "required": false,
+      "category": "notice"
+    },
+    {
       "id": "terms-of-service",
       "name": "Términos de Servicio",
       "description": "Términos y condiciones generales para todos los servicios bancarios",
@@ -68,7 +76,7 @@
   ],
   "rules": [
     {
-      "documentIds": ["terms-of-service", "privacy-policy", "fee-schedule", "patriot-act-notice"]
+      "documentIds": ["warmbank-special-notice", "terms-of-service", "privacy-policy", "fee-schedule", "patriot-act-notice"]
     },
     {
       "productTypes": ["checking"],
