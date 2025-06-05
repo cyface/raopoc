@@ -261,8 +261,9 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill identification number only
+    // Fill identification number and date of birth
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
     await user.click(nextButton)
@@ -280,6 +281,7 @@ describe('IdentificationInfo', () => {
     
     // Fill out the form
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
@@ -289,6 +291,7 @@ describe('IdentificationInfo', () => {
       expect(mockOnNext).toHaveBeenCalledWith({
         identificationType: 'passport',
         identificationNumber: 'A12345678',
+        dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
       })
@@ -308,6 +311,7 @@ describe('IdentificationInfo', () => {
     // Fill out the form
     await user.type(screen.getByLabelText('State ID Number'), 'S1234567')
     await user.selectOptions(screen.getByLabelText('Issuing State'), 'NY')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
@@ -318,6 +322,7 @@ describe('IdentificationInfo', () => {
         identificationType: 'state-id',
         identificationNumber: 'S1234567',
         state: 'NY',
+        dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
       })
@@ -337,6 +342,7 @@ describe('IdentificationInfo', () => {
     // Fill out the form
     await user.type(screen.getByLabelText('Driver\'s License Number'), 'D1234567')
     await user.selectOptions(screen.getByLabelText('Issuing State'), 'CA')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
@@ -347,6 +353,7 @@ describe('IdentificationInfo', () => {
         identificationType: 'drivers-license',
         identificationNumber: 'D1234567',
         state: 'CA',
+        dateOfBirth: '1990-01-01',
         socialSecurityNumber: '123-45-6789',
         noSSN: false,
       })
@@ -357,8 +364,9 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    // Fill identification number
+    // Fill identification number and date of birth
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     
     // Check "no SSN"
     const noSSNCheckbox = screen.getByText('I don\'t have a Social Security Number')
@@ -371,6 +379,7 @@ describe('IdentificationInfo', () => {
       expect(mockOnNext).toHaveBeenCalledWith({
         identificationType: 'passport',
         identificationNumber: 'A12345678',
+        dateOfBirth: '1990-01-01',
         socialSecurityNumber: '',
         noSSN: true,
       })
@@ -383,6 +392,7 @@ describe('IdentificationInfo', () => {
     
     // Fill with invalid SSN
     await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.type(screen.getByLabelText('Date of Birth'), '1990-01-01')
     await user.type(screen.getByLabelText('Social Security Number'), '123-45-678') // Too short
     
     const nextButton = screen.getByRole('button', { name: 'Next' })
@@ -393,5 +403,30 @@ describe('IdentificationInfo', () => {
     })
     
     expect(mockOnNext).not.toHaveBeenCalled()
+  })
+
+  it('validates date of birth is required', async () => {
+    const user = userEvent.setup()
+    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    // Fill identification number and SSN but not date of birth
+    await user.type(screen.getByLabelText('Passport Number'), 'A12345678')
+    await user.type(screen.getByLabelText('Social Security Number'), '123-45-6789')
+    
+    const nextButton = screen.getByRole('button', { name: 'Next' })
+    await user.click(nextButton)
+    
+    await waitFor(() => {
+      expect(screen.getByText('Please enter a valid date of birth')).toBeInTheDocument()
+    })
+    
+    expect(mockOnNext).not.toHaveBeenCalled()
+  })
+
+  it('renders date of birth field', () => {
+    renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    expect(screen.getByLabelText('Date of Birth')).toBeInTheDocument()
+    expect(screen.getByLabelText('Date of Birth')).toHaveAttribute('type', 'date')
   })
 })

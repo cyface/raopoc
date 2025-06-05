@@ -22,6 +22,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'A12345678',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(validData)).not.toThrow()
@@ -34,6 +35,7 @@ describe('IdentificationInfoSchema', () => {
       state: 'CA',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(validData)).not.toThrow()
@@ -46,6 +48,7 @@ describe('IdentificationInfoSchema', () => {
       state: 'NY',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(validData)).not.toThrow()
@@ -56,6 +59,7 @@ describe('IdentificationInfoSchema', () => {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
       noSSN: true,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(validData)).not.toThrow()
@@ -67,6 +71,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: '',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Identification number is required')
@@ -78,6 +83,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'D1234567',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('State is required for this identification type')
@@ -89,6 +95,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'S1234567',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('State is required for this identification type')
@@ -99,6 +106,7 @@ describe('IdentificationInfoSchema', () => {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Social Security Number is required')
@@ -110,6 +118,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'A12345678',
       socialSecurityNumber: '123-45-678', // Invalid format
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Invalid Social Security Number format')
@@ -127,6 +136,7 @@ describe('IdentificationInfoSchema', () => {
         identificationNumber: 'A12345678',
         socialSecurityNumber: ssn,
         noSSN: false,
+        dateOfBirth: '1990-01-01',
       }
       
       expect(() => IdentificationInfoSchema.parse(validData)).not.toThrow()
@@ -139,6 +149,7 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'A12345678',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     const validData2 = {
@@ -146,9 +157,61 @@ describe('IdentificationInfoSchema', () => {
       identificationNumber: 'M12345678',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
+      dateOfBirth: '1990-01-01',
     }
     
     expect(() => IdentificationInfoSchema.parse(validData1)).not.toThrow()
     expect(() => IdentificationInfoSchema.parse(validData2)).not.toThrow()
+  })
+
+  it('requires date of birth', () => {
+    const invalidData = {
+      identificationType: 'passport' as const,
+      identificationNumber: 'A12345678',
+      socialSecurityNumber: '123-45-6789',
+      noSSN: false,
+      dateOfBirth: '',
+    }
+    
+    expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Date of birth is required')
+  })
+
+  it('validates minimum age requirement (18 years old)', () => {
+    const today = new Date()
+    const underageDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate()).toISOString().split('T')[0]
+    
+    const invalidData = {
+      identificationType: 'passport' as const,
+      identificationNumber: 'A12345678',
+      socialSecurityNumber: '123-45-6789',
+      noSSN: false,
+      dateOfBirth: underageDate,
+    }
+    
+    expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('You must be at least 18 years old')
+  })
+
+  it('validates maximum age (not over 120 years old)', () => {
+    const invalidData = {
+      identificationType: 'passport' as const,
+      identificationNumber: 'A12345678',
+      socialSecurityNumber: '123-45-6789',
+      noSSN: false,
+      dateOfBirth: '1800-01-01',
+    }
+    
+    expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Please enter a valid date of birth')
+  })
+
+  it('validates date format', () => {
+    const invalidData = {
+      identificationType: 'passport' as const,
+      identificationNumber: 'A12345678',
+      socialSecurityNumber: '123-45-6789',
+      noSSN: false,
+      dateOfBirth: 'invalid-date',
+    }
+    
+    expect(() => IdentificationInfoSchema.parse(invalidData)).toThrow('Invalid date format')
   })
 })

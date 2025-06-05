@@ -15,6 +15,31 @@ export const IdentificationInfoSchema = z.object({
   state: z.string().optional(),
   socialSecurityNumber: z.string().optional(),
   noSSN: z.boolean().default(false),
+  dateOfBirth: z.string()
+    .min(1, 'Date of birth is required')
+    .refine((date) => {
+      const parsedDate = new Date(date)
+      return !isNaN(parsedDate.getTime())
+    }, 'Invalid date format')
+    .refine((date) => {
+      const birthDate = new Date(date)
+      const today = new Date()
+      const age = today.getFullYear() - birthDate.getFullYear()
+      const monthDiff = today.getMonth() - birthDate.getMonth()
+      const dayDiff = today.getDate() - birthDate.getDate()
+      
+      // Check if birthday hasn't occurred this year
+      const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age
+      
+      return actualAge >= 18
+    }, 'You must be at least 18 years old')
+    .refine((date) => {
+      const birthDate = new Date(date)
+      const today = new Date()
+      const age = today.getFullYear() - birthDate.getFullYear()
+      
+      return age <= 120
+    }, 'Please enter a valid date of birth'),
 }).refine((data) => {
   // State is required for driver's license and state-id
   if ((data.identificationType === 'drivers-license' || data.identificationType === 'state-id') && !data.state) {

@@ -15,6 +15,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
     state: '',
     socialSecurityNumber: '',
     noSSN: false,
+    dateOfBirth: '',
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -189,6 +190,20 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
               {errors.state && <span className={styles.errorText}>{errors.state}</span>}
             </div>
           )}
+        </div>
+
+        <div className={styles.formField}>
+          <label className={styles.label} htmlFor="dateOfBirth">Date of Birth</label>
+          <input
+            id="dateOfBirth"
+            type="date"
+            className={styles.input}
+            value={formData.dateOfBirth}
+            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+            autoComplete="bday"
+            max={new Date().toISOString().split('T')[0]}
+          />
+          {errors.dateOfBirth && <span className={styles.errorText}>{errors.dateOfBirth}</span>}
         </div>
 
         <div className={styles.sectionTitle}>
