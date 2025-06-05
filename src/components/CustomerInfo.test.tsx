@@ -1,8 +1,26 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi, beforeEach, describe, it, expect } from 'vitest'
 import CustomerInfo from './CustomerInfo'
 import { OnboardingProvider } from '../context/OnboardingContext'
 import { type ProductType } from '../types/products'
+import { configService } from '../services/configService'
+
+// Mock the config service
+vi.mock('../services/configService', () => {
+  return {
+    configService: {
+      getProducts: vi.fn(),
+      getStates: vi.fn(),
+      getIdentificationTypes: vi.fn(),
+      getIdentificationTypesThatRequireState: vi.fn(),
+      clearCache: vi.fn(),
+    },
+    State: {},
+    IdentificationType: {},
+    Product: {},
+  }
+})
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
@@ -22,12 +40,24 @@ const defaultProps = {
 describe('CustomerInfo', () => {
   beforeEach(() => {
     mockOnNext.mockClear()
+    
+    // Set up the mock implementation
+    vi.mocked(configService.getStates).mockResolvedValue([
+      { code: 'AL', name: 'Alabama' },
+      { code: 'CA', name: 'California' },
+      { code: 'NY', name: 'New York' },
+      { code: 'TX', name: 'Texas' },
+    ])
   })
 
-  it('renders the customer info form with all required fields', () => {
+  it('renders the customer info form with all required fields', async () => {
     renderWithProvider(<CustomerInfo {...defaultProps} />)
     
-    expect(screen.getByText('Personal Information')).toBeInTheDocument()
+    // Wait for states to load
+    await waitFor(() => {
+      expect(screen.getByText('Personal Information')).toBeInTheDocument()
+    })
+    
     expect(screen.getByLabelText('First Name')).toBeInTheDocument()
     expect(screen.getByLabelText('Last Name')).toBeInTheDocument()
     expect(screen.getByLabelText('Email Address')).toBeInTheDocument()
@@ -35,16 +65,23 @@ describe('CustomerInfo', () => {
     expect(screen.getByText('Mailing Address')).toBeInTheDocument()
   })
 
-  it('displays selected products', () => {
+  it('displays selected products', async () => {
     renderWithProvider(<CustomerInfo {...defaultProps} />)
     
-    expect(screen.getByText('Selected Products:')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Selected Products:')).toBeInTheDocument()
+    })
+    
     expect(screen.getByText('checking')).toBeInTheDocument()
     expect(screen.getByText('savings')).toBeInTheDocument()
   })
 
-  it('shows billing address toggle enabled by default', () => {
+  it('shows billing address toggle enabled by default', async () => {
     renderWithProvider(<CustomerInfo {...defaultProps} />)
+    
+    await waitFor(() => {
+      expect(screen.getByText('Use same address for billing')).toBeInTheDocument()
+    })
     
     const toggle = screen.getByText('Use same address for billing')
     expect(toggle).toBeInTheDocument()
@@ -188,8 +225,12 @@ describe('CustomerInfo', () => {
     })
   })
 
-  it('has correct autocomplete attributes on form fields', () => {
+  it('has correct autocomplete attributes on form fields', async () => {
     renderWithProvider(<CustomerInfo {...defaultProps} />)
+    
+    await waitFor(() => {
+      expect(screen.getByLabelText('First Name')).toBeInTheDocument()
+    })
     
     // Personal details
     expect(screen.getByLabelText('First Name')).toHaveAttribute('autocomplete', 'given-name')

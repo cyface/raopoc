@@ -1,61 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Building2, Shield, CreditCard } from 'lucide-react'
-import { IdentificationInfoSchema, type IdentificationInfoData, IDENTIFICATION_TYPES } from '../types/identification'
+import { IdentificationInfoSchema, type IdentificationInfoData } from '../types/identification'
+import { configService, type State, type IdentificationType } from '../services/configService'
 import * as styles from '../styles/theme.css'
-
-// Import US states from CustomerInfo component
-const US_STATES = [
-  { code: 'AL', name: 'Alabama' },
-  { code: 'AK', name: 'Alaska' },
-  { code: 'AZ', name: 'Arizona' },
-  { code: 'AR', name: 'Arkansas' },
-  { code: 'CA', name: 'California' },
-  { code: 'CO', name: 'Colorado' },
-  { code: 'CT', name: 'Connecticut' },
-  { code: 'DE', name: 'Delaware' },
-  { code: 'FL', name: 'Florida' },
-  { code: 'GA', name: 'Georgia' },
-  { code: 'HI', name: 'Hawaii' },
-  { code: 'ID', name: 'Idaho' },
-  { code: 'IL', name: 'Illinois' },
-  { code: 'IN', name: 'Indiana' },
-  { code: 'IA', name: 'Iowa' },
-  { code: 'KS', name: 'Kansas' },
-  { code: 'KY', name: 'Kentucky' },
-  { code: 'LA', name: 'Louisiana' },
-  { code: 'ME', name: 'Maine' },
-  { code: 'MD', name: 'Maryland' },
-  { code: 'MA', name: 'Massachusetts' },
-  { code: 'MI', name: 'Michigan' },
-  { code: 'MN', name: 'Minnesota' },
-  { code: 'MS', name: 'Mississippi' },
-  { code: 'MO', name: 'Missouri' },
-  { code: 'MT', name: 'Montana' },
-  { code: 'NE', name: 'Nebraska' },
-  { code: 'NV', name: 'Nevada' },
-  { code: 'NH', name: 'New Hampshire' },
-  { code: 'NJ', name: 'New Jersey' },
-  { code: 'NM', name: 'New Mexico' },
-  { code: 'NY', name: 'New York' },
-  { code: 'NC', name: 'North Carolina' },
-  { code: 'ND', name: 'North Dakota' },
-  { code: 'OH', name: 'Ohio' },
-  { code: 'OK', name: 'Oklahoma' },
-  { code: 'OR', name: 'Oregon' },
-  { code: 'PA', name: 'Pennsylvania' },
-  { code: 'RI', name: 'Rhode Island' },
-  { code: 'SC', name: 'South Carolina' },
-  { code: 'SD', name: 'South Dakota' },
-  { code: 'TN', name: 'Tennessee' },
-  { code: 'TX', name: 'Texas' },
-  { code: 'UT', name: 'Utah' },
-  { code: 'VT', name: 'Vermont' },
-  { code: 'VA', name: 'Virginia' },
-  { code: 'WA', name: 'Washington' },
-  { code: 'WV', name: 'West Virginia' },
-  { code: 'WI', name: 'Wisconsin' },
-  { code: 'WY', name: 'Wyoming' },
-]
 
 interface IdentificationInfoProps {
   onNext: (identificationInfo: IdentificationInfoData) => void
@@ -71,6 +18,24 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [states, setStates] = useState<State[]>([])
+  const [identificationTypes, setIdentificationTypes] = useState<IdentificationType[]>([])
+
+  useEffect(() => {
+    const loadConfigs = async () => {
+      try {
+        const [statesData, identificationTypesData] = await Promise.all([
+          configService.getStates(),
+          configService.getIdentificationTypes()
+        ])
+        setStates(statesData)
+        setIdentificationTypes(identificationTypesData)
+      } catch (error) {
+        console.error('Failed to load configuration:', error)
+      }
+    }
+    loadConfigs()
+  }, [])
 
   const formatSSN = (value: string): string => {
     // Remove all non-digit characters
@@ -122,8 +87,9 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
       // Clean up the form data before validation
       const cleanedData = { ...formData }
       
-      // Remove state if not driver's license or state-id
-      if (cleanedData.identificationType !== 'drivers-license' && cleanedData.identificationType !== 'state-id') {
+      // Remove state if identification type doesn't require state
+      const currentType = identificationTypes.find(type => type.value === cleanedData.identificationType)
+      if (!currentType?.requiresState) {
         delete cleanedData.state
       }
       
@@ -173,7 +139,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             onChange={(e) => handleInputChange('identificationType', e.target.value as any)}
             autoComplete="off"
           >
-            {IDENTIFICATION_TYPES.map(type => (
+            {identificationTypes.map(type => (
               <option key={type.value} value={type.value}>
                 {type.label}
               </option>
@@ -201,7 +167,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             {errors.identificationNumber && <span className={styles.errorText}>{errors.identificationNumber}</span>}
           </div>
 
-          {(formData.identificationType === 'drivers-license' || formData.identificationType === 'state-id') && (
+          {identificationTypes.find(type => type.value === formData.identificationType)?.requiresState && (
             <div className={styles.formField}>
               <label className={styles.label} htmlFor="state">
                 {formData.identificationType === 'drivers-license' ? 'Issuing State' : 'Issuing State'}
@@ -214,7 +180,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
                 autoComplete="address-level1"
               >
                 <option value="">Select a state</option>
-                {US_STATES.map(state => (
+                {states.map(state => (
                   <option key={state.code} value={state.code}>
                     {state.name}
                   </option>

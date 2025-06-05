@@ -1,0 +1,20 @@
+[
+  {
+    "type": "checking",
+    "title": "Checking Account",
+    "description": "Everyday banking with easy access to your money through ATMs, online banking, and mobile apps.",
+    "icon": "CreditCard"
+  },
+  {
+    "type": "savings", 
+    "title": "Savings Account",
+    "description": "Earn interest on your deposits while keeping your money safe and accessible.",
+    "icon": "PiggyBank"
+  },
+  {
+    "type": "money-market",
+    "title": "Money Market Account", 
+    "description": "Higher interest rates with limited monthly transactions and higher minimum balance requirements.",
+    "icon": "TrendingUp"
+  }
+]

@@ -1,61 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Building2, User, Mail, Phone, MapPin } from 'lucide-react'
 import { CustomerInfoSchema, type CustomerInfoData, type AddressData } from '../types/customer'
 import { type ProductType } from '../types/products'
+import { configService, type State } from '../services/configService'
 import * as styles from '../styles/theme.css'
-
-const US_STATES = [
-  { code: 'AL', name: 'Alabama' },
-  { code: 'AK', name: 'Alaska' },
-  { code: 'AZ', name: 'Arizona' },
-  { code: 'AR', name: 'Arkansas' },
-  { code: 'CA', name: 'California' },
-  { code: 'CO', name: 'Colorado' },
-  { code: 'CT', name: 'Connecticut' },
-  { code: 'DE', name: 'Delaware' },
-  { code: 'FL', name: 'Florida' },
-  { code: 'GA', name: 'Georgia' },
-  { code: 'HI', name: 'Hawaii' },
-  { code: 'ID', name: 'Idaho' },
-  { code: 'IL', name: 'Illinois' },
-  { code: 'IN', name: 'Indiana' },
-  { code: 'IA', name: 'Iowa' },
-  { code: 'KS', name: 'Kansas' },
-  { code: 'KY', name: 'Kentucky' },
-  { code: 'LA', name: 'Louisiana' },
-  { code: 'ME', name: 'Maine' },
-  { code: 'MD', name: 'Maryland' },
-  { code: 'MA', name: 'Massachusetts' },
-  { code: 'MI', name: 'Michigan' },
-  { code: 'MN', name: 'Minnesota' },
-  { code: 'MS', name: 'Mississippi' },
-  { code: 'MO', name: 'Missouri' },
-  { code: 'MT', name: 'Montana' },
-  { code: 'NE', name: 'Nebraska' },
-  { code: 'NV', name: 'Nevada' },
-  { code: 'NH', name: 'New Hampshire' },
-  { code: 'NJ', name: 'New Jersey' },
-  { code: 'NM', name: 'New Mexico' },
-  { code: 'NY', name: 'New York' },
-  { code: 'NC', name: 'North Carolina' },
-  { code: 'ND', name: 'North Dakota' },
-  { code: 'OH', name: 'Ohio' },
-  { code: 'OK', name: 'Oklahoma' },
-  { code: 'OR', name: 'Oregon' },
-  { code: 'PA', name: 'Pennsylvania' },
-  { code: 'RI', name: 'Rhode Island' },
-  { code: 'SC', name: 'South Carolina' },
-  { code: 'SD', name: 'South Dakota' },
-  { code: 'TN', name: 'Tennessee' },
-  { code: 'TX', name: 'Texas' },
-  { code: 'UT', name: 'Utah' },
-  { code: 'VT', name: 'Vermont' },
-  { code: 'VA', name: 'Virginia' },
-  { code: 'WA', name: 'Washington' },
-  { code: 'WV', name: 'West Virginia' },
-  { code: 'WI', name: 'Wisconsin' },
-  { code: 'WY', name: 'Wyoming' },
-]
 
 interface CustomerInfoProps {
   selectedProducts: ProductType[]
@@ -79,6 +27,19 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [states, setStates] = useState<State[]>([])
+
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        const statesData = await configService.getStates()
+        setStates(statesData)
+      } catch (error) {
+        console.error('Failed to load states:', error)
+      }
+    }
+    loadStates()
+  }, [])
 
   const formatPhoneNumber = (value: string): string => {
     // Remove all non-digit characters
@@ -302,7 +263,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
               autoComplete="address-level1"
             >
               <option value="">Select a state</option>
-              {US_STATES.map(state => (
+              {states.map(state => (
                 <option key={state.code} value={state.code}>
                   {state.name}
                 </option>
@@ -383,7 +344,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
                   autoComplete="billing address-level1"
                 >
                   <option value="">Select a state</option>
-                  {US_STATES.map(state => (
+                  {states.map(state => (
                     <option key={state.code} value={state.code}>
                       {state.name}
                     </option>

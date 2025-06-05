@@ -1,7 +1,25 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi, beforeEach, describe, it, expect } from 'vitest'
 import IdentificationInfo from './IdentificationInfo'
 import { OnboardingProvider } from '../context/OnboardingContext'
+import { configService } from '../services/configService'
+
+// Mock the config service
+vi.mock('../services/configService', () => {
+  return {
+    configService: {
+      getProducts: vi.fn(),
+      getStates: vi.fn(),
+      getIdentificationTypes: vi.fn(),
+      getIdentificationTypesThatRequireState: vi.fn(),
+      clearCache: vi.fn(),
+    },
+    State: {},
+    IdentificationType: {},
+    Product: {},
+  }
+})
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
@@ -9,6 +27,12 @@ const renderWithProvider = (component: React.ReactElement) => {
       {component}
     </OnboardingProvider>
   )
+}
+
+const waitForConfigLoad = async () => {
+  await waitFor(() => {
+    expect(screen.getByRole('option', { name: 'Passport' })).toBeInTheDocument()
+  })
 }
 
 const mockOnNext = vi.fn()
@@ -20,12 +44,32 @@ const defaultProps = {
 describe('IdentificationInfo', () => {
   beforeEach(() => {
     mockOnNext.mockClear()
+    
+    // Set up the mock implementation
+    vi.mocked(configService.getStates).mockResolvedValue([
+      { code: 'AL', name: 'Alabama' },
+      { code: 'CA', name: 'California' },
+      { code: 'NY', name: 'New York' },
+      { code: 'TX', name: 'Texas' },
+    ])
+    
+    vi.mocked(configService.getIdentificationTypes).mockResolvedValue([
+      { value: 'passport', label: 'Passport', requiresState: false },
+      { value: 'drivers-license', label: 'Driver\'s License', requiresState: true },
+      { value: 'state-id', label: 'State ID', requiresState: true },
+      { value: 'military-id', label: 'Military ID', requiresState: false },
+    ])
+    
+    vi.mocked(configService.getIdentificationTypesThatRequireState).mockResolvedValue(['drivers-license', 'state-id'])
   })
 
-  it('renders the identification form with all required fields', () => {
+  it('renders the identification form with all required fields', async () => {
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
-    expect(screen.getByText('Identity Verification')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Identity Verification')).toBeInTheDocument()
+    })
+    
     expect(screen.getByLabelText('Identification Type')).toBeInTheDocument()
     expect(screen.getByLabelText('Passport Number')).toBeInTheDocument()
     expect(screen.getByText('Social Security Information')).toBeInTheDocument()
@@ -36,6 +80,8 @@ describe('IdentificationInfo', () => {
   it('shows state dropdown when driver\'s license is selected', async () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    await waitForConfigLoad()
     
     const identificationSelect = screen.getByLabelText('Identification Type')
     await user.selectOptions(identificationSelect, 'drivers-license')
@@ -48,6 +94,8 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
+    await waitForConfigLoad()
+    
     const identificationSelect = screen.getByLabelText('Identification Type')
     await user.selectOptions(identificationSelect, 'state-id')
     
@@ -58,6 +106,8 @@ describe('IdentificationInfo', () => {
   it('hides state dropdown for passport and military ID types', async () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    await waitForConfigLoad()
     
     // Default is passport
     expect(screen.queryByLabelText('Issuing State')).not.toBeInTheDocument()
@@ -73,6 +123,8 @@ describe('IdentificationInfo', () => {
   it('updates field labels based on identification type', async () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    await waitForConfigLoad()
     
     const identificationSelect = screen.getByLabelText('Identification Type')
     
@@ -161,6 +213,8 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
+    await waitForConfigLoad()
+    
     // Select driver's license
     const identificationSelect = screen.getByLabelText('Identification Type')
     await user.selectOptions(identificationSelect, 'drivers-license')
@@ -182,6 +236,8 @@ describe('IdentificationInfo', () => {
   it('validates state is required for state ID', async () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    await waitForConfigLoad()
     
     // Select state ID
     const identificationSelect = screen.getByLabelText('Identification Type')
@@ -243,6 +299,8 @@ describe('IdentificationInfo', () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
     
+    await waitForConfigLoad()
+    
     // Select state ID
     const identificationSelect = screen.getByLabelText('Identification Type')
     await user.selectOptions(identificationSelect, 'state-id')
@@ -269,6 +327,8 @@ describe('IdentificationInfo', () => {
   it('submits form with valid driver\'s license data', async () => {
     const user = userEvent.setup()
     renderWithProvider(<IdentificationInfo {...defaultProps} />)
+    
+    await waitForConfigLoad()
     
     // Select driver's license
     const identificationSelect = screen.getByLabelText('Identification Type')

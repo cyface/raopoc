@@ -1,34 +1,34 @@
-import { useState } from 'react'
-import { PiggyBank, CreditCard, TrendingUp, Building2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { PiggyBank, CreditCard, TrendingUp, Building2, LucideIcon } from 'lucide-react'
 import { ProductType, ProductSelectionSchema, type ProductSelectionData } from '../types/products'
 import { useOnboarding } from '../context/OnboardingContext'
+import { configService, type Product } from '../services/configService'
 import * as styles from '../styles/theme.css'
 
-const PRODUCTS = [
-  {
-    type: 'checking' as const,
-    title: 'Checking Account',
-    description: 'Everyday banking with easy access to your money through ATMs, online banking, and mobile apps.',
-    icon: CreditCard,
-  },
-  {
-    type: 'savings' as const,
-    title: 'Savings Account',
-    description: 'Earn interest on your deposits while keeping your money safe and accessible.',
-    icon: PiggyBank,
-  },
-  {
-    type: 'money-market' as const,
-    title: 'Money Market Account',
-    description: 'Higher interest rates with limited monthly transactions and higher minimum balance requirements.',
-    icon: TrendingUp,
-  },
-]
+// Icon mapping to convert string names to React components
+const ICON_MAP: Record<string, LucideIcon> = {
+  CreditCard,
+  PiggyBank,
+  TrendingUp,
+}
 
 export default function ProductSelection() {
   const { setSelectedProducts: setGlobalProducts, setCurrentStep } = useOnboarding()
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string>('')
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const productsData = await configService.getProducts()
+        setProducts(productsData)
+      } catch (error) {
+        console.error('Failed to load products:', error)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const toggleProduct = (productType: ProductType) => {
     setSelectedProducts(prev => {
@@ -70,15 +70,15 @@ export default function ProductSelection() {
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.productGrid}>
-        {PRODUCTS.map((product) => {
-          const IconComponent = product.icon
+        {products && products.map((product) => {
+          const IconComponent = ICON_MAP[product.icon] || CreditCard // fallback icon
           return (
             <div
               key={product.type}
               className={`${styles.productCard} ${
-                selectedProducts.includes(product.type) ? styles.productCardSelected : ''
+                selectedProducts.includes(product.type as ProductType) ? styles.productCardSelected : ''
               }`}
-              onClick={() => toggleProduct(product.type)}
+              onClick={() => toggleProduct(product.type as ProductType)}
             >
               <IconComponent className={styles.productIcon} />
               <h3 className={styles.productTitle}>{product.title}</h3>

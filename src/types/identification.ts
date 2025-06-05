@@ -49,9 +49,4 @@ export const IdentificationInfoSchema = z.object({
 
 export type IdentificationInfoData = z.infer<typeof IdentificationInfoSchema>
 
-export const IDENTIFICATION_TYPES = [
-  { value: 'passport', label: 'Passport' },
-  { value: 'drivers-license', label: 'Driver\'s License' },
-  { value: 'state-id', label: 'State ID' },
-  { value: 'military-id', label: 'Military ID' },
-] as const
+// IDENTIFICATION_TYPES moved to config/identification-types.json and loaded via configService

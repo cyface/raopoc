@@ -14,6 +14,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - TypeScript type checking: `pnpm typecheck`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
 
+## Environment Variables
+
+- `VITE_CONFIG_PATH`: Specifies the path where configuration files are served from. Defaults to `/config`. 
+  - Example: `VITE_CONFIG_PATH=/api/config` would make the app fetch config files from `/api/config/states.json`, etc.
+  - In development: Files are served from `public/config/` (copied from `config/` directory)
+  - In production: Files should be available at the specified path on your web server
+
+- `VITE_CONFIG_CACHE_TIMEOUT`: Specifies how long to cache configuration files in milliseconds. Defaults to `5000` (5 seconds).
+  - Example: `VITE_CONFIG_CACHE_TIMEOUT=30000` would cache config files for 30 seconds
+  - Set to `0` to disable caching entirely (always fetch fresh data)
+  - Maximum allowed value: `3600000` (1 hour)
+  - Invalid values will fall back to the default 5 seconds with a console warning
+
 ## Project Structure
 
 This is a minimal TypeScript project with:
