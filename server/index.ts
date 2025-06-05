@@ -22,6 +22,11 @@ interface State {
   name: string
 }
 
+interface Country {
+  code: string
+  name: string
+}
+
 interface IdentificationType {
   value: string
   label: string
@@ -72,12 +77,19 @@ interface BankInfo {
   }
 }
 
+interface BadSSNConfig {
+  badSSNs: string[]
+  description: string
+}
+
 interface ConfigCache {
   states?: State[]
+  countries?: Country[]
   identificationTypes?: IdentificationType[]
   products?: Product[]
   documents?: DocumentConfig
   bankInfo?: BankInfo
+  badSSNs?: BadSSNConfig
 }
 
 const configCache: ConfigCache = {}
@@ -98,10 +110,12 @@ async function loadConfigFile(filename: string) {
 async function loadAllConfigs() {
   try {
     configCache.states = await loadConfigFile('states.json')
+    configCache.countries = await loadConfigFile('countries.json')
     configCache.identificationTypes = await loadConfigFile('identification-types.json')
     configCache.products = await loadConfigFile('products.json')
     configCache.documents = await loadConfigFile('documents.json')
     configCache.bankInfo = await loadConfigFile('bank-info.json')
+    configCache.badSSNs = await loadConfigFile('bad-ssns.json')
     console.log('All config files loaded successfully')
   } catch (error) {
     console.error('Error loading config files:', error)
@@ -123,6 +137,8 @@ if (process.env.NODE_ENV !== 'production') {
     try {
       if (filename === 'states.json') {
         configCache.states = await loadConfigFile(filename)
+      } else if (filename === 'countries.json') {
+        configCache.countries = await loadConfigFile(filename)
       } else if (filename === 'identification-types.json') {
         configCache.identificationTypes = await loadConfigFile(filename)
       } else if (filename === 'products.json') {
@@ -131,6 +147,8 @@ if (process.env.NODE_ENV !== 'production') {
         configCache.documents = await loadConfigFile(filename)
       } else if (filename === 'bank-info.json') {
         configCache.bankInfo = await loadConfigFile(filename)
+      } else if (filename === 'bad-ssns.json') {
+        configCache.badSSNs = await loadConfigFile(filename)
       }
       console.log(`Successfully reloaded ${filename}`)
     } catch (error) {
@@ -145,6 +163,13 @@ app.get('/api/config/states', (_req, res) => {
     return res.status(500).json({ error: 'States configuration not loaded' })
   }
   res.json(configCache.states)
+})
+
+app.get('/api/config/countries', (_req, res) => {
+  if (!configCache.countries) {
+    return res.status(500).json({ error: 'Countries configuration not loaded' })
+  }
+  res.json(configCache.countries)
 })
 
 app.get('/api/config/identification-types', (_req, res) => {
@@ -190,20 +215,18 @@ app.get('/api/documents/:documentId', async (req, res) => {
       return res.status(404).json({ error: 'Document not found' })
     }
     
-    // In a real implementation, you would serve the actual PDF file
-    // For now, we'll return a mock PDF response
-    const mockPdfPath = path.join(__dirname, '..', 'public', 'mock-document.pdf')
+    // Serve the actual generated PDF file
+    const pdfPath = path.join(__dirname, '..', 'public', 'documents', `${documentId}.pdf`)
     
     try {
-      await fs.access(mockPdfPath)
+      await fs.access(pdfPath)
       res.setHeader('Content-Type', 'application/pdf')
       res.setHeader('Content-Disposition', `inline; filename="${document.name}.pdf"`)
-      const pdfBuffer = await fs.readFile(mockPdfPath)
+      const pdfBuffer = await fs.readFile(pdfPath)
       res.send(pdfBuffer)
-    } catch {
-      // If mock PDF doesn't exist, return a simple text response
-      res.setHeader('Content-Type', 'text/plain')
-      res.send(`Mock document content for: ${document.name}\n\nThis is where the actual document content would be displayed.`)
+    } catch (error) {
+      console.error(`Error serving document ${documentId}:`, error)
+      res.status(404).json({ error: 'Document file not found' })
     }
   } catch (error) {
     console.error('Error serving document:', error)
@@ -225,20 +248,18 @@ app.get('/api/documents/:documentId/download', async (req, res) => {
       return res.status(404).json({ error: 'Document not found' })
     }
     
-    // In a real implementation, you would serve the actual PDF file for download
-    const mockPdfPath = path.join(__dirname, '..', 'public', 'mock-document.pdf')
+    // Serve the actual generated PDF file for download
+    const pdfPath = path.join(__dirname, '..', 'public', 'documents', `${documentId}.pdf`)
     
     try {
-      await fs.access(mockPdfPath)
+      await fs.access(pdfPath)
       res.setHeader('Content-Type', 'application/pdf')
       res.setHeader('Content-Disposition', `attachment; filename="${document.name}.pdf"`)
-      const pdfBuffer = await fs.readFile(mockPdfPath)
+      const pdfBuffer = await fs.readFile(pdfPath)
       res.send(pdfBuffer)
-    } catch {
-      // If mock PDF doesn't exist, return a simple text file
-      res.setHeader('Content-Type', 'text/plain')
-      res.setHeader('Content-Disposition', `attachment; filename="${document.name}.txt"`)
-      res.send(`Mock document content for: ${document.name}\n\nThis is where the actual document content would be displayed.`)
+    } catch (error) {
+      console.error(`Error downloading document ${documentId}:`, error)
+      res.status(404).json({ error: 'Document file not found' })
     }
   } catch (error) {
     console.error('Error downloading document:', error)
@@ -325,6 +346,45 @@ app.get('/api/applications/:id', async (req, res) => {
   }
 })
 
+// Credit check endpoint
+app.post('/api/credit-check', async (req, res) => {
+  try {
+    const { ssn } = req.body
+
+    if (!ssn) {
+      return res.status(400).json({ error: 'SSN is required' })
+    }
+
+    if (!configCache.badSSNs) {
+      return res.status(500).json({ error: 'Credit check service unavailable' })
+    }
+
+    // Normalize SSN format (remove dashes for comparison)
+    const normalizedSSN = ssn.replace(/[^0-9]/g, '')
+    const badSSNs = configCache.badSSNs.badSSNs.map(badSSN => badSSN.replace(/[^0-9]/g, ''))
+
+    const isOnBadList = badSSNs.includes(normalizedSSN)
+
+    console.log(`🔍 Credit check performed for SSN: ${ssn.substring(0, 3)}-XX-XXXX`)
+    console.log(`📊 Credit check result: ${isOnBadList ? 'REQUIRES_VERIFICATION' : 'PASSED'}`)
+
+    res.json({
+      status: isOnBadList ? 'requires_verification' : 'approved',
+      requiresVerification: isOnBadList,
+      message: isOnBadList 
+        ? 'Additional verification required - a representative will contact you'
+        : 'Credit check passed'
+    })
+
+  } catch (error) {
+    console.error('Error performing credit check:', error)
+    res.status(500).json({ 
+      error: 'Credit check failed',
+      message: 'Please try again later'
+    })
+  }
+})
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
@@ -338,6 +398,7 @@ async function start() {
     console.log(`Server running on http://localhost:${PORT}`)
     console.log('Config endpoints available at:')
     console.log(`  - http://localhost:${PORT}/api/config/states`)
+    console.log(`  - http://localhost:${PORT}/api/config/countries`)
     console.log(`  - http://localhost:${PORT}/api/config/identification-types`)
     console.log(`  - http://localhost:${PORT}/api/config/products`)
     console.log(`  - http://localhost:${PORT}/api/config/documents`)

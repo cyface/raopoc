@@ -20,6 +20,7 @@ describe('IdentificationInfoSchema', () => {
     const validData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: '1990-01-01',
@@ -58,6 +59,7 @@ describe('IdentificationInfoSchema', () => {
     const validData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       noSSN: true,
       dateOfBirth: '1990-01-01',
     }
@@ -69,6 +71,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: '',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: '1990-01-01',
@@ -105,6 +108,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       noSSN: false,
       dateOfBirth: '1990-01-01',
     }
@@ -116,6 +120,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-678', // Invalid format
       noSSN: false,
       dateOfBirth: '1990-01-01',
@@ -134,6 +139,7 @@ describe('IdentificationInfoSchema', () => {
       const validData = {
         identificationType: 'passport' as const,
         identificationNumber: 'A12345678',
+        country: 'US',
         socialSecurityNumber: ssn,
         noSSN: false,
         dateOfBirth: '1990-01-01',
@@ -147,6 +153,7 @@ describe('IdentificationInfoSchema', () => {
     const validData1 = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: '1990-01-01',
@@ -168,6 +175,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: '',
@@ -183,6 +191,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: underageDate,
@@ -195,6 +204,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: '1800-01-01',
@@ -207,6 +217,7 @@ describe('IdentificationInfoSchema', () => {
     const invalidData = {
       identificationType: 'passport' as const,
       identificationNumber: 'A12345678',
+      country: 'US',
       socialSecurityNumber: '123-45-6789',
       noSSN: false,
       dateOfBirth: 'invalid-date',

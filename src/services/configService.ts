@@ -3,6 +3,11 @@ export interface State {
   name: string
 }
 
+export interface Country {
+  code: string
+  name: string
+}
+
 export interface IdentificationType {
   value: string
   label: string
@@ -55,11 +60,13 @@ export interface BankInfo {
 
 class ConfigService {
   private statesCache: State[] | null = null
+  private countriesCache: Country[] | null = null
   private identificationTypesCache: IdentificationType[] | null = null
   private productsCache: Product[] | null = null
   private documentsCache: DocumentConfig | null = null
   private bankInfoCache: BankInfo | null = null
   private lastStatesLoad = 0
+  private lastCountriesLoad = 0
   private lastIdentificationTypesLoad = 0
   private lastProductsLoad = 0
   private lastDocumentsLoad = 0
@@ -106,6 +113,10 @@ class ConfigService {
     return this.statesCache === null || (Date.now() - this.lastStatesLoad) > this.cacheTimeout
   }
 
+  private shouldReloadCountries(): boolean {
+    return this.countriesCache === null || (Date.now() - this.lastCountriesLoad) > this.cacheTimeout
+  }
+
   private shouldReloadIdentificationTypes(): boolean {
     return this.identificationTypesCache === null || (Date.now() - this.lastIdentificationTypesLoad) > this.cacheTimeout
   }
@@ -139,6 +150,25 @@ class ConfigService {
       }
     }
     return this.statesCache || []
+  }
+
+  async getCountries(): Promise<Country[]> {
+    if (this.shouldReloadCountries()) {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/config/countries`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch countries: ${response.status}`)
+        }
+        const data = await response.json()
+        this.countriesCache = data as Country[]
+        this.lastCountriesLoad = Date.now()
+      } catch (error) {
+        console.error('Failed to load countries configuration:', error)
+        // Return cached data if available, otherwise empty array
+        return this.countriesCache || []
+      }
+    }
+    return this.countriesCache || []
   }
 
   async getIdentificationTypes(): Promise<IdentificationType[]> {
@@ -245,11 +275,13 @@ class ConfigService {
 
   clearCache(): void {
     this.statesCache = null
+    this.countriesCache = null
     this.identificationTypesCache = null
     this.productsCache = null
     this.documentsCache = null
     this.bankInfoCache = null
     this.lastStatesLoad = 0
+    this.lastCountriesLoad = 0
     this.lastIdentificationTypesLoad = 0
     this.lastProductsLoad = 0
     this.lastDocumentsLoad = 0

@@ -5,6 +5,12 @@ import { type CustomerInfoData } from '../types/customer'
 import { type IdentificationInfoData } from '../types/identification'
 import { type DocumentAcceptanceState } from '../types/documents'
 
+interface CreditCheckResult {
+  status: 'approved' | 'requires_verification' | 'pending' | 'error'
+  requiresVerification: boolean
+  message: string
+}
+
 interface OnboardingContextType {
   data: OnboardingData
   setSelectedProducts: (products: ProductType[]) => void
@@ -13,6 +19,9 @@ interface OnboardingContextType {
   setDocumentAcceptance: (documentAcceptance: DocumentAcceptanceState) => void
   currentStep: number
   setCurrentStep: (step: number) => void
+  creditCheckResult: CreditCheckResult | null
+  setCreditCheckResult: (result: CreditCheckResult | null) => void
+  performCreditCheck: (ssn: string) => Promise<void>
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
@@ -26,6 +35,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   })
   
   const [currentStep, setCurrentStep] = useState(1)
+  const [creditCheckResult, setCreditCheckResult] = useState<CreditCheckResult | null>(null)
 
   const setSelectedProducts = (products: ProductType[]) => {
     setData(prev => ({ ...prev, selectedProducts: products }))
@@ -43,6 +53,39 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setData(prev => ({ ...prev, documentAcceptance }))
   }
 
+  const performCreditCheck = async (ssn: string) => {
+    try {
+      setCreditCheckResult({ status: 'pending', requiresVerification: false, message: 'Checking credit...' })
+      
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+      const response = await fetch(`${apiBaseUrl}/credit-check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ssn }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Credit check failed')
+      }
+
+      const result = await response.json()
+      setCreditCheckResult({
+        status: result.status,
+        requiresVerification: result.requiresVerification,
+        message: result.message,
+      })
+    } catch (error) {
+      console.error('Credit check error:', error)
+      setCreditCheckResult({
+        status: 'error',
+        requiresVerification: false,
+        message: 'Credit check failed. Please try again.',
+      })
+    }
+  }
+
   const value = {
     data,
     setSelectedProducts,
@@ -51,6 +94,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setDocumentAcceptance,
     currentStep,
     setCurrentStep,
+    creditCheckResult,
+    setCreditCheckResult,
+    performCreditCheck,
   }
 
   return (

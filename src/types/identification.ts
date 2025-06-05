@@ -13,6 +13,7 @@ export const IdentificationInfoSchema = z.object({
   identificationType: IdentificationTypeSchema,
   identificationNumber: z.string().min(1, 'Identification number is required'),
   state: z.string().optional(),
+  country: z.string().optional(),
   socialSecurityNumber: z.string().optional(),
   noSSN: z.boolean().default(false),
   dateOfBirth: z.string()
@@ -49,6 +50,15 @@ export const IdentificationInfoSchema = z.object({
 }, {
   message: 'State is required for this identification type',
   path: ['state'],
+}).refine((data) => {
+  // Country is required for passport
+  if (data.identificationType === 'passport' && !data.country) {
+    return false
+  }
+  return true
+}, {
+  message: 'Country is required for passport',
+  path: ['country'],
 }).refine((data) => {
   // SSN is required unless noSSN is checked
   if (!data.noSSN && !data.socialSecurityNumber) {
