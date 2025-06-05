@@ -8,8 +8,26 @@ import { configService } from '../services/configService'
 // Mock the configService
 vi.mock('../services/configService', () => ({
   configService: {
+    // New API methods
+    getProductsFor: vi.fn(),
+    getBankInfoFor: vi.fn(),
+    getStatesFor: vi.fn(),
+    getCountriesFor: vi.fn(),
+    getIdentificationTypesFor: vi.fn(),
+    getDocumentsFor: vi.fn(),
+    preloadLanguages: vi.fn(),
+    preloadConfiguration: vi.fn(),
+    clearAllCaches: vi.fn(),
+    getCacheStats: vi.fn(),
+    // Backwards compatibility methods
+    getProducts: vi.fn(),
+    getStates: vi.fn(),
+    getCountries: vi.fn(),
+    getIdentificationTypes: vi.fn(),
     getDocuments: vi.fn(),
     getBankInfo: vi.fn(),
+    getIdentificationTypesThatRequireState: vi.fn(),
+    clearCache: vi.fn(),
   },
 }))
 

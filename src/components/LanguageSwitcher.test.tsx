@@ -8,7 +8,29 @@ import '../i18n'
 // Mock the config service
 vi.mock('../services/configService', () => ({
   configService: {
+    // New API methods
+    getProductsFor: vi.fn(),
+    getBankInfoFor: vi.fn(),
+    getStatesFor: vi.fn(),
+    getCountriesFor: vi.fn(),
+    getIdentificationTypesFor: vi.fn(),
+    getDocumentsFor: vi.fn(),
+    preloadLanguages: vi.fn(),
+    preloadConfiguration: vi.fn(),
+    clearAllCaches: vi.fn(),
+    getCacheStats: vi.fn(),
+    // Backwards compatibility methods
+    getProducts: vi.fn(),
+    getStates: vi.fn(),
+    getIdentificationTypes: vi.fn(),
+    getBankInfo: vi.fn().mockResolvedValue({
+      bankName: 'Test Bank',
+      displayName: 'Test Bank',
+      contact: { phone: '123-456-7890', phoneDisplay: '123-456-7890', email: 'test@bank.com', hours: '24/7' },
+      branding: { primaryColor: '#000', logoIcon: 'Building2' }
+    }),
     refreshForLanguageChange: vi.fn(),
+    clearCache: vi.fn(),
   }
 }))
 
