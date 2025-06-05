@@ -3,19 +3,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ProductSelection from './ProductSelection'
 import { OnboardingProvider } from '../context/OnboardingContext'
 import { ThemeProvider } from '../context/ThemeContext'
-import { configService } from '../services/configService'
-import type { Product, BankInfo } from '../services/configService'
+import { useProductsAndBankInfo } from '../hooks/useConfig'
+import type { Product, BankInfo } from '../services/configService.v2'
 import '../i18n'
 
-// Mock the config service
-vi.mock('../services/configService', () => ({
-  configService: {
-    getProducts: vi.fn(),
-    getBankInfo: vi.fn(),
-    refreshForLanguageChange: vi.fn(),
-    getCurrentFinancialInstitution: vi.fn(),
-    clearCache: vi.fn(),
-  }
+// Mock the useConfig hooks directly
+vi.mock('../hooks/useConfig', () => ({
+  useProductsAndBankInfo: vi.fn(),
 }))
 
 // Mock window.location
@@ -102,8 +96,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
   describe('Issue: fi parameter changes not detected', () => {
     it('FAILS: does not reload configs when fi parameter changes in URL', async () => {
       // Initial render with default bank
-      vi.mocked(configService.getProducts).mockResolvedValue(mockDefaultProducts)
-      vi.mocked(configService.getBankInfo).mockResolvedValue(mockDefaultBankInfo)
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockDefaultProducts)
+      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
       vi.mocked(configService.getCurrentFinancialInstitution).mockReturnValue(null)
 
       const { rerender } = renderProductSelection()
@@ -113,14 +107,14 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         expect(screen.getByText('Default Bank')).toBeInTheDocument()
       })
 
-      expect(configService.getProducts).toHaveBeenCalledTimes(1)
-      expect(configService.getBankInfo).toHaveBeenCalledTimes(1)
+      expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(1)
+      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledTimes(1)
 
       // Simulate URL change to fi=warmbank
       mockLocation.search = '?fi=warmbank'
       vi.mocked(configService.getCurrentFinancialInstitution).mockReturnValue('warmbank')
-      vi.mocked(configService.getProducts).mockResolvedValue(mockWarmBankProducts)
-      vi.mocked(configService.getBankInfo).mockResolvedValue(mockWarmBankInfo)
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockWarmBankProducts)
+      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockWarmBankInfo)
 
       // Force re-render (simulating what would happen in real browser when URL changes)
       rerender(
@@ -145,8 +139,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         }, { timeout: 500 })
         
         // If we reach here, the component is working correctly
-        expect(configService.getProducts).toHaveBeenCalledTimes(2)
-        expect(configService.getBankInfo).toHaveBeenCalledTimes(2)
+        expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(2)
+        expect(configServiceV2.getBankInfoFor).toHaveBeenCalledTimes(2)
       } catch {
         // This is expected to fail with current implementation
         console.log('Expected failure: ProductSelection does not react to URL changes')
@@ -156,8 +150,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         expect(screen.getByText('Default Bank')).toBeInTheDocument()
         
         // Config service should only have been called once (initial load)
-        expect(configService.getProducts).toHaveBeenCalledTimes(1)
-        expect(configService.getBankInfo).toHaveBeenCalledTimes(1)
+        expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(1)
+        expect(configServiceV2.getBankInfoFor).toHaveBeenCalledTimes(1)
         
         throw new Error('ProductSelection component does not react to fi parameter changes - this is the bug!')
       }
@@ -174,8 +168,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         React.useEffect(() => {
           const loadConfigs = async () => {
             const [productsData, bankInfoData] = await Promise.all([
-              configService.getProducts(),
-              configService.getBankInfo()
+              configServiceV2.getProductsFor(null, 'en'),
+              configServiceV2.getBankInfoFor(null, 'en')
             ])
             setProducts(productsData)
             setBankInfo(bankInfoData)
@@ -195,8 +189,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
       }
 
       // Initial render
-      vi.mocked(configService.getProducts).mockResolvedValue(mockDefaultProducts)
-      vi.mocked(configService.getBankInfo).mockResolvedValue(mockDefaultBankInfo)
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockDefaultProducts)
+      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
 
       const { rerender } = render(<TestComponentWithUrlWatching />)
 
@@ -207,8 +201,8 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
 
       // Change URL and mock new responses
       mockLocation.search = '?fi=warmbank'
-      vi.mocked(configService.getProducts).mockResolvedValue(mockWarmBankProducts)
-      vi.mocked(configService.getBankInfo).mockResolvedValue(mockWarmBankInfo)
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue(mockWarmBankProducts)
+      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockWarmBankInfo)
 
       // Re-render with new URL
       rerender(<TestComponentWithUrlWatching />)
@@ -219,18 +213,18 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         expect(screen.getByText('Eco Savings')).toBeInTheDocument()
       })
 
-      expect(configService.getProducts).toHaveBeenCalledTimes(2)
-      expect(configService.getBankInfo).toHaveBeenCalledTimes(2)
+      expect(configServiceV2.getProductsFor).toHaveBeenCalledTimes(2)
+      expect(configServiceV2.getBankInfoFor).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('Issue: language changes not reflected in products', () => {
     it('FAILS: language changes do not trigger product reload', async () => {
       // Initial English load
-      vi.mocked(configService.getProducts).mockResolvedValue([
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue([
         { type: 'checking', title: 'Checking Account', description: 'English description', icon: 'CreditCard' }
       ])
-      vi.mocked(configService.getBankInfo).mockResolvedValue(mockDefaultBankInfo)
+      vi.mocked(configServiceV2.getBankInfoFor).mockResolvedValue(mockDefaultBankInfo)
 
       renderProductSelection()
 
@@ -242,12 +236,12 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
       vi.clearAllMocks()
 
       // Mock Spanish responses
-      vi.mocked(configService.getProducts).mockResolvedValue([
+      vi.mocked(configServiceV2.getProductsFor).mockResolvedValue([
         { type: 'checking', title: 'Cuenta Corriente', description: 'Descripción en español', icon: 'CreditCard' }
       ])
 
       // Simulate language change (LanguageSwitcher calls refreshForLanguageChange)
-      configService.refreshForLanguageChange()
+      configServiceV2.clearAllCaches()
 
       // In current implementation, ProductSelection won't reload because
       // it doesn't listen for language changes or config service updates
@@ -261,11 +255,11 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
         }, { timeout: 500 })
 
         // If we reach here, it's working (unexpected with current implementation)
-        expect(configService.getProducts).toHaveBeenCalled()
+        expect(configServiceV2.getProductsFor).toHaveBeenCalled()
       } catch {
         // Expected failure - component doesn't reload after language change
         expect(screen.getByText('Checking Account')).toBeInTheDocument()
-        expect(configService.getProducts).not.toHaveBeenCalled()
+        expect(configServiceV2.getProductsFor).not.toHaveBeenCalled()
         
         throw new Error('ProductSelection does not reload after language changes - this is the bug!')
       }
@@ -277,7 +271,7 @@ describe('ProductSelection URL Parameter Reactivity Tests', () => {
       // This test documents what needs to be implemented:
       // 1. ProductSelection should watch window.location.search
       // 2. When search params change, it should reload configs
-      // 3. When configService.refreshForLanguageChange() is called, ProductSelection should detect and reload
+      // 3. When configServiceV2.clearAllCaches() is called, ProductSelection should detect and reload
 
       expect('ProductSelection needs to be updated to watch for:').toBe('ProductSelection needs to be updated to watch for:')
       expect('1. URL parameter changes (window.location.search)').toBe('1. URL parameter changes (window.location.search)')

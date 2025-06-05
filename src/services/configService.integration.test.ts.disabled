@@ -56,7 +56,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
       expect(products).toEqual(mockProducts)
     })
 
@@ -74,7 +74,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products')
       expect(products).toEqual(mockProducts)
     })
 
@@ -86,7 +86,7 @@ describe('ConfigService Integration Tests', () => {
       })
 
       await configService.getProducts()
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
       
       // Change fi parameter
       mockLocation.search = '?fi=coolbank'
@@ -98,7 +98,7 @@ describe('ConfigService Integration Tests', () => {
 
       const newProducts = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/coolbank/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/coolbank/products')
       expect(newProducts[0].title).toBe('Cool Checking')
     })
 
@@ -128,7 +128,7 @@ describe('ConfigService Integration Tests', () => {
 
       const bankInfo = await configService.getBankInfo()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/bank-info')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info')
       expect(bankInfo).toEqual(mockBankInfo)
     })
   })
@@ -146,7 +146,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
       expect(products).toEqual(mockProducts)
     })
 
@@ -164,7 +164,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products.es')
       expect(products).toEqual(mockProducts)
     })
 
@@ -185,7 +185,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products.es')
       expect(products).toEqual(mockProducts)
     })
 
@@ -197,7 +197,7 @@ describe('ConfigService Integration Tests', () => {
       })
 
       await configService.getProducts()
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
       
       // Change language to Spanish
       mockLocation.search = '?lng=es'
@@ -210,7 +210,7 @@ describe('ConfigService Integration Tests', () => {
 
       const spanishProducts = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products.es')
       expect(spanishProducts[0].title).toBe('Cuenta Corriente')
     })
   })
@@ -230,7 +230,7 @@ describe('ConfigService Integration Tests', () => {
 
       const products = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
       expect(products).toEqual(mockProducts)
     })
 
@@ -242,7 +242,7 @@ describe('ConfigService Integration Tests', () => {
       })
 
       await configService.getProducts()
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
       
       // Change to warmbank + Spanish
       mockLocation.search = '?fi=warmbank&lng=es'
@@ -254,7 +254,7 @@ describe('ConfigService Integration Tests', () => {
 
       const newProducts = await configService.getProducts()
       
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/config/warmbank/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
       expect(newProducts[0].title).toBe('Ahorros Cálidos')
     })
   })

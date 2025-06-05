@@ -32,10 +32,12 @@ const getInitialLanguage = (): string => {
   return 'en'
 }
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
+// Only initialize if not already initialized
+if (!i18n.isInitialized) {
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
     fallbackLng: 'en',
     lng: getInitialLanguage(),
     debug: import.meta.env.DEV,
@@ -60,5 +62,6 @@ i18n
       caches: ['localStorage'],
     }
   })
+}
 
 export default i18n
