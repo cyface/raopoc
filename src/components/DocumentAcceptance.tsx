@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, ArrowDownTrayIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { Document, DocumentAcceptanceState, DocumentConfig, type DocumentAcceptance } from '../types/documents';
 import { configService, type BankInfo } from '../services/configService';
-import * as styles from '../styles/theme.css';
+import { useOnboarding } from '../context/OnboardingContext';
+import { StepIndicator } from './StepIndicator';
+import { useTheme } from '../context/ThemeContext';
 
 interface DocumentAcceptanceProps {
   selectedProducts: string[];
@@ -18,12 +20,15 @@ export function DocumentAcceptance({
   onAcceptanceChange,
   onNext
 }: DocumentAcceptanceProps) {
+  const { currentStep } = useOnboarding();
+  const { styles } = useTheme();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [acceptances, setAcceptances] = useState<Record<string, boolean>>({});
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
   const [documentConfig, setDocumentConfig] = useState<DocumentConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalDocument, setModalDocument] = useState<{ document: Document; url: string } | null>(null);
 
   const loadApplicableDocuments = useCallback(async () => {
     try {
@@ -118,13 +123,18 @@ export function DocumentAcceptance({
       
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setModalDocument({ document, url });
     } catch (err) {
       console.error('Error viewing document:', err);
       alert('Unable to open document. Please try again.');
     }
+  };
+
+  const handleCloseModal = () => {
+    if (modalDocument?.url) {
+      URL.revokeObjectURL(modalDocument.url);
+    }
+    setModalDocument(null);
   };
 
   const handleDownloadDocument = async (document: Document) => {
@@ -168,10 +178,12 @@ export function DocumentAcceptance({
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <BuildingOffice2Icon className={styles.bankIcon} />
         <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
+      
+      <StepIndicator currentStep={currentStep} totalSteps={5} />
       
       <h1 className={styles.heading}>Review Required Documents</h1>
       <p className={styles.subheading}>
@@ -270,6 +282,77 @@ export function DocumentAcceptance({
           >
             Continue
           </button>
+        </div>
+      )}
+
+      {modalDocument && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 50,
+            padding: '1rem'
+          }}
+          onClick={handleCloseModal}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              width: '90vw',
+              height: '90vh',
+              maxWidth: '1200px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              style={{
+                padding: '1rem',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+                {modalDocument.document.name}
+              </h3>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.25rem',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Close"
+              >
+                <XMarkIcon style={{ width: '1.5rem', height: '1.5rem' }} />
+              </button>
+            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <iframe
+                src={modalDocument.url}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                title={modalDocument.document.name}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

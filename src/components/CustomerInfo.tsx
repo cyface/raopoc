@@ -3,7 +3,10 @@ import { Building2, User, Mail, Phone, MapPin } from 'lucide-react'
 import { CustomerInfoSchema, type CustomerInfoData, type AddressData } from '../types/customer'
 import { type ProductType } from '../types/products'
 import { configService, type State, type BankInfo } from '../services/configService'
-import * as styles from '../styles/theme.css'
+import { useOnboarding } from '../context/OnboardingContext'
+import { StepIndicator } from './StepIndicator'
+import { StateSelect } from './StateSelect'
+import { useTheme } from '../context/ThemeContext'
 
 interface CustomerInfoProps {
   selectedProducts: ProductType[]
@@ -11,6 +14,8 @@ interface CustomerInfoProps {
 }
 
 export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoProps) {
+  const { currentStep } = useOnboarding()
+  const { styles } = useTheme()
   const [formData, setFormData] = useState<CustomerInfoData>({
     firstName: '',
     lastName: '',
@@ -131,10 +136,12 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <Building2 className={styles.bankIcon} />
         <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
+      
+      <StepIndicator currentStep={currentStep} totalSteps={5} />
       
       <h1 className={styles.heading}>Personal Information</h1>
       <p className={styles.subheading}>
@@ -142,8 +149,8 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
       </p>
 
       <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#eff6ff', borderRadius: '0.5rem', border: '1px solid #bfdbfe' }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e40af', fontWeight: '600' }}>Selected Products:</h3>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <h3 style={{ margin: '0', color: '#1e40af', fontWeight: '600' }}>Selected Products:</h3>
           {selectedProducts.map(product => (
             <span key={product} style={{ 
               padding: '0.25rem 0.75rem', 
@@ -161,7 +168,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <div className={styles.sectionTitle}>
-          <User style={{ display: 'inline', marginRight: '0.5rem', width: '1.25rem', height: '1.25rem' }} />
+          <User className={styles.sectionIcon} />
           Personal Details
         </div>
 
@@ -196,7 +203,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
         <div className={styles.formRow}>
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="email">
-              <Mail style={{ display: 'inline', marginRight: '0.25rem', width: '1rem', height: '1rem' }} />
+              <Mail className={styles.labelIcon} />
               Email Address
             </label>
             <input
@@ -213,7 +220,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
 
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="phoneNumber">
-              <Phone style={{ display: 'inline', marginRight: '0.25rem', width: '1rem', height: '1rem' }} />
+              <Phone className={styles.labelIcon} />
               Phone Number
             </label>
             <input
@@ -230,7 +237,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
         </div>
 
         <div className={styles.sectionTitle}>
-          <MapPin style={{ display: 'inline', marginRight: '0.5rem', width: '1.25rem', height: '1.25rem' }} />
+          <MapPin className={styles.sectionIcon} />
           Mailing Address
         </div>
 
@@ -261,24 +268,15 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
             {errors['mailingAddress.city'] && <span className={styles.errorText}>{errors['mailingAddress.city']}</span>}
           </div>
 
-          <div className={styles.formField}>
-            <label className={styles.label} htmlFor="mailingState">State</label>
-            <select
-              id="mailingState"
-              className={styles.input}
-              value={formData.mailingAddress.state}
-              onChange={(e) => handleAddressChange('mailingAddress', 'state', e.target.value)}
-              autoComplete="address-level1"
-            >
-              <option value="">Select a state</option>
-              {states.map(state => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
-            {errors['mailingAddress.state'] && <span className={styles.errorText}>{errors['mailingAddress.state']}</span>}
-          </div>
+          <StateSelect
+            id="mailingState"
+            label="State"
+            value={formData.mailingAddress.state}
+            onChange={(value) => handleAddressChange('mailingAddress', 'state', value)}
+            states={states}
+            error={errors['mailingAddress.state']}
+            autoComplete="address-level1"
+          />
 
           <div className={styles.formField}>
             <label className={styles.label} htmlFor="mailingZip">ZIP Code</label>
@@ -342,24 +340,15 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
                 {errors['billingAddress.city'] && <span className={styles.errorText}>{errors['billingAddress.city']}</span>}
               </div>
 
-              <div className={styles.formField}>
-                <label className={styles.label} htmlFor="billingState">State</label>
-                <select
-                  id="billingState"
-                  className={styles.input}
-                  value={formData.billingAddress?.state || ''}
-                  onChange={(e) => handleAddressChange('billingAddress', 'state', e.target.value)}
-                  autoComplete="billing address-level1"
-                >
-                  <option value="">Select a state</option>
-                  {states.map(state => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
-                {errors['billingAddress.state'] && <span className={styles.errorText}>{errors['billingAddress.state']}</span>}
-              </div>
+              <StateSelect
+                id="billingState"
+                label="State"
+                value={formData.billingAddress?.state || ''}
+                onChange={(value) => handleAddressChange('billingAddress', 'state', value)}
+                states={states}
+                error={errors['billingAddress.state']}
+                autoComplete="billing address-level1"
+              />
 
               <div className={styles.formField}>
                 <label className={styles.label} htmlFor="billingZip">ZIP Code</label>

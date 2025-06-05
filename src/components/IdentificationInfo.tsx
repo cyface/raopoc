@@ -1,18 +1,25 @@
 import { useState, useEffect } from 'react'
 import { Building2, Shield, CreditCard } from 'lucide-react'
 import { IdentificationInfoSchema, type IdentificationInfoData } from '../types/identification'
-import { configService, type State, type IdentificationType, type BankInfo } from '../services/configService'
-import * as styles from '../styles/theme.css'
+import { configService, type State, type Country, type IdentificationType, type BankInfo } from '../services/configService'
+import { useOnboarding } from '../context/OnboardingContext'
+import { StepIndicator } from './StepIndicator'
+import { StateSelect } from './StateSelect'
+import { CountrySelect } from './CountrySelect'
+import { useTheme } from '../context/ThemeContext'
 
 interface IdentificationInfoProps {
   onNext: (identificationInfo: IdentificationInfoData) => void
 }
 
 export default function IdentificationInfo({ onNext }: IdentificationInfoProps) {
+  const { currentStep, performCreditCheck } = useOnboarding()
+  const { styles } = useTheme()
   const [formData, setFormData] = useState<IdentificationInfoData>({
-    identificationType: 'passport',
+    identificationType: 'drivers-license',
     identificationNumber: '',
     state: '',
+    country: '',
     socialSecurityNumber: '',
     noSSN: false,
     dateOfBirth: '',
@@ -20,18 +27,21 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
   
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [states, setStates] = useState<State[]>([])
+  const [countries, setCountries] = useState<Country[]>([])
   const [identificationTypes, setIdentificationTypes] = useState<IdentificationType[]>([])
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
 
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const [statesData, identificationTypesData, bankInfoData] = await Promise.all([
+        const [statesData, countriesData, identificationTypesData, bankInfoData] = await Promise.all([
           configService.getStates(),
+          configService.getCountries(),
           configService.getIdentificationTypes(),
           configService.getBankInfo()
         ])
         setStates(statesData)
+        setCountries(countriesData)
         setIdentificationTypes(identificationTypesData)
         setBankInfo(bankInfoData)
       } catch (error) {
@@ -84,7 +94,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     try {
@@ -103,6 +113,18 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
       }
       
       const validatedData = IdentificationInfoSchema.parse(cleanedData)
+      
+      // Perform credit check if SSN is provided
+      if (validatedData.socialSecurityNumber && !validatedData.noSSN) {
+        try {
+          await performCreditCheck(validatedData.socialSecurityNumber)
+        } catch (error) {
+          console.error('Credit check failed:', error)
+          // Continue with the flow even if credit check fails
+          // The error will be handled in the credit check context
+        }
+      }
+      
       onNext(validatedData)
     } catch (error) {
       const fieldErrors: Record<string, string> = {}
@@ -121,10 +143,12 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={`${styles.header} ${styles.headerHiddenOnMobile}`}>
         <Building2 className={styles.bankIcon} />
         <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>
       </div>
+      
+      <StepIndicator currentStep={currentStep} totalSteps={5} />
       
       <h1 className={styles.heading}>Identity Verification</h1>
       <p className={styles.subheading}>
@@ -133,7 +157,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
 
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <div className={styles.sectionTitle}>
-          <Shield style={{ display: 'inline', marginRight: '0.5rem', width: '1.25rem', height: '1.25rem' }} />
+          <Shield className={styles.sectionIcon} />
           Identification Document
         </div>
 
@@ -141,7 +165,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
           <label className={styles.label} htmlFor="identificationType">Identification Type</label>
           <select
             id="identificationType"
-            className={styles.input}
+            className={styles.select}
             value={formData.identificationType}
             onChange={(e) => handleInputChange('identificationType', e.target.value)}
             autoComplete="off"
@@ -175,26 +199,27 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
           </div>
 
           {identificationTypes.find(type => type.value === formData.identificationType)?.requiresState && (
-            <div className={styles.formField}>
-              <label className={styles.label} htmlFor="state">
-                {formData.identificationType === 'drivers-license' ? 'Issuing State' : 'Issuing State'}
-              </label>
-              <select
-                id="state"
-                className={styles.input}
-                value={formData.state || ''}
-                onChange={(e) => handleInputChange('state', e.target.value)}
-                autoComplete="address-level1"
-              >
-                <option value="">Select a state</option>
-                {states.map(state => (
-                  <option key={state.code} value={state.code}>
-                    {state.name}
-                  </option>
-                ))}
-              </select>
-              {errors.state && <span className={styles.errorText}>{errors.state}</span>}
-            </div>
+            <StateSelect
+              id="state"
+              label={formData.identificationType === 'drivers-license' ? 'Issuing State' : 'Issuing State'}
+              value={formData.state || ''}
+              onChange={(value) => handleInputChange('state', value)}
+              states={states}
+              error={errors.state}
+              autoComplete="address-level1"
+            />
+          )}
+
+          {formData.identificationType === 'passport' && (
+            <CountrySelect
+              id="country"
+              label="Issuing Country"
+              value={formData.country || ''}
+              onChange={(value) => handleInputChange('country', value)}
+              countries={countries}
+              error={errors.country}
+              autoComplete="country"
+            />
           )}
         </div>
 
@@ -213,7 +238,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
         </div>
 
         <div className={styles.sectionTitle}>
-          <CreditCard style={{ display: 'inline', marginRight: '0.5rem', width: '1.25rem', height: '1.25rem' }} />
+          <CreditCard className={styles.sectionIcon} />
           Social Security Information
         </div>
 
