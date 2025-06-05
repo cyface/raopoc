@@ -4,6 +4,7 @@ import IdentificationInfo from './components/IdentificationInfo'
 import { DocumentAcceptance } from './components/DocumentAcceptance'
 import { ConfirmationScreen } from './components/ConfirmationScreen'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
+import { ThemeProvider } from './context/ThemeContext'
 import type { CustomerInfoData } from './types/customer'
 import type { IdentificationInfoData } from './types/identification'
 
@@ -63,9 +64,11 @@ function OnboardingFlow() {
 
 function App() {
   return (
-    <OnboardingProvider>
-      <OnboardingFlow />
-    </OnboardingProvider>
+    <ThemeProvider>
+      <OnboardingProvider>
+        <OnboardingFlow />
+      </OnboardingProvider>
+    </ThemeProvider>
   )
 }
 

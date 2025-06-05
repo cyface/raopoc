@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { PiggyBank, CreditCard, TrendingUp, Building2, LucideIcon } from 'lucide-react'
+import { PiggyBank, CreditCard, TrendingUp, Building2, Sun, Moon, LucideIcon } from 'lucide-react'
 import { ProductType, ProductSelectionSchema, type ProductSelectionData } from '../types/products'
 import { useOnboarding } from '../context/OnboardingContext'
+import { useTheme } from '../context/ThemeContext'
 import { configService, type Product, type BankInfo } from '../services/configService'
-import * as styles from '../styles/theme.css'
 
 // Icon mapping to convert string names to React components
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -14,6 +14,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 export default function ProductSelection() {
   const { setSelectedProducts: setGlobalProducts, setCurrentStep } = useOnboarding()
+  const { theme, toggleTheme, styles } = useTheme()
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
@@ -62,6 +63,13 @@ export default function ProductSelection() {
 
   return (
     <div className={styles.container}>
+      <button className={styles.themeToggle} onClick={toggleTheme}>
+        {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+        <span className={styles.themeToggleLabel}>
+          {theme === 'light' ? 'Dark' : 'Light'} mode
+        </span>
+      </button>
+      
       <div className={styles.header}>
         <Building2 className={styles.bankIcon} />
         <h1 className={styles.bankName}>{bankInfo?.bankName || 'Cool Bank'}</h1>

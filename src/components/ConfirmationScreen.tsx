@@ -3,14 +3,15 @@ import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/rea
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useOnboarding } from '../context/OnboardingContext';
 import { configService, type BankInfo } from '../services/configService';
-import * as styles from '../styles/theme.css';
+import { useTheme } from '../context/ThemeContext';
 
 interface ConfirmationScreenProps {
   applicationId?: string;
 }
 
 export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
-  const { data } = useOnboarding();
+  const { data, creditCheckResult } = useOnboarding();
+  const { styles } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -224,6 +225,39 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
         )}
 
         <div style={{ display: 'grid', gap: '1.5rem', margin: '2rem 0' }}>
+          {creditCheckResult?.requiresVerification && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '1rem',
+              padding: '1rem',
+              backgroundColor: '#fef3c7',
+              border: '2px solid #f59e0b',
+              borderRadius: '8px'
+            }}>
+              <div style={{ 
+                width: '24px', 
+                height: '24px', 
+                backgroundColor: '#f59e0b',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>!</span>
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: '#92400e' }}>
+                  Additional Verification Required
+                </h4>
+                <p style={{ fontSize: '0.875rem', color: '#92400e', margin: 0 }}>
+                  A bank representative will contact you within 1-2 business days to complete your account opening process.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -259,7 +293,11 @@ ${bankInfo?.bankName || 'Cool Bank'} Team
                 What&apos;s Next?
               </h4>
               <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-                We&apos;ll review your application within 1-2 business days. You may be contacted for additional information if needed.
+                {creditCheckResult?.requiresVerification ? (
+                  <>A representative will contact you within 1-2 business days to complete the verification process and finalize your account opening.</>
+                ) : (
+                  <>We&apos;ll review your application within 1-2 business days. You may be contacted for additional information if needed.</>
+                )}
               </p>
             </div>
           </div>
