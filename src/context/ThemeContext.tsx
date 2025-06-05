@@ -1,22 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import * as lightTheme from '../styles/theme.css'
-import * as darkTheme from '../styles/darkTheme.css'
-import * as greenTheme from '../styles/greenTheme.css'
+import * as baseTheme from '../styles/theme.css'
+import { darkTheme } from '../styles/darkTheme.css'
+import { greenLightTheme, greenDarkTheme } from '../styles/greenTheme.css'
+import { orangeLightTheme, orangeDarkTheme } from '../styles/orangeTheme.css'
+import { configService } from '../services/configService'
+import { isDarkModeRequested } from '../utils/urlParams'
 
-export type Theme = 'light' | 'dark' | 'greenLight' | 'greenDark'
+export type Theme = 'light' | 'dark' | 'greenLight' | 'greenDark' | 'orangeLight' | 'orangeDark'
 
-export const themeStyles = {
-  light: lightTheme,
+// Map theme names to theme classes
+export const themeClasses = {
+  light: baseTheme.themeClass,
   dark: darkTheme,
-  greenLight: greenTheme,
-  greenDark: greenTheme,
+  greenLight: greenLightTheme,
+  greenDark: greenDarkTheme,
+  orangeLight: orangeLightTheme,
+  orangeDark: orangeDarkTheme,
 }
+
+// All themes use the same component styles
+export const themeStyles = baseTheme
 
 interface ThemeContextValue {
   theme: Theme
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
-  styles: typeof lightTheme
+  styles: typeof baseTheme
+  themeClass: string
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -34,14 +44,83 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme')
-    return (saved as Theme) || 'light'
-  })
+  const [theme, setTheme] = useState<Theme>('light')
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false)
+
+  // Load theme from bank config on mount
+  useEffect(() => {
+    const loadBankTheme = async () => {
+      try {
+        const bankInfo = await configService.getBankInfo()
+        const bankTheme = bankInfo.theme
+        
+        if (bankTheme) {
+          // Check if dark mode is requested via URL parameter
+          const darkModeRequested = isDarkModeRequested()
+          
+          let finalTheme = bankTheme
+          
+          if (darkModeRequested) {
+            // Force dark variant of the bank's theme
+            if (bankTheme.includes('green')) {
+              finalTheme = 'greenDark'
+            } else if (bankTheme.includes('orange')) {
+              finalTheme = 'orangeDark'
+            } else {
+              finalTheme = 'dark'
+            }
+          } else {
+            // Check if user has a preference for light/dark within this bank's theme
+            const saved = localStorage.getItem('theme')
+            const savedTheme = saved as Theme
+            
+            // If saved theme is from the same theme family, use it
+            if (savedTheme && 
+                ((bankTheme.includes('green') && savedTheme.includes('green')) ||
+                 (bankTheme.includes('orange') && savedTheme.includes('orange')) ||
+                 (!bankTheme.includes('green') && !bankTheme.includes('orange') && 
+                  !savedTheme.includes('green') && !savedTheme.includes('orange')))) {
+              finalTheme = savedTheme
+            }
+          }
+          
+          setTheme(finalTheme)
+        } else {
+          // No bank theme specified, check URL parameter and saved preference
+          const darkModeRequested = isDarkModeRequested()
+          
+          if (darkModeRequested) {
+            setTheme('dark')
+          } else {
+            const saved = localStorage.getItem('theme')
+            setTheme((saved as Theme) || 'light')
+          }
+        }
+        
+        setIsThemeLoaded(true)
+      } catch (error) {
+        console.error('Failed to load bank theme:', error)
+        // Fall back to saved theme or default, but check dark parameter
+        const darkModeRequested = isDarkModeRequested()
+        
+        if (darkModeRequested) {
+          setTheme('dark')
+        } else {
+          const saved = localStorage.getItem('theme')
+          setTheme((saved as Theme) || 'light')
+        }
+        setIsThemeLoaded(true)
+      }
+    }
+
+    loadBankTheme()
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem('theme', theme)
-  }, [theme])
+    if (isThemeLoaded) {
+      localStorage.setItem('theme', theme)
+    }
+  }, [theme, isThemeLoaded])
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -53,6 +132,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     } else if (theme === 'greenDark') {
       document.body.style.backgroundColor = '#0a1a0a'
       document.body.style.color = '#e8f5e8'
+    } else if (theme === 'orangeLight') {
+      document.body.style.backgroundColor = '#fff7ed'
+      document.body.style.color = '#7c2d12'
+    } else if (theme === 'orangeDark') {
+      document.body.style.backgroundColor = '#1c0f08'
+      document.body.style.color = '#fef3c7'
     } else {
       document.body.style.backgroundColor = '#ffffff'
       document.body.style.color = '#1f2937'
@@ -60,29 +145,37 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    setTheme(prev => {
+      // Toggle between light and dark variants of the same theme family
+      switch (prev) {
+        case 'light':
+          return 'dark'
+        case 'dark':
+          return 'light'
+        case 'greenLight':
+          return 'greenDark'
+        case 'greenDark':
+          return 'greenLight'
+        case 'orangeLight':
+          return 'orangeDark'
+        case 'orangeDark':
+          return 'orangeLight'
+        default:
+          return 'dark'
+      }
+    })
   }
 
-  const getThemeStyles = () => {
-    if (theme === 'greenLight') {
-      return { 
-        ...lightTheme, 
-        container: `${lightTheme.container} ${greenTheme.greenLightTheme}` 
-      }
-    }
-    if (theme === 'greenDark') {
-      return { 
-        ...lightTheme, 
-        container: `${lightTheme.container} ${greenTheme.greenDarkTheme}` 
-      }
-    }
-    return themeStyles[theme]
-  }
+  const styles = themeStyles
+  const themeClass = themeClasses[theme]
 
-  const styles = getThemeStyles()
+  // Apply theme class to root element
+  useEffect(() => {
+    document.documentElement.className = themeClass
+  }, [themeClass])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, styles }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, styles, themeClass }}>
       {children}
     </ThemeContext.Provider>
   )

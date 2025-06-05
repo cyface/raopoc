@@ -64,9 +64,9 @@ export default function ProductSelection() {
   return (
     <div className={styles.container}>
       <button className={styles.themeToggle} onClick={toggleTheme}>
-        {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+        {(theme.endsWith('Light') || theme === 'light') ? <Moon size={16} /> : <Sun size={16} />}
         <span className={styles.themeToggleLabel}>
-          {theme === 'light' ? 'Dark' : 'Light'} mode
+          {(theme.endsWith('Light') || theme === 'light') ? 'Dark' : 'Light'} mode
         </span>
       </button>
       
