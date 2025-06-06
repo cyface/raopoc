@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { ThemeProvider } from '../context/ThemeContext'
-import { configService } from '../services/configService'
 import '../i18n'
 
 // Mock the config service
