@@ -1,0 +1,19 @@
+{
+  "languages": [
+    "en",
+    "es"
+  ],
+  "namespaces": [
+    "common",
+    "navigation",
+    "products",
+    "customer-info",
+    "identification",
+    "documents",
+    "confirmation",
+    "validation",
+    "bank-info"
+  ],
+  "version": "1.0.0",
+  "lastModified": "2025-06-06T20:41:00.576Z"
+}

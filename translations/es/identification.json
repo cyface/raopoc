@@ -1,0 +1,16 @@
+{
+  "identificationInfo.title": "Verificación de identidad",
+  "identificationInfo.subtitle": "Por favor proporcione sus detalles de identificación para la verificación de la cuenta.",
+  "identificationInfo.identificationDocument": "Documento de identificación",
+  "identificationInfo.identificationType": "Tipo de identificación",
+  "identificationInfo.passportNumber": "Número de pasaporte",
+  "identificationInfo.driversLicenseNumber": "Número de licencia de conducir",
+  "identificationInfo.stateIdNumber": "Número de identificación estatal",
+  "identificationInfo.militaryIdNumber": "Número de identificación militar",
+  "identificationInfo.issuingState": "Estado emisor",
+  "identificationInfo.issuingCountry": "País emisor",
+  "identificationInfo.dateOfBirth": "Fecha de nacimiento",
+  "identificationInfo.socialSecurityInformation": "Información del Seguro Social",
+  "identificationInfo.socialSecurityNumber": "Número de Seguro Social",
+  "identificationInfo.noSSN": "No tengo un Número de Seguro Social"
+}

@@ -1,0 +1,7 @@
+{
+  "validation.required": "Este campo es requerido",
+  "validation.invalidEmail": "Por favor ingrese una dirección de correo electrónico válida",
+  "validation.invalidPhone": "Por favor ingrese un número de teléfono válido",
+  "validation.invalidSSN": "Por favor ingrese un Número de Seguro Social válido",
+  "validation.selectAtLeastOneProduct": "Por favor seleccione al menos un producto"
+}

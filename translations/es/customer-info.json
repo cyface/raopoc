@@ -1,0 +1,20 @@
+{
+  "customerInfo.title": "Información personal",
+  "customerInfo.subtitle": "Por favor proporcione su información de contacto y direcciones para su(s) nueva(s) cuenta(s).",
+  "customerInfo.personalDetails": "Detalles personales",
+  "customerInfo.firstName": "Nombre",
+  "customerInfo.lastName": "Apellido",
+  "customerInfo.emailAddress": "Dirección de correo electrónico",
+  "customerInfo.phoneNumber": "Número de teléfono",
+  "customerInfo.mailingAddress": "Dirección postal",
+  "customerInfo.billingAddress": "Dirección de facturación",
+  "customerInfo.streetAddress": "Dirección",
+  "customerInfo.city": "Ciudad",
+  "customerInfo.state": "Estado",
+  "customerInfo.zipCode": "Código postal",
+  "customerInfo.useSameAddress": "Usar la misma dirección para facturación",
+  "customerInfo.placeholders.email": "nombre@ejemplo.com",
+  "customerInfo.placeholders.phone": "(555) 123-4567",
+  "customerInfo.placeholders.zipCode": "12345",
+  "customerInfo.placeholders.selectState": "Seleccionar un estado"
+}

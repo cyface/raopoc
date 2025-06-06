@@ -1,0 +1,16 @@
+{
+  "identificationInfo.title": "Identity Verification",
+  "identificationInfo.subtitle": "Please provide your identification details for account verification.",
+  "identificationInfo.identificationDocument": "Identification Document",
+  "identificationInfo.identificationType": "Identification Type",
+  "identificationInfo.passportNumber": "Passport Number",
+  "identificationInfo.driversLicenseNumber": "Driver's License Number",
+  "identificationInfo.stateIdNumber": "State ID Number",
+  "identificationInfo.militaryIdNumber": "Military ID Number",
+  "identificationInfo.issuingState": "Issuing State",
+  "identificationInfo.issuingCountry": "Issuing Country",
+  "identificationInfo.dateOfBirth": "Date of Birth",
+  "identificationInfo.socialSecurityInformation": "Social Security Information",
+  "identificationInfo.socialSecurityNumber": "Social Security Number",
+  "identificationInfo.noSSN": "I don't have a Social Security Number"
+}

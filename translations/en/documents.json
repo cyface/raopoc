@@ -1,0 +1,17 @@
+{
+  "documentAcceptance.title": "Review Required Documents",
+  "documentAcceptance.subtitle": "Please review and accept the following documents to continue with your account opening.",
+  "documentAcceptance.loading": "Loading document requirements...",
+  "documentAcceptance.noDocumentsRequired": "No additional documents are required for your selected products.",
+  "documentAcceptance.acceptAllDocuments": "Accept All Documents",
+  "documentAcceptance.allDocumentsAccepted": "All Documents Accepted",
+  "documentAcceptance.viewDocument": "View Document",
+  "documentAcceptance.view": "View",
+  "documentAcceptance.downloadDocument": "Download Document",
+  "documentAcceptance.download": "Download",
+  "documentAcceptance.acceptText": "I have read and accept the {{documentName}}",
+  "documentAcceptance.close": "Close",
+  "documentAcceptance.errors.failedToLoad": "Failed to load document requirements",
+  "documentAcceptance.errors.unableToOpen": "Unable to open document. Please try again.",
+  "documentAcceptance.errors.unableToDownload": "Unable to download document. Please try again."
+}

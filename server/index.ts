@@ -5,6 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import chokidar from 'chokidar'
 import { randomUUID } from 'crypto'
+import translationsRouter from './routes/translations.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -535,6 +536,9 @@ app.post('/api/credit-check', async (req, res) => {
     })
   }
 })
+
+// Mount translations router
+app.use('/api/translations', translationsRouter)
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

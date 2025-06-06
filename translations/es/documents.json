@@ -1,0 +1,17 @@
+{
+  "documentAcceptance.title": "Revisar documentos requeridos",
+  "documentAcceptance.subtitle": "Por favor revise y acepte los siguientes documentos para continuar con la apertura de su cuenta.",
+  "documentAcceptance.loading": "Cargando requisitos de documentos...",
+  "documentAcceptance.noDocumentsRequired": "No se requieren documentos adicionales para los productos seleccionados.",
+  "documentAcceptance.acceptAllDocuments": "Aceptar todos los documentos",
+  "documentAcceptance.allDocumentsAccepted": "Todos los documentos aceptados",
+  "documentAcceptance.viewDocument": "Ver documento",
+  "documentAcceptance.view": "Ver",
+  "documentAcceptance.downloadDocument": "Descargar documento",
+  "documentAcceptance.download": "Descargar",
+  "documentAcceptance.acceptText": "He leído y acepto {{documentName}}",
+  "documentAcceptance.close": "Cerrar",
+  "documentAcceptance.errors.failedToLoad": "Error al cargar los requisitos de documentos",
+  "documentAcceptance.errors.unableToOpen": "No se puede abrir el documento. Por favor, inténtelo de nuevo.",
+  "documentAcceptance.errors.unableToDownload": "No se puede descargar el documento. Por favor, inténtelo de nuevo."
+}

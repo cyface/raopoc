@@ -1,0 +1,20 @@
+{
+  "customerInfo.title": "Personal Information",
+  "customerInfo.subtitle": "Please provide your contact information and addresses for your new account(s).",
+  "customerInfo.personalDetails": "Personal Details",
+  "customerInfo.firstName": "First Name",
+  "customerInfo.lastName": "Last Name",
+  "customerInfo.emailAddress": "Email Address",
+  "customerInfo.phoneNumber": "Phone Number",
+  "customerInfo.mailingAddress": "Mailing Address",
+  "customerInfo.billingAddress": "Billing Address",
+  "customerInfo.streetAddress": "Street Address",
+  "customerInfo.city": "City",
+  "customerInfo.state": "State",
+  "customerInfo.zipCode": "ZIP Code",
+  "customerInfo.useSameAddress": "Use same address for billing",
+  "customerInfo.placeholders.email": "name@example.com",
+  "customerInfo.placeholders.phone": "(555) 123-4567",
+  "customerInfo.placeholders.zipCode": "12345",
+  "customerInfo.placeholders.selectState": "Select a state"
+}

@@ -1,0 +1,12 @@
+{
+  "common.next": "Next",
+  "common.continue": "Continue",
+  "common.tryAgain": "Try Again",
+  "common.loading": "Loading...",
+  "common.error": "Error",
+  "common.close": "Close",
+  "common.view": "View",
+  "common.download": "Download",
+  "common.darkMode": "Dark mode",
+  "common.lightMode": "Light mode"
+}
