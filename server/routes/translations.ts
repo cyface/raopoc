@@ -37,7 +37,7 @@ router.get('/health', async (_req, res) => {
       languages: SUPPORTED_LANGUAGES,
       namespaces: NAMESPACES
     })
-  } catch (error) {
+  } catch {
     res.status(503).json({
       status: 'unhealthy',
       error: 'Translations directory not accessible'
@@ -79,7 +79,7 @@ router.get('/:language', async (req, res) => {
   }
 
   try {
-    const translations: Record<string, any> = {}
+    const translations: Record<string, Record<string, string>> = {}
     
     // Load all namespaces for this language
     const loadPromises = NAMESPACES.map(async (namespace) => {
@@ -144,7 +144,7 @@ router.get('/:language/:namespace', async (req, res) => {
     console.error(`Error loading ${namespace} for ${language}:`, error)
     
     // If file doesn't exist, return empty object
-    if ((error as any).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return res.json({})
     }
     

@@ -21,15 +21,15 @@ const NAMESPACES = {
 /**
  * Flatten nested object to dot notation keys
  */
-function flattenObject(obj: any, prefix = '', result: Record<string, string> = {}): Record<string, string> {
+function flattenObject(obj: Record<string, unknown>, prefix = '', result: Record<string, string> = {}): Record<string, string> {
   for (const key in obj) {
     const value = obj[key]
     const newKey = prefix ? `${prefix}.${key}` : key
     
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      flattenObject(value, newKey, result)
+      flattenObject(value as Record<string, unknown>, newKey, result)
     } else {
-      result[newKey] = value
+      result[newKey] = String(value)
     }
   }
   

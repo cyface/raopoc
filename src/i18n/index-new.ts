@@ -41,7 +41,7 @@ const translationLoader = new TranslationLoader({
 const customBackend = {
   type: 'backend' as const,
   init: () => {},
-  read: async (language: string, namespace: string, callback: Function) => {
+  read: async (language: string, namespace: string, callback: (error: unknown, data: Record<string, string> | null) => void) => {
     try {
       const translations = await translationLoader.loadNamespace(language, namespace)
       callback(null, translations)
