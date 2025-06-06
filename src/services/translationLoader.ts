@@ -25,7 +25,7 @@ export interface TranslationLoaderConfig {
 
 export class TranslationLoader {
   private config: Required<TranslationLoaderConfig>
-  private cache: Map<string, { data: TranslationData; timestamp: number }> = new Map()
+  private cache: Map<string, { data: any; timestamp: number }> = new Map()
 
   constructor(config: TranslationLoaderConfig = {}) {
     this.config = {
@@ -174,7 +174,7 @@ export class TranslationLoader {
   }
 
   // Private cache management methods
-  private getFromCache(key: string): TranslationData | null {
+  private getFromCache(key: string): any | null {
     const cached = this.cache.get(key)
     if (!cached) return null
 
@@ -187,7 +187,7 @@ export class TranslationLoader {
     return cached.data
   }
 
-  private setCache(key: string, data: TranslationData) {
+  private setCache(key: string, data: any) {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
