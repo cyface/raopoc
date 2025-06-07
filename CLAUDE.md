@@ -23,9 +23,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Environment Variables
 
-- `VITE_API_URL`: Specifies the base URL for the backend API server. Defaults to `http://localhost:3001/api`. 
+- `VITE_API_URL`: Specifies the base URL for the backend API server. Defaults to `http://localhost:3000/api`. 
   - Example: `VITE_API_URL=https://api.example.com` would make the app fetch config from `https://api.example.com/config/states`, etc.
-  - In development: The backend server runs on port 3001 by default
+  - In development: The backend server runs on port 3000 by default
   - In production: Set this to your production API server URL
 
 - `VITE_CONFIG_CACHE_TIMEOUT`: Specifies how long to cache configuration files in milliseconds. Defaults to `5000` (5 seconds).

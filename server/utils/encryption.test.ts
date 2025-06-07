@@ -230,12 +230,16 @@ describe('Encryption Utilities', () => {
       expect((encrypted as any).customerInfo.dateOfBirth).toHaveProperty('_encrypted', true)
       expect((encrypted as any).customerInfo.phoneNumber).toHaveProperty('_encrypted', true)
       expect((encrypted as any).customerInfo.email).toHaveProperty('_encrypted', true)
+      expect((encrypted as any).customerInfo.address.street).toHaveProperty('_encrypted', true)
+      expect((encrypted as any).customerInfo.address.zipCode).toHaveProperty('_encrypted', true)
       expect((encrypted as any).identificationInfo.passportNumber).toHaveProperty('_encrypted', true)
       expect((encrypted as any).fundingInfo.initialDepositAmount).toHaveProperty('_encrypted', true)
 
       // Verify non-sensitive fields remain unchanged
       expect((encrypted as any).customerInfo.firstName).toBe('John')
-      expect((encrypted as any).customerInfo.address.street).toBe('123 Main St')
+      expect((encrypted as any).customerInfo.lastName).toBe('Doe')
+      expect((encrypted as any).customerInfo.address.city).toBe('Anytown')
+      expect((encrypted as any).customerInfo.address.state).toBe('CA')
       expect((encrypted as any).selectedProducts).toEqual(['checking', 'savings'])
       expect((encrypted as any).acceptedDocuments).toEqual(applicationData.acceptedDocuments)
 
@@ -248,12 +252,29 @@ describe('Encryption Utilities', () => {
   describe('getSensitiveFields', () => {
     it('should return the list of sensitive fields', () => {
       const fields = getSensitiveFields()
+      
+      // Social Security
       expect(fields).toContain('ssn')
+      expect(fields).toContain('socialSecurityNumber')
+      
+      // Personal Information
       expect(fields).toContain('dateOfBirth')
       expect(fields).toContain('email')
       expect(fields).toContain('phoneNumber')
+      
+      // Identification Documents
+      expect(fields).toContain('identificationNumber')
+      expect(fields).toContain('passportNumber')
+      expect(fields).toContain('driversLicenseNumber')
+      
+      // Address Information
+      expect(fields).toContain('street')
+      expect(fields).toContain('zipCode')
+      
+      // Financial Information
       expect(fields).toContain('routingNumber')
       expect(fields).toContain('accountNumber')
+      expect(fields).toContain('initialDepositAmount')
     })
   })
 })

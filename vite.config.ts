@@ -7,6 +7,10 @@ export default defineConfig({
     react(), 
     vanillaExtractPlugin()
   ],
+  server: {
+    port: 5173,
+    strictPort: true, // Fail if port 5173 is not available
+  },
   // @ts-ignore - Vitest config
   test: {
     globals: true,

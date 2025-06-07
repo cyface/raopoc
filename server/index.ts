@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
-const PORT = Number(process.env.PORT) || 3001
+const PORT = Number(process.env.PORT) || 3000
 
 // Enable CORS for development
 app.use(cors())
@@ -569,8 +569,14 @@ async function start() {
     console.log(`  - http://127.0.0.1:${PORT}/api/config/bank-info`)
   })
   
-  server.on('error', (err) => {
-    console.error('Server error:', err)
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use. Please free up the port or set a different PORT environment variable.`)
+      process.exit(1)
+    } else {
+      console.error('Server error:', err)
+      process.exit(1)
+    }
   })
 }
 

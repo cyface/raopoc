@@ -84,7 +84,7 @@ class ConfigService {
 
   constructor() {
     // Get API base URL from environment variable, default to local development server
-    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api'
+    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api'
     
     // Get cache timeout from environment variable, default to 5000ms (5 seconds)
     const envCacheTimeout = import.meta.env.VITE_CONFIG_CACHE_TIMEOUT

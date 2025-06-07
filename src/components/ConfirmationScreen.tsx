@@ -57,7 +57,7 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
 
     try {
       // Submit application to API
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/applications`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/applications`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

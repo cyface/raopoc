@@ -77,12 +77,12 @@ describe('ConfigService V2 - Multi-Dimensional Caching', () => {
       // Load English products
       const englishResult = await configService.getProductsFor(null, 'en')
       expect(englishResult).toEqual(englishProducts)
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/products')
 
       // Load Spanish products
       const spanishResult = await configService.getProductsFor(null, 'es')
       expect(spanishResult).toEqual(spanishProducts)
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/products.es')
 
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
@@ -149,12 +149,12 @@ describe('ConfigService V2 - Multi-Dimensional Caching', () => {
       // Load default bank info
       const defaultResult = await configService.getBankInfoFor(null, 'en')
       expect(defaultResult).toEqual(defaultBankInfo)
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/bank-info')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/bank-info')
 
       // Load warm bank info
       const warmResult = await configService.getBankInfoFor('warmbank', 'en')
       expect(warmResult).toEqual(warmBankInfo)
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/bank-info')
 
       expect(mockFetch).toHaveBeenCalledTimes(2)
 
@@ -171,10 +171,10 @@ describe('ConfigService V2 - Multi-Dimensional Caching', () => {
   describe('Combined Bank and Language Caching', () => {
     it('caches all four combinations separately: default/warm × en/es', async () => {
       const combinations = [
-        { fi: null, lng: 'en', expectedUrl: 'http://127.0.0.1:3001/api/config/products' },
-        { fi: null, lng: 'es', expectedUrl: 'http://127.0.0.1:3001/api/config/products.es' },
-        { fi: 'warmbank', lng: 'en', expectedUrl: 'http://127.0.0.1:3001/api/config/warmbank/products' },
-        { fi: 'warmbank', lng: 'es', expectedUrl: 'http://127.0.0.1:3001/api/config/warmbank/products.es' }
+        { fi: null, lng: 'en', expectedUrl: 'http://127.0.0.1:3000/api/config/products' },
+        { fi: null, lng: 'es', expectedUrl: 'http://127.0.0.1:3000/api/config/products.es' },
+        { fi: 'warmbank', lng: 'en', expectedUrl: 'http://127.0.0.1:3000/api/config/warmbank/products' },
+        { fi: 'warmbank', lng: 'es', expectedUrl: 'http://127.0.0.1:3000/api/config/warmbank/products.es' }
       ]
 
       // Mock responses for each combination
@@ -227,10 +227,10 @@ describe('ConfigService V2 - Multi-Dimensional Caching', () => {
       expect(mockFetch).toHaveBeenCalledTimes(12)
       
       // Check some specific calls
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products')
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info')
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/bank-info.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/products')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/bank-info')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/bank-info.es')
     })
 
     it('makes subsequent access instant after preloading', async () => {
@@ -288,7 +288,7 @@ describe('ConfigService V2 - Multi-Dimensional Caching', () => {
       // Old API should still work
       const products = await configService.getProducts()
       expect(products[0].title).toBe('Backward Compatible')
-      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3001/api/config/warmbank/products.es')
+      expect(mockFetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/config/warmbank/products.es')
     })
   })
 

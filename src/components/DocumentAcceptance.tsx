@@ -124,7 +124,7 @@ export function DocumentAcceptance({
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/documents/${document.id}`);
       if (!response.ok) throw new Error('Failed to fetch document');
       
       const blob = await response.blob();
@@ -145,7 +145,7 @@ export function DocumentAcceptance({
 
   const handleDownloadDocument = async (document: Document) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${document.id}/download`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/documents/${document.id}/download`);
       if (!response.ok) throw new Error('Failed to download document');
       
       const blob = await response.blob();

@@ -57,7 +57,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     try {
       setCreditCheckResult({ status: 'pending', requiresVerification: false, message: 'Checking credit...' })
       
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
       const response = await fetch(`${apiBaseUrl}/credit-check`, {
         method: 'POST',
         headers: {

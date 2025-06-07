@@ -1,6 +1,10 @@
 import * as crypto from 'crypto'
 import * as fs from 'fs/promises'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Type for encrypted data structure
 interface EncryptedValue {
@@ -32,13 +36,30 @@ const SALT_LENGTH = 32 // 256 bits
 
 // Fields that should be encrypted
 const SENSITIVE_FIELDS = [
+  // Social Security
   'ssn',
+  'socialSecurityNumber',
+  
+  // Personal Information
   'dateOfBirth',
   'phoneNumber',
   'email',
+  
+  // Identification Documents
+  'identificationNumber',
   'driverLicenseNumber',
+  'driversLicenseNumber',
   'passportNumber',
   'stateIdNumber',
+  'militaryIdNumber',
+  
+  // Address Information
+  'street',
+  'address',
+  'zipCode',
+  'postalCode',
+  
+  // Financial Information
   'routingNumber',
   'accountNumber',
   'initialDepositAmount'
