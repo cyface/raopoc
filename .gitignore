@@ -10,6 +10,13 @@
 /applications/*
 !/applications/.gitkeep
 
+# Encryption key - NEVER commit this
+.encryption-key
+
+# Environment variables
+.env
+.env.local
+
 /node_modules
 npm-debug.log*
 yarn-debug.log*

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DocumentTextIcon, ArrowDownTrayIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +31,10 @@ export function DocumentAcceptance({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalDocument, setModalDocument] = useState<{ document: Document; url: string } | null>(null);
+  
+  // Use ref to store the latest onAcceptanceChange function to avoid dependency issues
+  const onAcceptanceChangeRef = useRef(onAcceptanceChange);
+  onAcceptanceChangeRef.current = onAcceptanceChange;
 
   const loadApplicableDocuments = useCallback(async () => {
     try {
@@ -90,7 +94,7 @@ export function DocumentAcceptance({
 
   useEffect(() => {
     const allAccepted = documents.length > 0 && documents.every(doc => acceptances[doc.id]);
-    onAcceptanceChange({
+    onAcceptanceChangeRef.current({
       acceptances: Object.entries(acceptances).reduce((acc, [docId, accepted]) => {
         acc[docId] = {
           documentId: docId,
@@ -101,7 +105,7 @@ export function DocumentAcceptance({
       }, {} as Record<string, DocumentAcceptance>),
       allAccepted,
     });
-  }, [acceptances, documents, onAcceptanceChange]);
+  }, [acceptances, documents]);
 
   const handleDocumentAcceptance = (documentId: string, accepted: boolean) => {
     setAcceptances(prev => ({

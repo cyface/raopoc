@@ -25,7 +25,7 @@ export interface TranslationLoaderConfig {
 
 export class TranslationLoader {
   private config: Required<TranslationLoaderConfig>
-  private cache: Map<string, { data: any; timestamp: number }> = new Map()
+  private cache: Map<string, { data: unknown; timestamp: number }> = new Map()
 
   constructor(config: TranslationLoaderConfig = {}) {
     this.config = {
@@ -91,7 +91,7 @@ export class TranslationLoader {
     // Check cache first
     if (this.config.enableCache) {
       const cached = this.getFromCache(cacheKey)
-      if (cached) return cached
+      if (cached) return cached as TranslationData
     }
 
     try {
@@ -174,7 +174,7 @@ export class TranslationLoader {
   }
 
   // Private cache management methods
-  private getFromCache(key: string): any | null {
+  private getFromCache(key: string): unknown | null {
     const cached = this.cache.get(key)
     if (!cached) return null
 
@@ -187,7 +187,7 @@ export class TranslationLoader {
     return cached.data
   }
 
-  private setCache(key: string, data: any) {
+  private setCache(key: string, data: unknown) {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
@@ -207,9 +207,10 @@ export class TranslationLoader {
       const parsed = JSON.parse(stored)
       const now = Date.now()
 
-      Object.entries(parsed).forEach(([key, value]: [string, any]) => {
-        if (now - value.timestamp <= this.config.cacheTTL) {
-          this.cache.set(key, value)
+      Object.entries(parsed).forEach(([key, value]) => {
+        const cacheEntry = value as { data: unknown; timestamp: number }
+        if (now - cacheEntry.timestamp <= this.config.cacheTTL) {
+          this.cache.set(key, cacheEntry)
         }
       })
     } catch (error) {
@@ -219,7 +220,7 @@ export class TranslationLoader {
 
   private saveCacheToStorage() {
     try {
-      const cacheObj: Record<string, any> = {}
+      const cacheObj: Record<string, { data: unknown; timestamp: number }> = {}
       this.cache.forEach((value, key) => {
         cacheObj[key] = value
       })

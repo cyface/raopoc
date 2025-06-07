@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import chokidar from 'chokidar'
 import { randomUUID } from 'crypto'
 import translationsRouter from './routes/translations.js'
+import { encryptSensitiveFields, decryptSensitiveFields } from './utils/encryption.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -432,12 +433,15 @@ app.post('/api/applications', async (req, res) => {
     const sanitizedLastName = lastName.replace(/[^a-zA-Z0-9]/g, '')
     const filename = `${applicationId}-${sanitizedLastName}.json`
     
+    // Encrypt sensitive fields in the application data
+    const encryptedData = await encryptSensitiveFields(applicationData)
+    
     // Create application record with metadata
     const application = {
       id: applicationId,
       submittedAt: new Date().toISOString(),
       status: 'submitted',
-      data: applicationData,
+      data: encryptedData,
       metadata: {
         userAgent: req.headers['user-agent'],
         ipAddress: req.ip || req.socket.remoteAddress,
@@ -489,6 +493,11 @@ app.get('/api/applications/:id', async (req, res) => {
     const filePath = path.join(applicationsDir, applicationFile)
     const applicationData = await fs.readFile(filePath, 'utf-8')
     const application = JSON.parse(applicationData)
+    
+    // Decrypt sensitive fields before sending
+    if (application.data) {
+      application.data = await decryptSensitiveFields(application.data)
+    }
     
     res.json(application)
     
