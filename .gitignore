@@ -39,6 +39,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Test coverage
+coverage/
+
 # Caddy
 caddy_data/
 caddy_config/
