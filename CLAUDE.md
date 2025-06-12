@@ -6,8 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Install dependencies: `pnpm install`
 - Run both frontend and backend (recommended): `pnpm run dev`
+- **Run with HTTPS (recommended for production-like testing): `pnpm run dev:https`**
 - Run frontend dev server only: `pnpm run dev:frontend`
 - Run backend API server only: `pnpm run dev:server`
+- Run Caddy reverse proxy for HTTPS: `pnpm run dev:caddy`
 - Build the frontend project: `pnpm run build`
 - Build the backend server: `pnpm run build:server`
 - Preview built frontend: `pnpm run preview`
@@ -20,6 +22,65 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Code linting with auto-fix: `pnpm lint:fix`
 - The TypeScript source files are in `src/` and compiled output goes to `dist/`
 - The backend server files are in `server/`
+
+## HTTPS Development Setup
+
+For local HTTPS development, this project uses [Caddy](https://caddyserver.com/) as a reverse proxy with automatic HTTPS certificates.
+
+### Prerequisites
+
+1. **Install Caddy** (choose one method):
+   ```bash
+   # macOS with Homebrew (recommended)
+   brew install caddy
+   
+   # Or download from https://caddyserver.com/download
+   ```
+
+2. **Add DNS entries** (one-time setup):
+   ```bash
+   # Add these lines to your /etc/hosts file
+   sudo nano /etc/hosts
+   
+   # Add these entries at the end:
+   127.0.0.1       app.localhost
+   127.0.0.1       api.localhost
+   ```
+
+### Usage
+
+1. **Start HTTPS development server**:
+   ```bash
+   pnpm run dev:https
+   ```
+
+2. **Access your application**:
+   - Frontend: https://app.localhost
+   - Backend API: https://api.localhost
+   - The first time you visit, your browser will warn about self-signed certificates. Click "Advanced" → "Proceed to site" to continue.
+
+3. **Trust the certificate (optional but recommended)**:
+   - Caddy automatically generates self-signed certificates
+   - To avoid browser warnings, you can trust Caddy's root CA:
+   ```bash
+   # Trust Caddy's root CA (macOS)
+   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/.local/share/caddy/pki/authorities/local/root.crt
+   ```
+
+### Configuration
+
+- **Caddyfile**: Contains the reverse proxy configuration
+- **Automatic HTTPS**: Caddy automatically generates and manages SSL certificates
+- **CORS**: Pre-configured for cross-origin requests between frontend and backend
+- **Hot reload**: Works seamlessly with Vite's development server
+- **Environment**: For HTTPS development, copy `.env.https` to `.env` to use HTTPS URLs
+
+### Troubleshooting
+
+- **Port conflicts**: Ensure ports 5173 and 3000 are available
+- **Certificate warnings**: Normal for self-signed certificates - you can safely proceed
+- **DNS issues**: `.localhost` domains should work automatically on macOS
+- **API calls**: Make sure to use `https://api.localhost/api` for HTTPS development (set in .env)
 
 ## Environment Variables
 

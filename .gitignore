@@ -1,12 +1,13 @@
-/tmp
-/out-tsc
-/dist
-/coverage
+# Created by https://www.toptal.com/developers/gitignore/api/node,react,typescript,vite,macos
+# Edit at https://www.toptal.com/developers/gitignore?templates=node,react,typescript,vite,macos
 
-# Config files copied to public at build time
-/public/config
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Application submissions - contains customer data
+# Applications storage directory (for storing application submissions)
 /applications/*
 !/applications/.gitkeep
 
@@ -22,7 +23,22 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-/.pnp
-.pnp.js
+lerna-debug.log*
 
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
 .vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Caddy
+caddy_data/
+caddy_config/
