@@ -15,7 +15,15 @@ const app = express()
 const PORT = Number(process.env.PORT) || 3000
 
 // Enable CORS for development
-app.use(cors())
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://app.localhost',
+    'http://localhost:3000', // For testing
+    'https://api.localhost'   // For testing
+  ],
+  credentials: true
+}))
 app.use(express.json())
 
 // Cache for config files
