@@ -1,0 +1,33 @@
+# Caddyfile for local HTTPS development
+# Caddy automatically generates self-signed certificates
+
+# Frontend - React development server
+https://app.localhost {
+	reverse_proxy localhost:5173
+	
+	# Enable automatic HTTPS with self-signed certificates
+	tls internal
+}
+
+# Backend API server
+https://api.localhost {
+	reverse_proxy localhost:3000
+	
+	# Enable automatic HTTPS with self-signed certificates
+	tls internal
+}
+
+# Alternative: single domain with path-based routing
+# https://localhost {
+#	# API routes
+#	handle /api/* {
+#		reverse_proxy localhost:3000
+#	}
+#	
+#	# Frontend routes (everything else)
+#	handle {
+#		reverse_proxy localhost:5173
+#	}
+#	
+#	tls internal
+# }

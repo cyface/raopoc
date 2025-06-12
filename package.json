@@ -7,6 +7,8 @@
     "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:server\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch server/index.ts",
+    "dev:https": "concurrently \"pnpm dev:frontend\" \"pnpm dev:server\" \"pnpm dev:caddy\"",
+    "dev:caddy": "caddy run --config Caddyfile",
     "build": "tsc && vite build",
     "build:server": "tsc -p tsconfig.server.json",
     "preview": "vite preview",
