@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import ProductSelection from './ProductSelection'
 import { OnboardingProvider } from '../context/OnboardingContext'

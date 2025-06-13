@@ -72,7 +72,9 @@ describe('Configuration Hooks', () => {
     mockUseUrlParams.mockReturnValue({
       fi: null,
       lng: 'en',
-      dark: null
+      dark: null,
+      devStep: null,
+      mockScenario: null
     })
   })
 
@@ -116,7 +118,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: null,
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -153,7 +157,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: 'warmbank',
         lng: 'en',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -187,7 +193,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: 'warmbank',
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -231,7 +239,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: null,
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -277,7 +287,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: 'warmbank',
         lng: 'en',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -343,7 +355,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: 'warmbank',
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -392,7 +406,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: null,
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()
@@ -406,7 +422,9 @@ describe('Configuration Hooks', () => {
       mockUseUrlParams.mockReturnValue({
         fi: null,
         lng: 'en',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       rerender()

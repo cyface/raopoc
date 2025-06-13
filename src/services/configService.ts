@@ -49,6 +49,7 @@ export interface DocumentConfig {
 export interface BankInfo {
   bankName: string
   displayName: string
+  websiteUrl?: string
   theme?: 'light' | 'dark' | 'greenLight' | 'greenDark' | 'orangeLight' | 'orangeDark'
   contact: {
     phone: string
