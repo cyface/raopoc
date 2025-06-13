@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter } from 'react-router'
+import { createMemoryRouter, RouterProvider } from 'react-router'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import ProductSelection from './ProductSelection'
 import { OnboardingProvider } from '../context/OnboardingContext'
@@ -37,14 +37,19 @@ vi.mock('../services/configService', () => {
 })
 
 const renderWithProviders = (component: React.ReactElement) => {
+  const router = createMemoryRouter([
+    {
+      path: '/',
+      element: component,
+    },
+  ])
+  
   return render(
-    <BrowserRouter>
-      <ThemeProvider>
-        <OnboardingProvider>
-          {component}
-        </OnboardingProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <OnboardingProvider>
+        <RouterProvider router={router} />
+      </OnboardingProvider>
+    </ThemeProvider>
   )
 }
 
