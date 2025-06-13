@@ -3,6 +3,7 @@ import CustomerInfo from './components/CustomerInfo'
 import IdentificationInfo from './components/IdentificationInfo'
 import { DocumentAcceptance } from './components/DocumentAcceptance'
 import { ConfirmationScreen } from './components/ConfirmationScreen'
+import { DevHelper } from './components/DevHelper'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { useUrlParams } from './hooks/useUrlParams'
@@ -86,6 +87,7 @@ function App() {
       <OnboardingProvider>
         <UrlParamWatcher />
         <OnboardingFlow />
+        <DevHelper />
       </OnboardingProvider>
     </ThemeProvider>
   )
