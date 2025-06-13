@@ -3,7 +3,15 @@
 
 # Frontend - React development server
 https://app.localhost {
-	reverse_proxy localhost:5173
+	# API routes - proxy to backend
+	handle /api/* {
+		reverse_proxy localhost:3000
+	}
+	
+	# Frontend routes (everything else)
+	handle {
+		reverse_proxy localhost:5173
+	}
 	
 	# Enable automatic HTTPS with self-signed certificates
 	tls internal

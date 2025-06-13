@@ -44,4 +44,4 @@ coverage/
 
 # Caddy
 caddy_data/
-caddy_config/
+caddy_config/server/dist/

@@ -4,6 +4,7 @@ import { type ProductType } from '../types/products'
 import { type CustomerInfoData } from '../types/customer'
 import { type IdentificationInfoData } from '../types/identification'
 import { type DocumentAcceptanceState } from '../types/documents'
+import { getApiUrl } from '../utils/apiUrl'
 
 interface CreditCheckResult {
   status: 'approved' | 'requires_verification' | 'pending' | 'error'
@@ -57,8 +58,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     try {
       setCreditCheckResult({ status: 'pending', requiresVerification: false, message: 'Checking credit...' })
       
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-      const response = await fetch(`${apiBaseUrl}/credit-check`, {
+      const response = await fetch(`${getApiUrl()}/credit-check`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

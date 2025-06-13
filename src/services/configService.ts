@@ -1,4 +1,5 @@
 import { createCacheKey } from '../hooks/useUrlParams'
+import { getApiUrl } from '../utils/apiUrl'
 
 export interface State {
   code: string
@@ -80,12 +81,8 @@ class ConfigService {
   private bankInfoCache = new Map<string, CacheEntry<BankInfo>>()
   
   private readonly cacheTimeout: number
-  private readonly apiBaseUrl: string
 
   constructor() {
-    // Get API base URL from environment variable, default to local development server
-    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api'
-    
     // Get cache timeout from environment variable, default to 5000ms (5 seconds)
     const envCacheTimeout = import.meta.env.VITE_CONFIG_CACHE_TIMEOUT
     this.cacheTimeout = this.parseAndValidateCacheTimeout(envCacheTimeout)
@@ -124,12 +121,13 @@ class ConfigService {
 
   private buildConfigUrl(configName: string, fi: string | null, lng: string): string {
     const localizedConfigName = lng === 'en' ? configName : `${configName}.${lng}`
+    const apiBaseUrl = getApiUrl()
     
     if (fi) {
-      return `${this.apiBaseUrl}/config/${fi}/${localizedConfigName}`
+      return `${apiBaseUrl}/config/${fi}/${localizedConfigName}`
     }
     
-    return `${this.apiBaseUrl}/config/${localizedConfigName}`
+    return `${apiBaseUrl}/config/${localizedConfigName}`
   }
 
   /**

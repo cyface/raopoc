@@ -84,8 +84,8 @@ For local HTTPS development, this project uses [Caddy](https://caddyserver.com/)
 
 ## Environment Variables
 
-- `VITE_API_URL`: Specifies the base URL for the backend API server. Defaults to `http://localhost:3000/api`. 
-  - Example: `VITE_API_URL=https://api.example.com` would make the app fetch config from `https://api.example.com/config/states`, etc.
+- `API_URL`: Specifies the base URL for the backend API server. If not set, the URL is automatically detected based on hostname. 
+  - Example: `API_URL=https://api.example.com` would make the app fetch config from `https://api.example.com/config/states`, etc.
   - In development: The backend server runs on port 3000 by default
   - In production: Set this to your production API server URL
 

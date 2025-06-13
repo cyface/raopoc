@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { getApiUrl } from '../utils/apiUrl'
 
 // Schema for translation data - flat key structure
 const TranslationSchema = z.record(z.string())
@@ -29,7 +30,7 @@ export class TranslationLoader {
 
   constructor(config: TranslationLoaderConfig = {}) {
     this.config = {
-      apiUrl: config.apiUrl || import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+      apiUrl: config.apiUrl || getApiUrl(),
       enableCache: config.enableCache ?? true,
       cacheTTL: config.cacheTTL || 300000, // 5 minutes
       fallbackLng: config.fallbackLng || 'en'
