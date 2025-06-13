@@ -2,6 +2,32 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL: React Router v7 Usage
+
+**This project uses React Router v7.6.2** - ALWAYS use React Router v7 APIs and patterns:
+
+- ✅ Import from `'react-router'` (NOT `'react-router-dom'`)
+- ✅ Use `Response.json()` instead of `json()` helper
+- ✅ Use route-based data loading with loaders and actions
+- ✅ Use `Form` component for submissions with actions
+- ✅ Use `useNavigation()` for pending states
+- ✅ Route components in `src/routes/` with loaders in `src/routes/loaders/`
+- ❌ DO NOT use deprecated React Router v6 patterns
+- ❌ DO NOT import from `'react-router-dom'`
+- ❌ DO NOT use `defer()` or `Await` components (removed in v7)
+
+## ⚠️ CRITICAL: NestJS Backend Architecture
+
+**This project uses NestJS** - ALWAYS follow NestJS patterns and conventions:
+
+- ✅ Controllers in `server/controllers/` with proper decorators
+- ✅ Services in `server/services/` for business logic
+- ✅ DTOs in `server/dto/` with validation decorators
+- ✅ Use NestJS validation pipes and class-validator
+- ✅ Module-based architecture with dependency injection
+- ❌ DO NOT use Express.js patterns directly
+- ❌ DO NOT create routes outside of NestJS controller structure
+
 ## Development Commands
 
 - Install dependencies: `pnpm install`
@@ -95,6 +121,33 @@ For local HTTPS development, this project uses [Caddy](https://caddyserver.com/)
   - Maximum allowed value: `3600000` (1 hour)
   - Invalid values will fall back to the default 5 seconds with a console warning
 
+## URL Parameters
+
+The application supports several URL parameters for configuration and development:
+
+### Core Configuration Parameters
+- **`fi`** - Financial Institution slug for multi-tenant configuration
+- **`lng`** - Language code (`en`, `es`) for internationalization  
+- **`dark`** - Dark mode toggle (`dark=1` enables dark theme)
+
+### Development & Testing Parameters  
+- **`devStep`** - Jump to specific onboarding step (1-5) with mock data
+- **`mockScenario`** - Apply specific customer scenario for testing
+  - Used with `devStep` to test different customer types
+  - See "Development Testing" section for available scenarios
+
+### Examples
+```
+# Multi-tenant Spanish bank with dark mode
+/?fi=santander&lng=es&dark=1
+
+# Development testing - step 3 with international customer
+/?devStep=3&mockScenario=noSSN
+
+# Complex development scenario
+/?fi=testbank&lng=es&devStep=2&mockScenario=differentBilling
+```
+
 ## Configuration Files
 
 The application uses JSON configuration files in the `config/` directory:
@@ -106,46 +159,69 @@ The application uses JSON configuration files in the `config/` directory:
 
 ## Project Structure
 
-This is a minimal TypeScript project with:
-- TypeScript source code in `src/`
-- Main entry point: `src/index.ts`
-- Build output directory: `dist/`
-- TypeScript configuration uses CommonJS modules targeting ES2016
+This is a modern React Router v7 + NestJS application with:
+
+### Frontend (`src/`)
+- **Router**: React Router v7 configuration in `src/router/`
+- **Routes**: Route components with loaders/actions in `src/routes/`
+- **Components**: Reusable React components in `src/components/`
+- **Test Utils**: React Router v7 testing utilities in `src/test-utils/`
+- **Main entry point**: `src/main.tsx` with React Router v7 provider
+
+### Backend (`server/`)
+- **NestJS Structure**: Controllers, services, DTOs following NestJS conventions
+- **Main entry point**: `server/main.ts` with NestJS bootstrap
+- **Module System**: `server/app.module.ts` with dependency injection
+- **Build output**: `server/dist/` (compiled from TypeScript)
 
 ## Project Description
 
-- Customer onboarding application for a bank
-- Goal: Smoothly guide customers through bank account setup
+- Modern customer onboarding application for banks
+- Goal: Smoothly guide customers through bank account setup with enterprise-grade architecture
 - Key Features:
-  - Product selection (checking, savings, money market)
-  - Configurable workflow steps
-  - Personal information collection
-  - KYC validation integration
+  - **React Router v7**: Route-based data loading, form actions, lazy loading
+  - Product selection (checking, savings, money market) with dynamic pricing
+  - Configurable workflow steps with route-based navigation
+  - Personal information collection with comprehensive validation
+  - KYC validation integration with credit check APIs
+  - Document management with acceptance rules
   - Account funding information capture
 - Workflow Characteristics:
-  - Configurable across different banks
-  - Dynamic field interactions (fields can trigger additional fields)
+  - **NestJS Backend**: Enterprise patterns with controllers, services, DTOs
+  - Configurable across different banks with multi-tenant support
+  - Dynamic field interactions with real-time validation
+  - Route-based data loading for optimal performance
 - Technology Stack:
-  - Frontend: React
-  - Build Tool: Vite
-  - Backend: Express
-  - Routing: Node Router
-  - UI Components: Vanilla Extract and Headless UI for theming
+  - **Frontend**: React 18 + React Router v7 + TypeScript 5+
+  - **Backend**: NestJS + TypeScript (enterprise architecture)
+  - **Build Tool**: Vite with HMR and optimized bundling
+  - **Routing**: React Router v7 with loaders, actions, error boundaries
+  - **UI Components**: Vanilla Extract CSS-in-JS with theme system
+  - **Validation**: Zod (frontend) + class-validator (backend)
+  - **Testing**: Vitest + React Testing Library with React Router v7 utilities
 
 ## Security and Testing
 
-- This project should aim to be very secure
-- Unit tests should be run with vitest
+- **NestJS Security**: Enterprise-grade security with guards, pipes, and middleware
+- **Multi-layer Validation**: Zod schemas (frontend) + class-validator decorators (backend)
+- **PII Encryption**: AES-256-GCM encryption for all sensitive data
+- **Testing**: Vitest with React Router v7 test utilities and NestJS testing module
+- **Type Safety**: Strict TypeScript configuration with comprehensive type checking
 
 ## Data Validation
 
-- Data validation should happen with Zod
+- **Frontend**: Zod schemas with runtime validation and type inference
+- **Backend**: NestJS validation pipes with class-validator decorators
+- **DTOs**: Strongly typed Data Transfer Objects for API validation
+- **Route Validation**: Action functions validate form data before processing
 
 ## Data Persistence
 
-- Once the customer information is gathered, it should be persisted via Redis stream API calls
-- Mocks for those calls should be part of the test suite
-- Sessions should use redis
+- **NestJS Services**: Business logic in injectable services with proper DI
+- **Encrypted Storage**: Customer information encrypted before persistence
+- **API Integration**: Redis stream API calls for data persistence
+- **Test Mocks**: Comprehensive mocks for external API calls in test suite
+- **Session Management**: Redis-based session storage with encryption
 
 ## Component Systems
 
@@ -158,11 +234,140 @@ This is a minimal TypeScript project with:
 
 ## API Calls
 
-- Backend API calls that use HTTP should use fetch
+- **Frontend**: Use fetch with dynamic API URL detection (`getApiUrl()` utility)
+- **Backend**: NestJS controllers with proper HTTP decorators and status codes
+- **Error Handling**: Comprehensive error boundaries and API error responses
+- **Type Safety**: Strongly typed API interfaces with DTOs and response types
+
+## React Router v7 Patterns
+
+**ALWAYS follow these React Router v7 patterns:**
+
+```typescript
+// Route component with loader and action
+export const customerInfoLoader: LoaderFunction = async ({ request }) => {
+  // Load data before component renders
+  return { data: await fetchData() }
+}
+
+export const customerInfoAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData()
+  // Process form submission
+  return Response.json({ success: true }) // Use Response.json, not json()
+}
+
+// Route component
+export function CustomerInfoRoute() {
+  const data = useLoaderData() as LoaderData
+  const navigation = useNavigation()
+  
+  return (
+    <Form method="post"> {/* Use Form component for actions */}
+      {/* Form content */}
+    </Form>
+  )
+}
+```
+
+## NestJS Patterns
+
+**ALWAYS follow these NestJS patterns:**
+
+```typescript
+// Controller
+@Controller('api/applications')
+export class ApplicationController {
+  @Post()
+  async create(@Body() createDto: CreateApplicationDto) {
+    return this.applicationService.create(createDto)
+  }
+}
+
+// Service
+@Injectable()
+export class ApplicationService {
+  async create(data: CreateApplicationDto) {
+    // Business logic here
+  }
+}
+
+// DTO with validation
+export class CreateApplicationDto {
+  @IsString()
+  @IsNotEmpty()
+  firstName: string
+  
+  @IsArray()
+  selectedProducts: string[]
+}
+```
+
+## Development Testing with URL Parameters
+
+This project includes comprehensive development and testing tools using URL parameters:
+
+### DevStep Parameter (`?devStep=1-5`)
+
+**CRITICAL for development and testing** - allows jumping to any onboarding step with pre-populated mock data:
+
+```
+?devStep=1  # Product Selection
+?devStep=2  # Customer Information  
+?devStep=3  # Identification Information
+?devStep=4  # Document Acceptance
+?devStep=5  # Confirmation Screen
+```
+
+### Mock Scenarios (`?mockScenario=scenarioName`)
+
+Combine with `devStep` to test different customer scenarios:
+
+```
+?devStep=3&mockScenario=noSSN              # International customer
+?devStep=3&mockScenario=passport            # Passport verification
+?devStep=2&mockScenario=differentBilling    # Different billing address
+?devStep=1&mockScenario=moneyMarket         # Money market account
+?devStep=3&mockScenario=militaryId          # Military ID verification
+```
+
+### Available Mock Scenarios
+
+When working with mock data, these scenarios are available in `src/utils/mockData.ts`:
+
+- **`driversLicense`** - Standard driver's license (default)
+- **`passport`** - Passport-based identification
+- **`stateId`** - State ID verification
+- **`militaryId`** - Military ID verification  
+- **`noSSN`** - International customer without SSN
+- **`differentBilling`** - Customer with different billing address
+- **`moneyMarket`** - Money market account selection
+- **`savingsOnly`** - Savings account only
+
+### DevHelper Component
+
+The `DevHelper` component automatically appears when `devStep` is present:
+- **Fixed position** development panel (top-right)
+- **Step navigation** buttons (1-5)
+- **Scenario switcher** for testing different customer types
+- **Real-time URL updates** when switching steps/scenarios
+
+### Testing Guidelines
+
+When testing the onboarding flow:
+
+1. **Use devStep for rapid testing**: Start at any step without manually filling previous steps
+2. **Test edge cases with scenarios**: Use `noSSN`, `differentBilling`, etc. for comprehensive testing
+3. **Validate form behavior**: Ensure forms work with both empty and pre-populated data
+4. **Test route transitions**: Verify React Router v7 loaders/actions work correctly with mock data
 
 ## Code Generation Guidelines
 
-- When you create code, you should do typechecking and tests against that code before handing control back to me
+- **ALWAYS run typecheck and lint** after code changes: `pnpm typecheck && pnpm lint`
+- **Use React Router v7 APIs only** - import from `'react-router'`
+- **Follow NestJS patterns** for backend code with proper decorators
+- **Write tests** using Vitest with React Router v7 test utilities
+- **Validate forms** using both Zod (frontend) and class-validator (backend)
+- **Use devStep for testing** - include URL parameters in test scenarios when appropriate
 
 ## Local Development
 
