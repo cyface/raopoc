@@ -1,0 +1,265 @@
+import { 
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  redirect,
+  defer,
+  useRouteError,
+  useNavigation,
+  type LoaderFunction,
+  type ActionFunction,
+} from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { configService } from './services/configService'
+import { getSearchParams } from './utils/urlParams'
+import { getApiUrl } from './utils/apiUrl'
+import type { OnboardingData } from './types/customer'
+
+// Lazy load components for better code splitting
+const ProductSelection = lazy(() => import('./components/ProductSelection'))
+const CustomerInfo = lazy(() => import('./components/CustomerInfo'))
+const IdentificationInfo = lazy(() => import('./components/IdentificationInfo'))
+const DocumentAcceptance = lazy(() => import('./components/DocumentAcceptance').then(m => ({ default: m.DocumentAcceptance })))
+const ConfirmationScreen = lazy(() => import('./components/ConfirmationScreen').then(m => ({ default: m.ConfirmationScreen })))
+
+// Error boundary component
+export function ErrorBoundary() {
+  const error = useRouteError() as Error
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-red-800 mb-2">
+          Oops! Something went wrong
+        </h2>
+        <p className="text-red-600">{error.message || 'An unexpected error occurred'}</p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Start Over
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Loading component for Suspense
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  )
+}
+
+// Root layout component
+function RootLayout() {
+  const navigation = useNavigation()
+  const isLoading = navigation.state === 'loading'
+  
+  return (
+    <div className={isLoading ? 'opacity-70 pointer-events-none' : ''}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Outlet />
+      </Suspense>
+    </div>
+  )
+}
+
+// Loader for the root route - handles initial configuration
+const rootLoader: LoaderFunction = async ({ request }) => {
+  const { fi, lng } = getSearchParams(new URL(request.url).searchParams)
+  
+  // Defer loading of non-critical data
+  return defer({
+    // Critical data needed immediately
+    bankInfo: await configService.getBankInfoFor(fi, lng),
+    // Non-critical data can be loaded in parallel
+    products: configService.getProductsFor(fi, lng),
+    states: configService.getStatesFor(fi, lng),
+    countries: configService.getCountriesFor(fi, lng),
+    identificationTypes: configService.getIdentificationTypesFor(fi, lng),
+  })
+}
+
+// Action for product selection
+const productSelectionAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData()
+  const selectedProducts = formData.getAll('products') as string[]
+  
+  if (selectedProducts.length === 0) {
+    return { error: 'Please select at least one product' }
+  }
+  
+  // Store in session storage for now (could be server-side session)
+  sessionStorage.setItem('selectedProducts', JSON.stringify(selectedProducts))
+  
+  return redirect('/customer-info')
+}
+
+// Action for customer info submission
+const customerInfoAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData()
+  const customerData = Object.fromEntries(formData)
+  
+  // Validate data (you can use zod here)
+  if (!customerData.email || !customerData.firstName || !customerData.lastName) {
+    return { error: 'Please fill in all required fields' }
+  }
+  
+  sessionStorage.setItem('customerInfo', JSON.stringify(customerData))
+  return redirect('/identification')
+}
+
+// Action for identification submission
+const identificationAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData()
+  const identificationData = Object.fromEntries(formData)
+  
+  // Perform credit check if SSN provided
+  if (identificationData.socialSecurityNumber) {
+    try {
+      const response = await fetch(`${getApiUrl()}/credit-check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ssn: identificationData.socialSecurityNumber }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Credit check failed')
+      }
+      
+      const result = await response.json()
+      sessionStorage.setItem('creditCheckResult', JSON.stringify(result))
+    } catch (error) {
+      return { error: 'Credit check failed. Please try again.' }
+    }
+  }
+  
+  sessionStorage.setItem('identificationInfo', JSON.stringify(identificationData))
+  return redirect('/documents')
+}
+
+// Action for document acceptance
+const documentAcceptanceAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData()
+  const acceptedDocuments = Object.fromEntries(formData)
+  
+  sessionStorage.setItem('documentAcceptance', JSON.stringify(acceptedDocuments))
+  return redirect('/confirmation')
+}
+
+// Action for final application submission
+const confirmationAction: ActionFunction = async () => {
+  
+  // Gather all data from session storage
+  const applicationData: Partial<OnboardingData> = {
+    selectedProducts: JSON.parse(sessionStorage.getItem('selectedProducts') || '[]'),
+    customerInfo: JSON.parse(sessionStorage.getItem('customerInfo') || '{}'),
+    identificationInfo: JSON.parse(sessionStorage.getItem('identificationInfo') || '{}'),
+    documentAcceptance: JSON.parse(sessionStorage.getItem('documentAcceptance') || '{}'),
+  }
+  
+  try {
+    const response = await fetch(`${getApiUrl()}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(applicationData),
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to submit application')
+    }
+    
+    const result = await response.json()
+    
+    // Clear session storage
+    sessionStorage.clear()
+    
+    return { success: true, applicationId: result.applicationId }
+  } catch (error) {
+    return { error: 'Failed to submit application. Please try again.' }
+  }
+}
+
+// Loader for steps that need previous data
+const stepLoader: LoaderFunction = async ({ request, params }) => {
+  const step = params.step
+  
+  // Check if previous steps are completed
+  const selectedProducts = sessionStorage.getItem('selectedProducts')
+  const customerInfo = sessionStorage.getItem('customerInfo')
+  const identificationInfo = sessionStorage.getItem('identificationInfo')
+  
+  switch (step) {
+    case 'customer-info':
+      if (!selectedProducts) return redirect('/')
+      break
+    case 'identification':
+      if (!selectedProducts || !customerInfo) return redirect('/')
+      break
+    case 'documents':
+      if (!selectedProducts || !customerInfo || !identificationInfo) return redirect('/')
+      break
+    case 'confirmation':
+      if (!selectedProducts || !customerInfo || !identificationInfo) return redirect('/')
+      break
+  }
+  
+  const { fi, lng } = getSearchParams(new URL(request.url).searchParams)
+  
+  // Load any additional data needed for the step
+  if (step === 'documents') {
+    const documents = await configService.getDocumentsFor(fi, lng)
+    return { documents, hasNoSSN: JSON.parse(identificationInfo || '{}').noSSN }
+  }
+  
+  return null
+}
+
+// Create the router with all routes
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    errorElement: <ErrorBoundary />,
+    loader: rootLoader,
+    children: [
+      {
+        index: true,
+        element: <ProductSelection />,
+        action: productSelectionAction,
+      },
+      {
+        path: 'customer-info',
+        element: <CustomerInfo selectedProducts={[]} onNext={() => {}} />,
+        action: customerInfoAction,
+        loader: stepLoader,
+      },
+      {
+        path: 'identification',
+        element: <IdentificationInfo onNext={() => {}} />,
+        action: identificationAction,
+        loader: stepLoader,
+      },
+      {
+        path: 'documents',
+        element: <DocumentAcceptance selectedProducts={[]} hasNoSSN={false} onAcceptanceChange={() => {}} />,
+        action: documentAcceptanceAction,
+        loader: stepLoader,
+      },
+      {
+        path: 'confirmation',
+        element: <ConfirmationScreen />,
+        action: confirmationAction,
+        loader: stepLoader,
+      },
+    ],
+  },
+])
+
+// Router component to use in main.tsx
+export function Router() {
+  return <RouterProvider router={router} />
+}
