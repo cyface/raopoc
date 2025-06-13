@@ -57,9 +57,11 @@ export function renderWithRouter(
   const { initialEntries = ['/'], initialIndex = 0, routes, loader, action, ...renderOptions } = options
   
   // Create routes that include the component to test
+  // Use the path from initialEntries to match the component route
+  const testPath = initialEntries[0] || '/'
   const testRoutes: RouteObject[] = routes || [
     {
-      path: '/',
+      path: testPath,
       element: ui,
       loader,
       action,
