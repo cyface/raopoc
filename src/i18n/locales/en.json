@@ -16,6 +16,7 @@
   },
   "productSelection": {
     "title": "Let's Open Your Account!",
+    "welcomeTo": "Welcome to {{bankName}}",
     "subtitle": "Select the account types you'd like to open. You can choose multiple options.",
     "selectedProducts": "Selected Products:"
   },

@@ -113,16 +113,16 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
           <div style={{ 
             width: '48px', 
             height: '48px', 
-            border: '4px solid #f3f4f6', 
-            borderTop: '4px solid #3b82f6',
+            border: `4px solid ${styles.vars.color.border}`, 
+            borderTop: `4px solid ${styles.vars.color.primary}`,
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 2rem'
           }} />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem' }}>
+          <h2 className={styles.heading} style={{ marginBottom: '1rem' }}>
             {t('confirmationScreen.submitting.title')}
           </h2>
-          <p style={{ color: '#6b7280' }}>
+          <p className={styles.subheading}>
             {t('confirmationScreen.submitting.message')}
           </p>
         </div>
@@ -142,28 +142,28 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
           <div style={{ 
             width: '64px', 
             height: '64px', 
-            backgroundColor: '#fef2f2',
+            backgroundColor: styles.vars.color.surface,
+            border: `2px solid ${styles.vars.color.error}`,
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 2rem'
           }}>
-            <span style={{ fontSize: '2rem', color: '#dc2626' }}>✕</span>
+            <span style={{ fontSize: '2rem', color: styles.vars.color.error }}>✕</span>
           </div>
           
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#dc2626' }}>
+          <h2 className={styles.heading} style={{ marginBottom: '1rem', color: styles.vars.color.error }}>
             {t('confirmationScreen.error.title')}
           </h2>
-          <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+          <p className={styles.subheading} style={{ marginBottom: '2rem' }}>
             {submissionError}
           </p>
           
           <button
             type="button"
             onClick={handleSubmitApplication}
-            className={styles.button}
-            style={{ backgroundColor: '#3b82f6', color: 'white' }}
+            className={styles.primaryButton}
           >
             {t('confirmationScreen.error.tryAgain')}
           </button>
@@ -183,14 +183,15 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
         <div style={{ 
           width: '64px', 
           height: '64px', 
-          backgroundColor: '#ecfdf5',
+          backgroundColor: styles.vars.color.surface,
+          border: `2px solid ${styles.vars.color.success}`,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 2rem'
         }}>
-          <CheckCircleIcon style={{ width: '40px', height: '40px', color: '#059669' }} />
+          <CheckCircleIcon style={{ width: '40px', height: '40px', color: styles.vars.color.success }} />
         </div>
         
         <h1 className={styles.heading}>{t('confirmationScreen.success.title')}</h1>
@@ -200,28 +201,28 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
 
         {finalApplicationId && (
           <div style={{ 
-            backgroundColor: '#f8fafc', 
-            border: '1px solid #e2e8f0', 
+            backgroundColor: styles.vars.color.surface, 
+            border: `1px solid ${styles.vars.color.border}`, 
             borderRadius: '8px', 
             padding: '1.5rem', 
             margin: '2rem 0',
             textAlign: 'left'
           }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', color: styles.vars.color.textPrimary }}>
               {t('confirmationScreen.success.applicationDetails')}
             </h3>
             <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.875rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.applicationId')}:</span>
-                <span style={{ fontFamily: 'monospace', color: '#3b82f6' }}>{finalApplicationId}</span>
+                <span style={{ fontWeight: '500', color: styles.vars.color.textSecondary }}>{t('confirmationScreen.success.applicationId')}:</span>
+                <span style={{ fontFamily: 'monospace', color: styles.vars.color.primary }}>{finalApplicationId}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.submitted')}:</span>
-                <span>{new Date().toLocaleString()}</span>
+                <span style={{ fontWeight: '500', color: styles.vars.color.textSecondary }}>{t('confirmationScreen.success.submitted')}:</span>
+                <span style={{ color: styles.vars.color.textPrimary }}>{new Date().toLocaleString()}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>{t('confirmationScreen.success.selectedProducts')}:</span>
-                <span>{data.selectedProducts.join(', ')}</span>
+                <span style={{ fontWeight: '500', color: styles.vars.color.textSecondary }}>{t('confirmationScreen.success.selectedProducts')}:</span>
+                <span style={{ color: styles.vars.color.textPrimary }}>{data.selectedProducts.join(', ')}</span>
               </div>
             </div>
           </div>
@@ -234,8 +235,8 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
               alignItems: 'center', 
               gap: '1rem',
               padding: '1rem',
-              backgroundColor: '#fef3c7',
-              border: '2px solid #f59e0b',
+              backgroundColor: styles.vars.color.surface,
+              border: `2px solid #f59e0b`,
               borderRadius: '8px'
             }}>
               <div style={{ 
@@ -251,10 +252,10 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
                 <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>!</span>
               </div>
               <div style={{ textAlign: 'left' }}>
-                <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: '#92400e' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: styles.vars.color.textPrimary }}>
                   {t('confirmationScreen.success.verificationRequired')}
                 </h4>
-                <p style={{ fontSize: '0.875rem', color: '#92400e', margin: 0 }}>
+                <p style={{ fontSize: '0.875rem', color: styles.vars.color.textSecondary, margin: 0 }}>
                   {t('confirmationScreen.success.verificationMessage')}
                 </p>
               </div>
@@ -266,16 +267,16 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
             alignItems: 'center', 
             gap: '1rem',
             padding: '1rem',
-            backgroundColor: '#fefce8',
-            border: '1px solid #fde047',
+            backgroundColor: styles.vars.color.surface,
+            border: `1px solid ${styles.vars.color.border}`,
             borderRadius: '8px'
           }}>
-            <EnvelopeIcon style={{ width: '24px', height: '24px', color: '#ca8a04', flexShrink: 0 }} />
+            <EnvelopeIcon style={{ width: '24px', height: '24px', color: styles.vars.color.icon, flexShrink: 0 }} />
             <div style={{ textAlign: 'left' }}>
-              <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: styles.vars.color.textPrimary }}>
                 {t('confirmationScreen.success.emailSent')}
               </h4>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
+              <p style={{ fontSize: '0.875rem', color: styles.vars.color.textSecondary, margin: 0 }}>
                 {t('confirmationScreen.success.emailMessage', { email: data.customerInfo?.email })}
               </p>
             </div>
@@ -286,16 +287,16 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
             alignItems: 'center', 
             gap: '1rem',
             padding: '1rem',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #7dd3fc',
+            backgroundColor: styles.vars.color.surface,
+            border: `1px solid ${styles.vars.color.border}`,
             borderRadius: '8px'
           }}>
-            <DocumentCheckIcon style={{ width: '24px', height: '24px', color: '#0284c7', flexShrink: 0 }} />
+            <DocumentCheckIcon style={{ width: '24px', height: '24px', color: styles.vars.color.icon, flexShrink: 0 }} />
             <div style={{ textAlign: 'left' }}>
-              <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: styles.vars.color.textPrimary }}>
                 {t('confirmationScreen.success.whatsNext')}
               </h4>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
+              <p style={{ fontSize: '0.875rem', color: styles.vars.color.textSecondary, margin: 0 }}>
                 {creditCheckResult?.requiresVerification ? 
                   t('confirmationScreen.success.nextStepsVerification') : 
                   t('confirmationScreen.success.nextStepsReview')
@@ -306,15 +307,15 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
         </div>
 
         <div style={{ 
-          backgroundColor: '#f8fafc', 
-          border: '1px solid #e2e8f0', 
+          backgroundColor: styles.vars.color.surface, 
+          border: `1px solid ${styles.vars.color.border}`, 
           borderRadius: '8px', 
           padding: '1.5rem', 
           margin: '2rem 0',
           fontSize: '0.875rem',
-          color: '#6b7280'
+          color: styles.vars.color.textSecondary
         }}>
-          <p style={{ margin: '0 0 0.5rem 0' }}>
+          <p style={{ margin: '0 0 0.5rem 0', color: styles.vars.color.textPrimary }}>
             <strong>{t('confirmationScreen.success.needHelp')}</strong> {t('confirmationScreen.success.contactTeam')}:
           </p>
           <p style={{ margin: '0 0 0.5rem 0' }}>
