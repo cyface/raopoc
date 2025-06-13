@@ -1,24 +1,27 @@
 # Bank Customer Onboarding Application
 
-A secure, React-based customer onboarding application for banks that smoothly guides customers through account setup with comprehensive data protection.
+A modern, secure React-based customer onboarding application for banks that provides a smooth, multi-step account setup process with comprehensive data protection, built with React Router v7 and NestJS.
 
 ## Features
 
 ### 🏦 Customer Onboarding
-- Multi-step guided onboarding flow with progress indicators
-- Product selection (checking, savings, money market accounts)
-- Customer information collection with comprehensive form validation
+- **Modern Route-Based Architecture**: Built with React Router v7 for optimized data loading and navigation
+- Multi-step guided onboarding flow with progress indicators and step validation
+- Product selection (checking, savings, money market accounts) with dynamic pricing
+- Customer information collection with comprehensive form validation using Zod schemas
 - Identification document management (driver's license, passport, state ID, military ID)
-- Address management with separate billing address option
-- Phone number formatting and validation
-- Date of birth input with autocomplete support
-- SSN validation with "No SSN" option for ITIN holders
+- Address management with separate billing address option and state validation
+- Phone number formatting and validation with international support
+- Date of birth input with autocomplete support and age validation
+- SSN validation with "No SSN" option for ITIN holders and credit check integration
 
 ### 🔒 Security & Privacy
 - **End-to-end encryption** for all sensitive PII data (SSN, addresses, phone numbers, etc.)
-- AES-256-GCM encryption with automatic key management
-- Secure application submission and storage
-- Credit check integration with configurable validation rules
+- **NestJS Backend**: Enterprise-grade API with built-in security, validation, and middleware
+- AES-256-GCM encryption with automatic key management and secure key storage
+- DTO validation and transformation using NestJS decorators and class-validator
+- Secure application submission and storage with audit trails
+- Credit check integration with configurable validation rules and rate limiting
 
 ### 📄 Document Management
 - Dynamic document acceptance based on selected products and customer profile
@@ -33,17 +36,19 @@ A secure, React-based customer onboarding application for banks that smoothly gu
 - Dynamic content loading based on bank context
 
 ### 🎨 Modern UI/UX
-- Responsive design optimized for mobile and desktop
-- Accessible components with ARIA support
-- Theme system with bank-specific branding
-- Loading states and error handling
-- Autocomplete support for password managers
+- **React Router v7**: Latest routing with route-based data loading, form actions, and optimistic UI
+- Responsive design optimized for mobile and desktop with modern CSS Grid and Flexbox
+- Accessible components with comprehensive ARIA support and keyboard navigation
+- Advanced theme system with bank-specific branding and CSS custom properties
+- Progressive loading states, error boundaries, and graceful error handling
+- Autocomplete support for password managers and form field optimization
 
 ## Prerequisites
 
-- Node.js 18+
-- pnpm (install with `npm install -g pnpm`)
+- **Node.js 20+** (required for React Router v7)
+- **pnpm** (install with `npm install -g pnpm`)
 - **For HTTPS development**: Caddy (install with `brew install caddy`)
+- **TypeScript 5+** for enhanced type safety
 
 ## Installation
 
@@ -106,6 +111,57 @@ pnpm lint
 pnpm lint:fix
 ```
 
+### Development Testing with URL Parameters
+
+The application includes powerful development testing features using URL parameters:
+
+#### DevStep Parameter
+Jump directly to any onboarding step with pre-populated mock data:
+
+```bash
+# Jump to step 2 (Customer Info) with mock data
+http://localhost:5173/?devStep=2
+
+# Jump to step 3 (Identification) with mock data
+http://localhost:5173/?devStep=3
+
+# Available steps: 1-5 (Product Selection → Confirmation)
+```
+
+#### Mock Scenarios
+Test different customer scenarios by combining `devStep` with `mockScenario`:
+
+```bash
+# Test international customer (no SSN)
+http://localhost:5173/?devStep=3&mockScenario=noSSN
+
+# Test customer with passport
+http://localhost:5173/?devStep=3&mockScenario=passport
+
+# Test different billing address
+http://localhost:5173/?devStep=2&mockScenario=differentBilling
+
+# Test money market account selection
+http://localhost:5173/?devStep=1&mockScenario=moneyMarket
+```
+
+**Available Mock Scenarios:**
+- `driversLicense` - Standard driver's license verification
+- `passport` - Passport-based identification
+- `stateId` - State ID verification
+- `militaryId` - Military ID verification
+- `noSSN` - International customer without SSN
+- `differentBilling` - Customer with different billing address
+- `moneyMarket` - Money market account selection
+- `savingsOnly` - Savings account only
+
+#### Development Helper UI
+When using `devStep`, a floating development panel appears showing:
+- Current step and scenario
+- Quick navigation between steps (1-5)
+- Scenario switcher for testing different customer types
+- Real-time URL parameter updates
+
 ### Production Build
 ```bash
 # Build frontend
@@ -121,21 +177,23 @@ pnpm run preview
 ## Tech Stack
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite with Hot Module Replacement
-- **Styling**: Vanilla Extract CSS-in-JS
-- **Routing**: React Router v6
-- **State Management**: React Context API
-- **Validation**: Zod schemas with type inference
-- **Internationalization**: React i18next
-- **Testing**: Vitest + React Testing Library + jsdom
+- **Framework**: React 18 with TypeScript 5+
+- **Routing**: **React Router v7** with route-based data loading, form actions, and lazy loading
+- **Build Tool**: Vite with Hot Module Replacement and optimized bundling
+- **Styling**: Vanilla Extract CSS-in-JS with theme system
+- **State Management**: React Context API with optimized providers
+- **Validation**: Zod schemas with type inference and runtime validation
+- **Internationalization**: React i18next with dynamic loading
+- **Testing**: Vitest + React Testing Library + jsdom with router testing utilities
 
 ### Backend
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Security**: AES-256-GCM encryption for PII
-- **File Watching**: Chokidar for hot config reloading
-- **CORS**: Configured for cross-origin development
+- **Framework**: **NestJS** with TypeScript and enterprise architecture patterns
+- **Runtime**: Node.js 20+ with modern ES modules
+- **Architecture**: MVC pattern with controllers, services, and DTOs
+- **Validation**: NestJS validation pipes with class-validator decorators
+- **Security**: AES-256-GCM encryption for PII with secure key management
+- **Configuration**: NestJS Config module with hot reloading
+- **Documentation**: Auto-generated OpenAPI/Swagger documentation
 
 ### Development Tools
 - **HTTPS**: Caddy reverse proxy with automatic SSL
@@ -147,28 +205,36 @@ pnpm run preview
 ## Project Structure
 
 ```
-├── src/
-│   ├── components/          # React components with tests
-│   ├── context/            # Context providers (onboarding, theme)
-│   ├── hooks/              # Custom React hooks
-│   ├── i18n/               # Internationalization setup
-│   ├── services/           # API services and configuration
-│   ├── styles/             # Vanilla Extract theme system
-│   ├── types/              # TypeScript type definitions
-│   └── utils/              # Utility functions
-├── server/
-│   ├── routes/             # Express API routes
-│   ├── utils/              # Server utilities (encryption, etc.)
-│   └── index.ts            # Express server entry point
-├── config/                 # JSON configuration files
-│   ├── documents.json      # Document acceptance rules
-│   ├── products.json       # Available banking products
-│   ├── bank-info.json      # Bank branding and contact info
-│   └── [bankslug]/         # Bank-specific overrides
-├── translations/           # i18n translation files
-├── applications/           # Encrypted application storage
-├── Caddyfile              # HTTPS reverse proxy config
-└── .env.https             # HTTPS development environment
+├── src/                    # Frontend React application
+│   ├── components/         # Reusable React components with tests
+│   ├── context/           # Context providers (onboarding, theme)
+│   ├── hooks/             # Custom React hooks
+│   ├── router/            # React Router v7 configuration and error boundaries
+│   ├── routes/            # Route components with loaders and actions
+│   │   ├── loaders/       # Route-based data loaders
+│   │   └── __tests__/     # Route-specific tests
+│   ├── services/          # API services and configuration management
+│   ├── styles/            # Vanilla Extract theme system
+│   ├── test-utils/        # Testing utilities for React Router v7
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utility functions and helpers
+├── server/                # NestJS backend application
+│   ├── controllers/       # NestJS controllers (API endpoints)
+│   ├── services/          # Business logic services
+│   ├── dto/              # Data Transfer Objects with validation
+│   ├── types/            # Backend TypeScript types
+│   ├── app.module.ts     # Main NestJS application module
+│   ├── main.ts           # NestJS bootstrap and server setup
+│   └── nest-cli.json     # NestJS CLI configuration
+├── config/               # JSON configuration files
+│   ├── documents.json    # Document acceptance rules
+│   ├── products.json     # Available banking products
+│   ├── bank-info.json    # Bank branding and contact info
+│   └── [bankslug]/       # Bank-specific configuration overrides
+├── translations/         # i18n translation files (English/Spanish)
+├── applications/         # Encrypted application storage
+├── Caddyfile            # HTTPS reverse proxy configuration
+└── .env.https           # HTTPS development environment variables
 ```
 
 ## Configuration
@@ -182,12 +248,15 @@ The application uses a flexible configuration system:
 
 ## Security Features
 
+- **NestJS Security**: Enterprise-grade backend with built-in security middleware and guards
 - **PII Encryption**: All sensitive data encrypted at rest using AES-256-GCM
 - **Key Management**: Automatic encryption key generation and secure storage
 - **Field-level Security**: Granular encryption of SSN, addresses, phone numbers, etc.
-- **HTTPS Development**: Easy local SSL setup for production-like testing
-- **Input Validation**: Server-side validation with Zod schemas
+- **DTO Validation**: Server-side validation using NestJS validation pipes and decorators
+- **HTTPS Development**: Easy local SSL setup for production-like testing with Caddy
+- **Input Validation**: Multi-layer validation with Zod schemas and class-validator
 - **CORS Protection**: Properly configured cross-origin resource sharing
+- **Route Guards**: Protected API endpoints with authentication and authorization
 
 ## Contributing
 
