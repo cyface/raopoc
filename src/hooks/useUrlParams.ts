@@ -4,6 +4,8 @@ interface UrlParams {
   fi: string | null
   lng: string
   dark: string | null
+  devStep: number | null
+  mockScenario: string | null
 }
 
 /**
@@ -15,15 +17,18 @@ export function useUrlParams(): UrlParams {
 
   function getCurrentParams(): UrlParams {
     if (typeof window === 'undefined') {
-      return { fi: null, lng: 'en', dark: null }
+      return { fi: null, lng: 'en', dark: null, devStep: null, mockScenario: null }
     }
 
     const urlParams = new URLSearchParams(window.location.search)
     const fi = urlParams.get('fi')
     const lng = urlParams.get('lng') || 'en'
     const dark = urlParams.get('dark')
+    const devStepParam = urlParams.get('devStep')
+    const devStep = devStepParam ? parseInt(devStepParam, 10) : null
+    const mockScenario = urlParams.get('mockScenario')
 
-    return { fi, lng, dark }
+    return { fi, lng, dark, devStep, mockScenario }
   }
 
   const updateParams = useCallback(() => {

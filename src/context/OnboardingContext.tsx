@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { type OnboardingData } from '../types/customer'
 import { type ProductType } from '../types/products'
 import { type CustomerInfoData } from '../types/customer'
 import { type IdentificationInfoData } from '../types/identification'
 import { type DocumentAcceptanceState } from '../types/documents'
 import { getApiUrl } from '../utils/apiUrl'
+import { useUrlParams } from '../hooks/useUrlParams'
+import { populateMockDataUpToStep, MOCK_SCENARIOS, type MockScenario } from '../utils/mockData'
 
 interface CreditCheckResult {
   status: 'approved' | 'requires_verification' | 'pending' | 'error'
@@ -28,6 +30,8 @@ interface OnboardingContextType {
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const { devStep, mockScenario } = useUrlParams()
+  
   const [data, setData] = useState<OnboardingData>({
     selectedProducts: [],
     customerInfo: undefined,
@@ -37,6 +41,33 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   
   const [currentStep, setCurrentStep] = useState(1)
   const [creditCheckResult, setCreditCheckResult] = useState<CreditCheckResult | null>(null)
+
+  // Effect to handle devStep URL parameter
+  useEffect(() => {
+    if (devStep && devStep >= 1 && devStep <= 5) {
+      // Get mock scenario config
+      const scenarioConfig = mockScenario && mockScenario in MOCK_SCENARIOS 
+        ? MOCK_SCENARIOS[mockScenario as MockScenario].config 
+        : {}
+
+      // Populate mock data up to the target step
+      const mockData = populateMockDataUpToStep(devStep, scenarioConfig)
+      
+      // Update the onboarding data with mock data
+      setData(prev => ({
+        ...prev,
+        selectedProducts: mockData.selectedProducts || prev.selectedProducts,
+        customerInfo: mockData.customerInfo || prev.customerInfo,
+        identificationInfo: mockData.identificationInfo || prev.identificationInfo,
+        documentAcceptance: mockData.documentAcceptance || prev.documentAcceptance,
+      }))
+      
+      // Set the current step
+      setCurrentStep(devStep)
+      
+      console.log(`🔧 Dev Mode: Loaded step ${devStep}${mockScenario ? ` with scenario "${mockScenario}"` : ''}`)
+    }
+  }, [devStep, mockScenario])
 
   const setSelectedProducts = (products: ProductType[]) => {
     setData(prev => ({ ...prev, selectedProducts: products }))
