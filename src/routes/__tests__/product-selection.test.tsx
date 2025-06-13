@@ -104,14 +104,10 @@ describe('ProductSelection Route', () => {
         body: formData
       })
       
-      const result = await productSelectionAction({ request, params: {}, context: {} })
+      const result = await productSelectionAction({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        status: 302,
-        headers: expect.objectContaining({
-          Location: '/customer-info'
-        })
-      }))
+      expect(result.status).toBe(302)
+      expect(result.headers.get('Location')).toBe('/customer-info')
       
       // Check session storage
       const stored = sessionStorage.getItem('onboarding:selectedProducts')
@@ -141,13 +137,10 @@ describe('ProductSelection Route', () => {
         body: formData
       })
       
-      const result = await productSelectionAction({ request, params: {}, context: {} })
+      const result = await productSelectionAction({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        headers: expect.objectContaining({
-          Location: '/customer-info?fi=testbank&lng=es'
-        })
-      }))
+      expect(result.status).toBe(302)
+      expect(result.headers.get('Location')).toBe('/customer-info?fi=testbank&lng=es')
     })
   })
 

@@ -8,6 +8,7 @@ import { configService } from '../../services/configService'
 vi.mock('../../services/configService', () => ({
   configService: {
     getStatesFor: vi.fn(),
+    getBankInfo: vi.fn(),
   }
 }))
 
@@ -49,6 +50,12 @@ describe('CustomerInfo Route', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(configService.getStatesFor).mockResolvedValue(mockStates)
+    vi.mocked(configService.getBankInfo).mockResolvedValue({
+      bankName: 'Test Bank',
+      displayName: 'Test Bank',
+      contact: { phone: '1-800-TEST', phoneDisplay: '1-800-TEST', email: 'test@bank.com', hours: '9 AM - 5 PM' },
+      branding: { primaryColor: '#0066cc', logoIcon: '🏦' }
+    })
     sessionStorage.clear()
   })
 
@@ -56,14 +63,10 @@ describe('CustomerInfo Route', () => {
     it('should redirect if no products selected', async () => {
       const request = new Request('http://localhost/customer-info')
       
-      const result = await customerInfoLoader({ request, params: {}, context: {} })
+      const result = await customerInfoLoader({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        status: 302,
-        headers: expect.objectContaining({
-          Location: '/'
-        })
-      }))
+      expect(result.status).toBe(302)
+      expect(result.headers.get('Location')).toBe('/')
     })
 
     it('should load states when products are selected', async () => {
@@ -91,11 +94,9 @@ describe('CustomerInfo Route', () => {
         body: formData
       })
       
-      const result = await customerInfoAction({ request, params: {}, context: {} })
+      const result = await customerInfoAction({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        status: 400
-      }))
+      expect(result.status).toBe(400)
     })
 
     it('should save valid customer info and redirect', async () => {
@@ -115,14 +116,10 @@ describe('CustomerInfo Route', () => {
         body: formData
       })
       
-      const result = await customerInfoAction({ request, params: {}, context: {} })
+      const result = await customerInfoAction({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        status: 302,
-        headers: expect.objectContaining({
-          Location: '/identification'
-        })
-      }))
+      expect(result.status).toBe(302)
+      expect(result.headers.get('Location')).toBe('/identification')
       
       // Check session storage
       const stored = sessionStorage.getItem('onboarding:customerInfo')
@@ -149,11 +146,9 @@ describe('CustomerInfo Route', () => {
         body: formData
       })
       
-      const result = await customerInfoAction({ request, params: {}, context: {} })
+      const result = await customerInfoAction({ request, params: {}, context: {} }) as Response
       
-      expect(result).toEqual(expect.objectContaining({
-        status: 400
-      }))
+      expect(result.status).toBe(400)
     })
   })
 
@@ -170,7 +165,7 @@ describe('CustomerInfo Route', () => {
       })
       
       await waitFor(() => {
-        expect(screen.getByText('Personal Information')).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Personal Information' })).toBeInTheDocument()
       })
       
       expect(screen.getByLabelText(/First Name/)).toBeInTheDocument()
@@ -191,7 +186,7 @@ describe('CustomerInfo Route', () => {
       })
       
       await waitFor(() => {
-        expect(screen.getByText('Personal Information')).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Personal Information' })).toBeInTheDocument()
       })
       
       const checkbox = screen.getByLabelText(/Same as mailing address/)
@@ -216,7 +211,7 @@ describe('CustomerInfo Route', () => {
       })
       
       await waitFor(() => {
-        expect(screen.getByText('Personal Information')).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Personal Information' })).toBeInTheDocument()
       })
       
       const stateSelects = screen.getAllByDisplayValue('Select State')
