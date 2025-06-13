@@ -1,25 +1,17 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { fileURLToPath } from 'url'
-import {
-  encryptValue,
-  decryptValue,
-  encryptSensitiveFields,
-  decryptSensitiveFields,
-  getSensitiveFields
-} from './encryption'
+import { EncryptionService } from './encryption.service'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-describe('Encryption Utilities', () => {
-  const testKeyPath = path.join(__dirname, '..', '..', '.encryption-key')
+describe('Encryption Service', () => {
+  let encryptionService: EncryptionService
+  const testKeyPath = path.join(process.cwd(), '.encryption-key')
   let originalKey: string | null = null
 
   beforeAll(async () => {
+    encryptionService = new EncryptionService()
     // Backup existing key if present
     try {
       originalKey = await fs.readFile(testKeyPath, 'utf-8')
@@ -44,7 +36,7 @@ describe('Encryption Utilities', () => {
   describe('encryptValue and decryptValue', () => {
     it('should encrypt and decrypt a simple string', async () => {
       const originalValue = 'This is a test string'
-      const encrypted = await encryptValue(originalValue)
+      const encrypted = await encryptionService.encryptValue(originalValue)
 
       expect(encrypted).toHaveProperty('encrypted')
       expect(encrypted).toHaveProperty('iv')
@@ -52,29 +44,29 @@ describe('Encryption Utilities', () => {
       expect(encrypted).toHaveProperty('salt')
       expect(encrypted.encrypted).not.toBe(originalValue)
 
-      const decrypted = await decryptValue(encrypted)
+      const decrypted = await encryptionService.decryptValue(encrypted)
       expect(decrypted).toBe(originalValue)
     })
 
     it('should generate different ciphertexts for the same plaintext', async () => {
       const originalValue = 'Same value encrypted twice'
-      const encrypted1 = await encryptValue(originalValue)
-      const encrypted2 = await encryptValue(originalValue)
+      const encrypted1 = await encryptionService.encryptValue(originalValue)
+      const encrypted2 = await encryptionService.encryptValue(originalValue)
 
       expect(encrypted1.encrypted).not.toBe(encrypted2.encrypted)
       expect(encrypted1.iv).not.toBe(encrypted2.iv)
       expect(encrypted1.salt).not.toBe(encrypted2.salt)
 
-      const decrypted1 = await decryptValue(encrypted1)
-      const decrypted2 = await decryptValue(encrypted2)
+      const decrypted1 = await encryptionService.decryptValue(encrypted1)
+      const decrypted2 = await encryptionService.decryptValue(encrypted2)
       expect(decrypted1).toBe(originalValue)
       expect(decrypted2).toBe(originalValue)
     })
 
     it('should handle special characters and unicode', async () => {
       const originalValue = '✨ Special characters: !@#$%^&*() 你好世界 🌍'
-      const encrypted = await encryptValue(originalValue)
-      const decrypted = await decryptValue(encrypted)
+      const encrypted = await encryptionService.encryptValue(originalValue)
+      const decrypted = await encryptionService.decryptValue(encrypted)
       expect(decrypted).toBe(originalValue)
     })
   })
@@ -89,7 +81,7 @@ describe('Encryption Utilities', () => {
         phoneNumber: '555-123-4567'
       }
 
-      const encrypted = await encryptSensitiveFields(originalData)
+      const encrypted = await encryptionService.encryptSensitiveFields(originalData)
 
       // Non-sensitive fields should remain unchanged
       expect((encrypted as any).firstName).toBe('John')
@@ -102,7 +94,7 @@ describe('Encryption Utilities', () => {
       expect((encrypted as any).phoneNumber).toHaveProperty('_encrypted', true)
 
       // Decrypt and verify
-      const decrypted = await decryptSensitiveFields(encrypted)
+      const decrypted = await encryptionService.decryptSensitiveFields(encrypted)
       expect(decrypted).toEqual(originalData)
     })
 
@@ -125,7 +117,7 @@ describe('Encryption Utilities', () => {
         }
       }
 
-      const encrypted = await encryptSensitiveFields(originalData)
+      const encrypted = await encryptionService.encryptSensitiveFields(originalData)
 
       // Check that nested sensitive fields are encrypted
       expect((encrypted as any).customerInfo.ssn).toHaveProperty('_encrypted', true)
@@ -140,7 +132,7 @@ describe('Encryption Utilities', () => {
       expect((encrypted as any).identificationInfo.state).toBe('CA')
 
       // Decrypt and verify
-      const decrypted = await decryptSensitiveFields(encrypted)
+      const decrypted = await encryptionService.decryptSensitiveFields(encrypted)
       expect(decrypted).toEqual(originalData)
     })
 
@@ -158,7 +150,7 @@ describe('Encryption Utilities', () => {
         }
       }
 
-      const encrypted = await encryptSensitiveFields(originalData)
+      const encrypted = await encryptionService.encryptSensitiveFields(originalData)
 
       // Arrays should be preserved
       expect((encrypted as any).products).toEqual(['checking', 'savings'])
@@ -168,7 +160,7 @@ describe('Encryption Utilities', () => {
       expect((encrypted as any).additionalInfo.email).toHaveProperty('_encrypted', true)
 
       // Decrypt and verify
-      const decrypted = await decryptSensitiveFields(encrypted)
+      const decrypted = await encryptionService.decryptSensitiveFields(encrypted)
       expect(decrypted).toEqual(originalData)
     })
 
@@ -180,14 +172,14 @@ describe('Encryption Utilities', () => {
         phoneNumber: ''
       }
 
-      const encrypted = await encryptSensitiveFields(originalData)
+      const encrypted = await encryptionService.encryptSensitiveFields(originalData)
 
       expect((encrypted as any).firstName).toBe('Test')
       expect((encrypted as any).ssn).toBeNull()
       expect((encrypted as any).email).toBeUndefined()
       expect((encrypted as any).phoneNumber).toBe('') // Empty strings are not encrypted
 
-      const decrypted = await decryptSensitiveFields(encrypted)
+      const decrypted = await encryptionService.decryptSensitiveFields(encrypted)
       expect(decrypted).toEqual(originalData)
     })
 
@@ -223,7 +215,7 @@ describe('Encryption Utilities', () => {
         }
       }
 
-      const encrypted = await encryptSensitiveFields(applicationData)
+      const encrypted = await encryptionService.encryptSensitiveFields(applicationData)
       
       // Verify sensitive fields are encrypted
       expect((encrypted as any).customerInfo.ssn).toHaveProperty('_encrypted', true)
@@ -244,14 +236,14 @@ describe('Encryption Utilities', () => {
       expect((encrypted as any).acceptedDocuments).toEqual(applicationData.acceptedDocuments)
 
       // Decrypt and verify full equality
-      const decrypted = await decryptSensitiveFields(encrypted)
+      const decrypted = await encryptionService.decryptSensitiveFields(encrypted)
       expect(decrypted).toEqual(applicationData)
     })
   })
 
   describe('getSensitiveFields', () => {
     it('should return the list of sensitive fields', () => {
-      const fields = getSensitiveFields()
+      const fields = encryptionService.getSensitiveFields()
       
       // Social Security
       expect(fields).toContain('ssn')

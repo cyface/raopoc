@@ -4,9 +4,11 @@
     "outDir": "./dist/server",
     "rootDir": "./server",
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "types": ["node"]
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["server/**/*"],
   "exclude": ["node_modules", "dist"]
