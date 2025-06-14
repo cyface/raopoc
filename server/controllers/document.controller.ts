@@ -1,9 +1,11 @@
-import { Controller, Get, Param, HttpException, HttpStatus, Res } from '@nestjs/common'
+import { Controller, Get, Param, HttpException, HttpStatus, Res, Logger } from '@nestjs/common'
 import { Response } from 'express'
 import { DocumentService } from '../services/document.service'
 
 @Controller('api/documents')
 export class DocumentController {
+  private readonly logger = new Logger(DocumentController.name)
+  
   constructor(private readonly documentService: DocumentService) {}
 
   @Get(':documentId')
@@ -27,7 +29,7 @@ export class DocumentController {
         }
       }
       
-      console.error('Error serving document:', error)
+      this.logger.error('Error serving document:', error)
       throw new HttpException('Failed to serve document', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -53,7 +55,7 @@ export class DocumentController {
         }
       }
       
-      console.error('Error downloading document:', error)
+      this.logger.error('Error downloading document:', error)
       throw new HttpException('Failed to download document', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }

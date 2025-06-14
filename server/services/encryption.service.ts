@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import * as crypto from 'crypto'
 import * as fs from 'fs/promises'
 import * as path from 'path'
@@ -25,6 +25,7 @@ function isEncryptedValue(obj: unknown): obj is EncryptedValue {
 
 @Injectable()
 export class EncryptionService {
+  private readonly logger = new Logger(EncryptionService.name)
   private readonly ALGORITHM = 'aes-256-gcm'
   private readonly KEY_LENGTH = 32
   private readonly IV_LENGTH = 16
@@ -66,7 +67,7 @@ export class EncryptionService {
       if (key.length >= 44) {
         return key
       } else {
-        console.warn('⚠️  ENCRYPTION_KEY environment variable is too short, falling back to file-based key')
+        this.logger.warn('ENCRYPTION_KEY environment variable is too short, falling back to file-based key')
       }
     }
 
@@ -78,9 +79,9 @@ export class EncryptionService {
     } catch {
       const newKey = crypto.randomBytes(this.KEY_LENGTH).toString('base64')
       await fs.writeFile(keyPath, newKey, { mode: 0o600 })
-      console.log('⚠️  New encryption key generated and saved to .encryption-key')
-      console.log('⚠️  Make sure to backup this key securely and add .encryption-key to .gitignore')
-      console.log('⚠️  For production, consider using the ENCRYPTION_KEY environment variable instead')
+      this.logger.log('New encryption key generated and saved to .encryption-key')
+      this.logger.log('Make sure to backup this key securely and add .encryption-key to .gitignore')
+      this.logger.log('For production, consider using the ENCRYPTION_KEY environment variable instead')
       return newKey
     }
   }
@@ -198,7 +199,7 @@ export class EncryptionService {
           salt: obj.salt
         })
       } catch (error) {
-        console.error('Failed to decrypt value:', error)
+        this.logger.error('Failed to decrypt value:', error)
         return '[DECRYPTION_FAILED]'
       }
     }

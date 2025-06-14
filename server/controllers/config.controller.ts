@@ -1,4 +1,4 @@
-import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Param, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import { ConfigService } from '../services/config.service'
 import { 
   State, 
@@ -11,6 +11,8 @@ import {
 
 @Controller('api/config')
 export class ConfigController {
+  private readonly logger = new Logger(ConfigController.name)
+  
   constructor(private readonly configService: ConfigService) {}
 
   @Get('states')
@@ -74,7 +76,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback(configName, bankSlug)
       return config
     } catch (error) {
-      console.error(`Error loading bank-specific ${configName} config:`, error)
+      this.logger.error(`Error loading bank-specific ${configName} config:`, error)
       throw new HttpException(`Failed to load ${configName} configuration`, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -86,7 +88,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('states.json', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific states config:', error)
+      this.logger.error('Error loading bank-specific states config:', error)
       throw new HttpException('Failed to load states configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -97,7 +99,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('countries', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific countries config:', error)
+      this.logger.error('Error loading bank-specific countries config:', error)
       throw new HttpException('Failed to load countries configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -108,7 +110,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('identification-types', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific identification-types config:', error)
+      this.logger.error('Error loading bank-specific identification-types config:', error)
       throw new HttpException('Failed to load identification-types configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -119,7 +121,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('products', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific products config:', error)
+      this.logger.error('Error loading bank-specific products config:', error)
       throw new HttpException('Failed to load products configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -130,7 +132,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('documents', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific documents config:', error)
+      this.logger.error('Error loading bank-specific documents config:', error)
       throw new HttpException('Failed to load documents configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -141,7 +143,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback('bank-info', bankSlug)
       return config
     } catch (error) {
-      console.error('Error loading bank-specific bank-info config:', error)
+      this.logger.error('Error loading bank-specific bank-info config:', error)
       throw new HttpException('Failed to load bank-info configuration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -153,7 +155,7 @@ export class ConfigController {
       const config = await this.configService.loadConfigWithFallback(configName)
       return config
     } catch (error) {
-      console.error(`Error loading ${configName} config:`, error)
+      this.logger.error(`Error loading ${configName} config:`, error)
       throw new HttpException(`Failed to load ${configName} configuration`, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }

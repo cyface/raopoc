@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { ConfigService } from './config.service'
 
 @Injectable()
 export class DocumentService {
+  private readonly logger = new Logger(DocumentService.name)
+  
   constructor(private readonly configService: ConfigService) {}
 
   async getDocument(documentId: string): Promise<{ buffer: Buffer; document: any }> {
@@ -26,7 +28,7 @@ export class DocumentService {
       const pdfBuffer = await fs.readFile(pdfPath)
       return { buffer: pdfBuffer, document }
     } catch (error) {
-      console.error(`Error serving document ${documentId}:`, error)
+      this.logger.error(`Error serving document ${documentId}:`, error)
       throw new Error('Document file not found')
     }
   }

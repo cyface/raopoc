@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { readFile, access } from 'fs/promises'
 import * as path from 'path'
 
 @Injectable()
 export class TranslationService {
+  private readonly logger = new Logger(TranslationService.name)
   private readonly TRANSLATIONS_BASE_PATH = path.join(process.cwd(), '..', 'translations')
   private readonly SUPPORTED_LANGUAGES = ['en', 'es']
   private readonly NAMESPACES = [
@@ -56,7 +57,7 @@ export class TranslationService {
         const content = await readFile(filePath, 'utf-8')
         translations[namespace] = JSON.parse(content)
       } catch (error) {
-        console.warn(`Failed to load ${namespace} for ${language}:`, error)
+        this.logger.warn(`Failed to load ${namespace} for ${language}:`, error)
         translations[namespace] = {}
       }
     })
@@ -82,7 +83,7 @@ export class TranslationService {
       const content = await readFile(filePath, 'utf-8')
       return JSON.parse(content)
     } catch (error) {
-      console.error(`Error loading ${namespace} for ${language}:`, error)
+      this.logger.error(`Error loading ${namespace} for ${language}:`, error)
       
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         return {}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { randomUUID } from 'crypto'
@@ -7,6 +7,8 @@ import { ConfigService } from './config.service'
 
 @Injectable()
 export class ApplicationService {
+  private readonly logger = new Logger(ApplicationService.name)
+  
   constructor(
     private readonly encryptionService: EncryptionService,
     private readonly configService: ConfigService
@@ -39,8 +41,8 @@ export class ApplicationService {
     const filePath = path.join(applicationsDir, filename)
     await fs.writeFile(filePath, JSON.stringify(application, null, 2))
     
-    console.log(`✅ Application saved: ${filename}`)
-    console.log(`📧 Mock confirmation email sent to: ${applicationData.customerInfo?.email}`)
+    this.logger.log(`Application saved: ${filename}`)
+    this.logger.log(`Mock confirmation email sent to: ${applicationData.customerInfo?.email}`)
     
     return {
       applicationId,
@@ -83,8 +85,8 @@ export class ApplicationService {
 
     const isOnBadList = badSSNs.includes(normalizedSSN)
 
-    console.log(`🔍 Credit check performed for SSN: ${ssn.substring(0, 3)}-XX-XXXX`)
-    console.log(`📊 Credit check result: ${isOnBadList ? 'REQUIRES_VERIFICATION' : 'PASSED'}`)
+    this.logger.log(`Credit check performed for SSN: ${ssn.substring(0, 3)}-XX-XXXX`)
+    this.logger.log(`Credit check result: ${isOnBadList ? 'REQUIRES_VERIFICATION' : 'PASSED'}`)
 
     return {
       status: isOnBadList ? 'requires_verification' : 'approved',

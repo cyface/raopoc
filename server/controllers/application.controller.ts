@@ -1,10 +1,12 @@
-import { Controller, Post, Get, Body, Param, HttpException, HttpStatus, Req } from '@nestjs/common'
+import { Controller, Post, Get, Body, Param, HttpException, HttpStatus, Req, Logger } from '@nestjs/common'
 import { Request } from 'express'
 import { ApplicationService } from '../services/application.service'
 import { CreateApplicationDto, CreditCheckDto } from '../dto/application.dto'
 
 @Controller('api')
 export class ApplicationController {
+  private readonly logger = new Logger(ApplicationController.name)
+  
   constructor(private readonly applicationService: ApplicationService) {}
 
   @Post('applications')
@@ -17,7 +19,7 @@ export class ApplicationController {
       )
       return result
     } catch (error) {
-      console.error('Error saving application:', error)
+      this.logger.error('Error saving application:', error)
       throw new HttpException(
         {
           error: 'Failed to save application',
@@ -42,7 +44,7 @@ export class ApplicationController {
       if (error instanceof HttpException) {
         throw error
       }
-      console.error('Error retrieving application:', error)
+      this.logger.error('Error retrieving application:', error)
       throw new HttpException('Failed to retrieve application', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -53,7 +55,7 @@ export class ApplicationController {
       const result = await this.applicationService.performCreditCheck(creditCheckDto.ssn)
       return result
     } catch (error) {
-      console.error('Error performing credit check:', error)
+      this.logger.error('Error performing credit check:', error)
       throw new HttpException(
         {
           error: 'Credit check failed',

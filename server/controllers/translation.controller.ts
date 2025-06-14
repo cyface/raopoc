@@ -1,9 +1,11 @@
-import { Controller, Get, Param, HttpException, HttpStatus, Res } from '@nestjs/common'
+import { Controller, Get, Param, HttpException, HttpStatus, Res, Logger } from '@nestjs/common'
 import { Response } from 'express'
 import { TranslationService } from '../services/translation.service'
 
 @Controller('api/translations')
 export class TranslationController {
+  private readonly logger = new Logger(TranslationController.name)
+  
   constructor(private readonly translationService: TranslationService) {}
 
   @Get('health')
@@ -38,7 +40,7 @@ export class TranslationController {
         throw new HttpException('Language not supported', HttpStatus.NOT_FOUND)
       }
       
-      console.error(`Error loading translations for ${language}:`, error)
+      this.logger.error(`Error loading translations for ${language}:`, error)
       throw new HttpException('Failed to load translations', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
@@ -68,7 +70,7 @@ export class TranslationController {
         }
       }
       
-      console.error(`Error loading ${namespace} for ${language}:`, error)
+      this.logger.error(`Error loading ${namespace} for ${language}:`, error)
       throw new HttpException('Failed to load translations', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }

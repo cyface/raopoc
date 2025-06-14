@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common'
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import * as chokidar from 'chokidar'
@@ -17,6 +17,7 @@ import {
 
 @Injectable()
 export class ConfigService implements OnModuleInit {
+  private readonly logger = new Logger(ConfigService.name)
   private configCache: ConfigCache = {}
 
   async onModuleInit() {
@@ -33,7 +34,7 @@ export class ConfigService implements OnModuleInit {
       const data = await fs.readFile(filePath, 'utf-8')
       return JSON.parse(data)
     } catch (error) {
-      console.error(`Error loading config file ${filename}:`, error)
+      this.logger.error(`Error loading config file ${filename}:`, error)
       throw error
     }
   }
@@ -47,10 +48,10 @@ export class ConfigService implements OnModuleInit {
       this.configCache.documents = await this.loadConfigFile('documents.json')
       this.configCache.bankInfo = await this.loadConfigFile('bank-info.json')
       this.configCache.badSSNs = await this.loadConfigFile('bad-ssns.json')
-      console.log('All config files loaded successfully')
+      this.logger.log('All config files loaded successfully')
     } catch (error) {
-      console.error('Error loading config files:', error)
-      console.error('Server will continue without config files loaded')
+      this.logger.error('Error loading config files:', error)
+      this.logger.error('Server will continue without config files loaded')
     }
   }
 
@@ -63,7 +64,7 @@ export class ConfigService implements OnModuleInit {
 
     watcher.on('change', async (filePath) => {
       const filename = path.basename(filePath)
-      console.log(`Config file ${filename} changed, reloading...`)
+      this.logger.log(`Config file ${filename} changed, reloading...`)
       
       try {
         if (filename === 'states.json') {
@@ -81,9 +82,9 @@ export class ConfigService implements OnModuleInit {
         } else if (filename === 'bad-ssns.json') {
           this.configCache.badSSNs = await this.loadConfigFile(filename)
         }
-        console.log(`Successfully reloaded ${filename}`)
+        this.logger.log(`Successfully reloaded ${filename}`)
       } catch (error) {
-        console.error(`Error reloading ${filename}:`, error)
+        this.logger.error(`Error reloading ${filename}:`, error)
       }
     })
   }
@@ -113,7 +114,7 @@ export class ConfigService implements OnModuleInit {
         try {
           await fs.access(bankSpecificEnglishPath)
           const content = await fs.readFile(bankSpecificEnglishPath, 'utf-8')
-          console.log(`Warning: Bank-specific localized config ${configFileName} not found for ${bankSlug}, using English version`)
+          this.logger.warn(`Bank-specific localized config ${configFileName} not found for ${bankSlug}, using English version`)
           return JSON.parse(content)
         } catch {
           // Bank-specific English config not found either
@@ -135,7 +136,7 @@ export class ConfigService implements OnModuleInit {
       try {
         await fs.access(basePath)
         const content = await fs.readFile(basePath, 'utf-8')
-        console.log(`Warning: Localized config ${configFileName} not found, falling back to English version`)
+        this.logger.warn(`Localized config ${configFileName} not found, falling back to English version`)
         return JSON.parse(content)
       } catch {
         throw new Error(`Neither localized config ${configFileName} nor English config ${baseConfigName} found`)
