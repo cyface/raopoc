@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useOnboarding } from '../context/OnboardingContext';
 import { configService, type BankInfo } from '../services/configService';
 import { useTheme } from '../context/ThemeContext';
@@ -277,7 +277,13 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
                 {t('confirmationScreen.success.emailSent')}
               </h4>
               <p style={{ fontSize: '0.875rem', color: styles.vars.color.textSecondary, margin: 0 }}>
-                {t('confirmationScreen.success.emailMessage', { email: data.customerInfo?.email })}
+                <Trans
+                  i18nKey="confirmationScreen.success.emailMessage"
+                  values={{ email: data.customerInfo?.email }}
+                  components={{
+                    strong: <strong style={{ color: styles.vars.color.textPrimary }} />
+                  }}
+                />
               </p>
             </div>
           </div>
