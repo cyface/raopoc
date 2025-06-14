@@ -47,7 +47,7 @@ describe('DevStepNavigator', () => {
     )
 
     expect(mockNavigate).toHaveBeenCalledWith({
-      pathname: '/step/3/identification',
+      pathname: '/step/3/customer-info',
       search: '?devStep=3&mockScenario=noSSN&fi=testbank'
     }, { replace: true })
   })
@@ -96,7 +96,7 @@ describe('DevStepNavigator', () => {
     )
 
     expect(mockNavigate).toHaveBeenCalledWith({
-      pathname: '/step/2/customer-info',
+      pathname: '/step/2/product-selection',
       search: '?devStep=3&mockScenario=noSSN&fi=testbank'
     }, { replace: true })
   })

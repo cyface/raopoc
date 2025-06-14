@@ -41,7 +41,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: null,
         lng: 'en',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
     })
 
@@ -71,7 +73,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: 'warmbank',
         lng: 'es',
-        dark: '1'
+        dark: '1',
+        devStep: null,
+        mockScenario: null
       })
     })
   })
@@ -131,7 +135,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: 'warmbank',
         lng: 'en',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       // Simulate LanguageSwitcher changing to Spanish
@@ -143,7 +149,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: 'warmbank',
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
     })
 
@@ -154,7 +162,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: null,
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
       
       // Simulate navigation to different bank
@@ -166,7 +176,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: 'coolbank',
         lng: 'es',
-        dark: null
+        dark: null,
+        devStep: null,
+        mockScenario: null
       })
     })
 
@@ -175,10 +187,10 @@ describe('useUrlParams Hook', () => {
       
       // Rapid changes like user clicking language switcher multiple times
       const changes = [
-        { search: '?lng=es', expected: { fi: null, lng: 'es', dark: null } },
-        { search: '?fi=warmbank&lng=es', expected: { fi: 'warmbank', lng: 'es', dark: null } },
-        { search: '?fi=warmbank&lng=en', expected: { fi: 'warmbank', lng: 'en', dark: null } },
-        { search: '?fi=coolbank&lng=en&dark=1', expected: { fi: 'coolbank', lng: 'en', dark: '1' } },
+        { search: '?lng=es', expected: { fi: null, lng: 'es', dark: null, devStep: null, mockScenario: null } },
+        { search: '?fi=warmbank&lng=es', expected: { fi: 'warmbank', lng: 'es', dark: null, devStep: null, mockScenario: null } },
+        { search: '?fi=warmbank&lng=en', expected: { fi: 'warmbank', lng: 'en', dark: null, devStep: null, mockScenario: null } },
+        { search: '?fi=coolbank&lng=en&dark=1', expected: { fi: 'coolbank', lng: 'en', dark: '1', devStep: null, mockScenario: null } },
       ]
       
       changes.forEach(change => {
@@ -277,7 +289,9 @@ describe('useUrlParams Hook', () => {
       expect(result.current).toEqual({
         fi: '',
         lng: 'invalid', // Invalid languages are preserved
-        dark: ''
+        dark: '',
+        devStep: null,
+        mockScenario: null
       })
     })
 
