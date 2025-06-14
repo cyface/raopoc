@@ -5,7 +5,6 @@ A modern, secure React-based customer onboarding application for banks that prov
 ## Features
 
 ### 🏦 Customer Onboarding
-- **Modern Route-Based Architecture**: Built with React Router v7 for optimized data loading and navigation
 - Multi-step guided onboarding flow with progress indicators and step validation
 - Product selection (checking, savings, money market accounts) with dynamic pricing
 - Customer information collection with comprehensive form validation using Zod schemas
@@ -36,7 +35,6 @@ A modern, secure React-based customer onboarding application for banks that prov
 - Dynamic content loading based on bank context
 
 ### 🎨 Modern UI/UX
-- **React Router v7**: Latest routing with route-based data loading, form actions, and optimistic UI
 - Responsive design optimized for mobile and desktop with modern CSS Grid and Flexbox
 - Accessible components with comprehensive ARIA support and keyboard navigation
 - Advanced theme system with bank-specific branding and CSS custom properties
@@ -45,7 +43,7 @@ A modern, secure React-based customer onboarding application for banks that prov
 
 ## Prerequisites
 
-- **Node.js 20+** (required for React Router v7)
+- **Node.js 20+**
 - **pnpm** (install with `npm install -g pnpm`)
 - **For HTTPS development**: Caddy (install with `brew install caddy`)
 - **TypeScript 5+** for enhanced type safety
@@ -178,7 +176,7 @@ pnpm run preview
 
 ### Frontend
 - **Framework**: React 18 with TypeScript 5+
-- **Routing**: **React Router v7** with route-based data loading, form actions, and lazy loading
+- **Routing**: **React Router v6**
 - **Build Tool**: Vite with Hot Module Replacement and optimized bundling
 - **Styling**: Vanilla Extract CSS-in-JS with theme system
 - **State Management**: React Context API with optimized providers
@@ -209,7 +207,7 @@ pnpm run preview
 │   ├── components/         # Reusable React components with tests
 │   ├── context/           # Context providers (onboarding, theme)
 │   ├── hooks/             # Custom React hooks
-│   ├── router/            # React Router v7 configuration and error boundaries
+│   ├── router/            # React Router v6 configuration and error boundaries
 │   ├── routes/            # Route components with loaders and actions
 │   │   ├── loaders/       # Route-based data loaders
 │   │   └── __tests__/     # Route-specific tests

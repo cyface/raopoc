@@ -1,5 +1,6 @@
 import { useUrlParams } from '../hooks/useUrlParams'
 import { MOCK_SCENARIOS } from '../utils/mockData'
+import { STEP_TO_ROUTE } from '../constants/routes'
 
 export function DevHelper() {
   const { devStep, mockScenario } = useUrlParams()
@@ -12,14 +13,23 @@ export function DevHelper() {
   const currentUrl = new URL(window.location.href)
   
   const createStepUrl = (step: number, scenario?: string) => {
-    const newUrl = new URL(currentUrl)
-    newUrl.searchParams.set('devStep', step.toString())
+    const baseRoute = STEP_TO_ROUTE[step as keyof typeof STEP_TO_ROUTE] || '/'
+    const url = new URL(window.location.origin + baseRoute)
+    
+    // Preserve existing URL parameters
+    currentUrl.searchParams.forEach((value, key) => {
+      if (key !== 'devStep' && key !== 'mockScenario') {
+        url.searchParams.set(key, value)
+      }
+    })
+    
+    // Set dev parameters
+    url.searchParams.set('devStep', step.toString())
     if (scenario) {
-      newUrl.searchParams.set('mockScenario', scenario)
-    } else {
-      newUrl.searchParams.delete('mockScenario')
+      url.searchParams.set('mockScenario', scenario)
     }
-    return newUrl.toString()
+    
+    return url.toString()
   }
 
   const createScenarioUrl = (scenario: string) => {

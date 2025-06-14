@@ -1,16 +1,20 @@
-import ProductSelection from './components/ProductSelection'
-import CustomerInfo from './components/CustomerInfo'
-import IdentificationInfo from './components/IdentificationInfo'
-import { DocumentAcceptance } from './components/DocumentAcceptance'
-import { ConfirmationScreen } from './components/ConfirmationScreen'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { DevHelper } from './components/DevHelper'
-import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
+import { RouteGuard } from './components/RouteGuard'
+import { NamedRouteRedirect } from './components/NamedRouteRedirect'
+import { OnboardingProvider } from './context/OnboardingContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { useUrlParams } from './hooks/useUrlParams'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
-import type { CustomerInfoData } from './types/customer'
-import type { IdentificationInfoData } from './types/identification'
+import { ROUTES, NAMED_ROUTES } from './constants/routes'
+
+// Import page components
+import { ProductSelectionPage } from './pages/ProductSelectionPage'
+import { CustomerInfoPage } from './pages/CustomerInfoPage'
+import { IdentificationPage } from './pages/IdentificationPage'
+import { DocumentsPage } from './pages/DocumentsPage'
+import { ConfirmationPage } from './pages/ConfirmationPage'
 
 function UrlParamWatcher() {
   const { lng } = useUrlParams()
@@ -28,57 +32,64 @@ function UrlParamWatcher() {
 }
 
 function OnboardingFlow() {
-  const { currentStep, data, setCustomerInfo, setIdentificationInfo, setDocumentAcceptance, setCurrentStep } = useOnboarding()
-
-  const handleCustomerInfoNext = (customerInfo: CustomerInfoData) => {
-    setCustomerInfo(customerInfo)
-    setCurrentStep(3)
-  }
-
-  const handleIdentificationInfoNext = (identificationInfo: IdentificationInfoData) => {
-    setIdentificationInfo(identificationInfo)
-    setCurrentStep(4)
-  }
-
-  const handleDocumentAcceptanceNext = () => {
-    setCurrentStep(5)
-  }
-
-  switch (currentStep) {
-    case 1:
-      return <ProductSelection />
-    case 2:
-      return (
-        <CustomerInfo 
-          selectedProducts={data.selectedProducts} 
-          onNext={handleCustomerInfoNext}
-        />
-      )
-    case 3:
-      return (
-        <IdentificationInfo 
-          onNext={handleIdentificationInfoNext}
-        />
-      )
-    case 4:
-      return (
-        <DocumentAcceptance
-          selectedProducts={data.selectedProducts}
-          hasNoSSN={data.identificationInfo?.noSSN || false}
-          onAcceptanceChange={setDocumentAcceptance}
-          onNext={handleDocumentAcceptanceNext}
-        />
-      )
-    case 5:
-      return <ConfirmationScreen />
-    default:
-      return (
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <h1>Step {currentStep}</h1>
-          <p>Coming soon...</p>
-        </div>
-      )
-  }
+  return (
+    <Routes>
+      {/* Root redirect to first step */}
+      <Route path="/" element={<Navigate to={ROUTES.STEP_1} replace />} />
+      
+      {/* Named route redirects */}
+      <Route path={NAMED_ROUTES.PRODUCT_SELECTION} element={<NamedRouteRedirect />} />
+      <Route path={NAMED_ROUTES.CUSTOMER_INFO} element={<NamedRouteRedirect />} />
+      <Route path={NAMED_ROUTES.IDENTIFICATION} element={<NamedRouteRedirect />} />
+      <Route path={NAMED_ROUTES.DOCUMENTS} element={<NamedRouteRedirect />} />
+      <Route path={NAMED_ROUTES.CONFIRMATION} element={<NamedRouteRedirect />} />
+      
+      {/* Numbered step routes with guards */}
+      <Route 
+        path={ROUTES.STEP_1} 
+        element={
+          <RouteGuard requiredStep={1}>
+            <ProductSelectionPage />
+          </RouteGuard>
+        } 
+      />
+      <Route 
+        path={ROUTES.STEP_2} 
+        element={
+          <RouteGuard requiredStep={2}>
+            <CustomerInfoPage />
+          </RouteGuard>
+        } 
+      />
+      <Route 
+        path={ROUTES.STEP_3} 
+        element={
+          <RouteGuard requiredStep={3}>
+            <IdentificationPage />
+          </RouteGuard>
+        } 
+      />
+      <Route 
+        path={ROUTES.STEP_4} 
+        element={
+          <RouteGuard requiredStep={4}>
+            <DocumentsPage />
+          </RouteGuard>
+        } 
+      />
+      <Route 
+        path={ROUTES.STEP_5} 
+        element={
+          <RouteGuard requiredStep={5}>
+            <ConfirmationPage />
+          </RouteGuard>
+        } 
+      />
+      
+      {/* Catch-all redirect to first step */}
+      <Route path="*" element={<Navigate to={ROUTES.STEP_1} replace />} />
+    </Routes>
+  )
 }
 
 function App() {

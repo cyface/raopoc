@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PiggyBank, CreditCard, TrendingUp, Building2, Sun, Moon, LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ProductType, ProductSelectionSchema, type ProductSelectionData } from '../types/products'
@@ -6,6 +7,7 @@ import { useOnboarding } from '../context/OnboardingContext'
 import { useTheme } from '../context/ThemeContext'
 import { useProductsAndBankInfo } from '../hooks/useConfig'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { ROUTES } from '../constants/routes'
 
 // Icon mapping to convert string names to React components
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -15,9 +17,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 export default function ProductSelection() {
-  const { setSelectedProducts: setGlobalProducts, setCurrentStep } = useOnboarding()
+  const { setSelectedProducts: setGlobalProducts } = useOnboarding()
   const { theme, toggleTheme, styles } = useTheme()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   
   // Use reactive hooks that automatically update when URL parameters change
   const { products, bankInfo } = useProductsAndBankInfo()
@@ -42,7 +45,7 @@ export default function ProductSelection() {
       ProductSelectionSchema.parse(data)
       
       setGlobalProducts(selectedProducts)
-      setCurrentStep(2)
+      navigate(ROUTES.STEP_2)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
