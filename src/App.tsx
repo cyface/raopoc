@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { DevHelper } from './components/DevHelper'
+import { DevStepNavigator } from './components/DevStepNavigator'
 import { RouteGuard } from './components/RouteGuard'
 import { NamedRouteRedirect } from './components/NamedRouteRedirect'
 import { OnboardingProvider } from './context/OnboardingContext'
@@ -97,6 +98,7 @@ function App() {
     <ThemeProvider>
       <OnboardingProvider>
         <UrlParamWatcher />
+        <DevStepNavigator />
         <OnboardingFlow />
         <DevHelper />
       </OnboardingProvider>
