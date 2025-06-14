@@ -14,6 +14,14 @@
   "navigation": {
     "step": "Paso {{current}} de {{total}}"
   },
+  "emailCapture": {
+    "title": "¡Comencemos!",
+    "subtitle": "Ingresa tu dirección de correo electrónico para comenzar tu solicitud de cuenta. Lo usaremos para enviarte actualizaciones sobre tu solicitud.",
+    "emailLabel": "Dirección de Correo Electrónico",
+    "emailPlaceholder": "Ingresa tu dirección de correo electrónico",
+    "privacyNotice": "Protegemos tu privacidad y solo usaremos tu correo electrónico para comunicarnos sobre tu solicitud de cuenta. Puedes cancelar la suscripción en cualquier momento.",
+    "skipNotice": "Al continuar, aceptas recibir comunicaciones por correo electrónico sobre tu solicitud."
+  },
   "productSelection": {
     "title": "¡Abramos su cuenta!",
     "subtitle": "Seleccione los tipos de cuenta que le gustaría abrir. Puede elegir múltiples opciones.",

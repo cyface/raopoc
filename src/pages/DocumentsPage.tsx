@@ -10,11 +10,11 @@ export function DocumentsPage() {
 
   useEffect(() => {
     // Sync the onboarding context with the current route
-    setCurrentStep(4)
+    setCurrentStep(5)
   }, [setCurrentStep])
 
   const handleNext = () => {
-    navigate(ROUTES.STEP_5)
+    navigate(ROUTES.STEP_6)
   }
 
   return (

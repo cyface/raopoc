@@ -13,7 +13,7 @@ export function DevStepNavigator() {
   const location = useLocation()
 
   useEffect(() => {
-    if (devStep && devStep >= 1 && devStep <= 5) {
+    if (devStep && devStep >= 1 && devStep <= 6) {
       const targetRoute = STEP_TO_ROUTE[devStep as keyof typeof STEP_TO_ROUTE]
       
       // Only navigate if we're not already on the target route

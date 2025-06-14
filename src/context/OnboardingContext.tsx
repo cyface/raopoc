@@ -20,6 +20,7 @@ interface OnboardingContextType {
   setCustomerInfo: (customerInfo: CustomerInfoData) => void
   setIdentificationInfo: (identificationInfo: IdentificationInfoData) => void
   setDocumentAcceptance: (documentAcceptance: DocumentAcceptanceState) => void
+  setEmail: (email: string) => void
   currentStep: number
   setCurrentStep: (step: number) => void
   creditCheckResult: CreditCheckResult | null
@@ -44,7 +45,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   // Effect to handle devStep URL parameter
   useEffect(() => {
-    if (devStep && devStep >= 1 && devStep <= 5) {
+    if (devStep && devStep >= 1 && devStep <= 6) {
       // Get mock scenario config
       const scenarioConfig = mockScenario && mockScenario in MOCK_SCENARIOS 
         ? MOCK_SCENARIOS[mockScenario as MockScenario].config 
@@ -61,6 +62,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         identificationInfo: mockData.identificationInfo || prev.identificationInfo,
         documentAcceptance: mockData.documentAcceptance || prev.documentAcceptance,
       }))
+      
+      // Set captured email for dev mode (step 1 and above)
+      if (devStep >= 1) {
+        setEmail('dev@example.com')
+      }
       
       // Set the current step
       setCurrentStep(devStep)
@@ -83,6 +89,27 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   const setDocumentAcceptance = (documentAcceptance: DocumentAcceptanceState) => {
     setData(prev => ({ ...prev, documentAcceptance }))
+  }
+
+  const setEmail = (email: string) => {
+    setData(prev => ({
+      ...prev,
+      customerInfo: prev.customerInfo 
+        ? { ...prev.customerInfo, email }
+        : {
+            firstName: '',
+            lastName: '',
+            email,
+            phoneNumber: '',
+            mailingAddress: {
+              street: '',
+              city: '',
+              state: '',
+              zipCode: ''
+            },
+            useSameAddress: true
+          }
+    }))
   }
 
   const performCreditCheck = async (ssn: string) => {
@@ -123,6 +150,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setCustomerInfo,
     setIdentificationInfo,
     setDocumentAcceptance,
+    setEmail,
     currentStep,
     setCurrentStep,
     creditCheckResult,

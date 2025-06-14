@@ -11,12 +11,12 @@ export function IdentificationPage() {
 
   useEffect(() => {
     // Sync the onboarding context with the current route
-    setCurrentStep(3)
+    setCurrentStep(4)
   }, [setCurrentStep])
 
   const handleNext = (identificationInfo: IdentificationInfoData) => {
     setIdentificationInfo(identificationInfo)
-    navigate(ROUTES.STEP_4)
+    navigate(ROUTES.STEP_5)
   }
 
   return <IdentificationInfo onNext={handleNext} />

@@ -45,7 +45,7 @@ export default function ProductSelection() {
       ProductSelectionSchema.parse(data)
       
       setGlobalProducts(selectedProducts)
-      navigate(ROUTES.STEP_2)
+      navigate(ROUTES.STEP_3)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)

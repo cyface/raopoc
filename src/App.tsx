@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { ROUTES, NAMED_ROUTES } from './constants/routes'
 
 // Import page components
+import { EmailCapturePage } from './pages/EmailCapturePage'
 import { ProductSelectionPage } from './pages/ProductSelectionPage'
 import { CustomerInfoPage } from './pages/CustomerInfoPage'
 import { IdentificationPage } from './pages/IdentificationPage'
@@ -39,6 +40,7 @@ function OnboardingFlow() {
       <Route path="/" element={<Navigate to={ROUTES.STEP_1} replace />} />
       
       {/* Named route redirects */}
+      <Route path={NAMED_ROUTES.EMAIL_CAPTURE} element={<NamedRouteRedirect />} />
       <Route path={NAMED_ROUTES.PRODUCT_SELECTION} element={<NamedRouteRedirect />} />
       <Route path={NAMED_ROUTES.CUSTOMER_INFO} element={<NamedRouteRedirect />} />
       <Route path={NAMED_ROUTES.IDENTIFICATION} element={<NamedRouteRedirect />} />
@@ -50,7 +52,7 @@ function OnboardingFlow() {
         path={ROUTES.STEP_1} 
         element={
           <RouteGuard requiredStep={1}>
-            <ProductSelectionPage />
+            <EmailCapturePage />
           </RouteGuard>
         } 
       />
@@ -58,7 +60,7 @@ function OnboardingFlow() {
         path={ROUTES.STEP_2} 
         element={
           <RouteGuard requiredStep={2}>
-            <CustomerInfoPage />
+            <ProductSelectionPage />
           </RouteGuard>
         } 
       />
@@ -66,7 +68,7 @@ function OnboardingFlow() {
         path={ROUTES.STEP_3} 
         element={
           <RouteGuard requiredStep={3}>
-            <IdentificationPage />
+            <CustomerInfoPage />
           </RouteGuard>
         } 
       />
@@ -74,7 +76,7 @@ function OnboardingFlow() {
         path={ROUTES.STEP_4} 
         element={
           <RouteGuard requiredStep={4}>
-            <DocumentsPage />
+            <IdentificationPage />
           </RouteGuard>
         } 
       />
@@ -82,6 +84,14 @@ function OnboardingFlow() {
         path={ROUTES.STEP_5} 
         element={
           <RouteGuard requiredStep={5}>
+            <DocumentsPage />
+          </RouteGuard>
+        } 
+      />
+      <Route 
+        path={ROUTES.STEP_6} 
+        element={
+          <RouteGuard requiredStep={6}>
             <ConfirmationPage />
           </RouteGuard>
         } 

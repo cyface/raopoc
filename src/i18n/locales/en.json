@@ -14,6 +14,14 @@
   "navigation": {
     "step": "Step {{current}} of {{total}}"
   },
+  "emailCapture": {
+    "title": "Let's Get Started!",
+    "subtitle": "Enter your email address to begin your account application. We'll use this to send you updates about your application.",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "privacyNotice": "We protect your privacy and will only use your email to communicate about your account application. You can unsubscribe at any time.",
+    "skipNotice": "By continuing, you agree to receive email communications about your application."
+  },
   "productSelection": {
     "title": "Let's Open Your Account!",
     "welcomeTo": "Welcome to {{bankName}}",

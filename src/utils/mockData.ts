@@ -140,26 +140,31 @@ export function populateMockDataUpToStep(
   
   // Populate data for each step up to the target step
   if (targetStep >= 1) {
-    // Step 1: Product Selection
-    mockData.selectedProducts = config.productTypes || DEFAULT_PRODUCTS
+    // Step 1: Email Capture - handled by OnboardingContext setCapturedEmail
+    // No additional mock data needed here
   }
   
   if (targetStep >= 2) {
-    // Step 2: Customer Info
-    mockData.customerInfo = getMockCustomerInfo(config)
+    // Step 2: Product Selection
+    mockData.selectedProducts = config.productTypes || DEFAULT_PRODUCTS
   }
   
   if (targetStep >= 3) {
-    // Step 3: Identification Info
-    mockData.identificationInfo = getMockIdentificationInfo(config)
+    // Step 3: Customer Info
+    mockData.customerInfo = getMockCustomerInfo(config)
   }
   
   if (targetStep >= 4) {
-    // Step 4: Document Acceptance
+    // Step 4: Identification Info
+    mockData.identificationInfo = getMockIdentificationInfo(config)
+  }
+  
+  if (targetStep >= 5) {
+    // Step 5: Document Acceptance
     mockData.documentAcceptance = MOCK_DOCUMENT_ACCEPTANCE
   }
   
-  // Step 5 (Confirmation) doesn't require additional data
+  // Step 6 (Confirmation) doesn't require additional data
   
   return mockData
 }

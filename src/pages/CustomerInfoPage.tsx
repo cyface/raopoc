@@ -11,12 +11,12 @@ export function CustomerInfoPage() {
 
   useEffect(() => {
     // Sync the onboarding context with the current route
-    setCurrentStep(2)
+    setCurrentStep(3)
   }, [setCurrentStep])
 
   const handleNext = (customerInfo: CustomerInfoData) => {
     setCustomerInfo(customerInfo)
-    navigate(ROUTES.STEP_3)
+    navigate(ROUTES.STEP_4)
   }
 
   return (

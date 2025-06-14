@@ -7,7 +7,8 @@ interface StepIndicatorProps {
 }
 
 const stepNames = [
-  'Product Selection',
+  'Email Capture',
+  'Product Selection', 
   'Personal Information',
   'Identification',
   'Document Review',
@@ -16,12 +17,13 @@ const stepNames = [
 
 export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep }) => {
   const { styles } = useTheme();
+  // Show steps 2-4 in the indicator (Product Selection through Identification)
   const visibleSteps = stepNames.slice(1, 4);
 
   return (
     <div className={styles.stepIndicator}>
       {visibleSteps.map((name, index) => {
-        const stepNumber = index + 2;
+        const stepNumber = index + 2; // Still maps to steps 2, 3, 4
         const isActive = stepNumber === currentStep;
         const isCompleted = stepNumber < currentStep;
         

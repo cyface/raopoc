@@ -150,7 +150,7 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
         <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
-      <StepIndicator currentStep={currentStep} totalSteps={5} />
+      <StepIndicator currentStep={currentStep} totalSteps={6} />
       
       <h1 className={styles.heading}>{t('identificationInfo.title')}</h1>
       <p className={styles.subheading}>

@@ -7,7 +7,7 @@ export function ConfirmationPage() {
 
   useEffect(() => {
     // Sync the onboarding context with the current route
-    setCurrentStep(5)
+    setCurrentStep(6)
   }, [setCurrentStep])
 
   return <ConfirmationScreen />

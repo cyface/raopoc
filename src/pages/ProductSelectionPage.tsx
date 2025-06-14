@@ -7,7 +7,7 @@ export function ProductSelectionPage() {
 
   useEffect(() => {
     // Sync the onboarding context with the current route
-    setCurrentStep(1)
+    setCurrentStep(2)
   }, [setCurrentStep])
 
   return <ProductSelection />

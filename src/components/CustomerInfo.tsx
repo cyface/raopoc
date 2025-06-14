@@ -15,23 +15,23 @@ interface CustomerInfoProps {
 }
 
 export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoProps) {
-  const { currentStep } = useOnboarding()
+  const { currentStep, data } = useOnboarding()
   const { styles } = useTheme()
   const { t } = useTranslation()
-  const [formData, setFormData] = useState<CustomerInfoData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    mailingAddress: {
+  const [formData, setFormData] = useState<CustomerInfoData>(() => ({
+    firstName: data.customerInfo?.firstName || '',
+    lastName: data.customerInfo?.lastName || '',
+    email: data.customerInfo?.email || '',
+    phoneNumber: data.customerInfo?.phoneNumber || '',
+    mailingAddress: data.customerInfo?.mailingAddress || {
       street: '',
       city: '',
       state: '',
       zipCode: '',
     },
-    billingAddress: undefined,
-    useSameAddress: true,
-  })
+    billingAddress: data.customerInfo?.billingAddress,
+    useSameAddress: data.customerInfo?.useSameAddress ?? true,
+  }))
   
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [states, setStates] = useState<State[]>([])
@@ -143,7 +143,7 @@ export default function CustomerInfo({ selectedProducts, onNext }: CustomerInfoP
         <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
       </div>
       
-      <StepIndicator currentStep={currentStep} totalSteps={5} />
+      <StepIndicator currentStep={currentStep} totalSteps={6} />
       
       <h1 className={styles.heading}>{t('customerInfo.title')}</h1>
       <p className={styles.subheading}>

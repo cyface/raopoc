@@ -60,7 +60,7 @@ export function DevHelper() {
       <div style={{ marginBottom: '0.5rem' }}>
         <strong>Steps:</strong>
         <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
-          {[1, 2, 3, 4, 5].map(step => (
+          {[1, 2, 3, 4, 5, 6].map(step => (
             <a
               key={step}
               href={createStepUrl(step, mockScenario || undefined)}
