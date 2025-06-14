@@ -176,7 +176,7 @@ export function DocumentAcceptance({
   if (error) {
     return (
       <div className={styles.container}>
-        <div style={{ color: 'red' }}>{error}</div>
+        <div style={{ color: styles.vars.color.error }}>{error}</div>
       </div>
     );
   }
@@ -198,7 +198,7 @@ export function DocumentAcceptance({
       </p>
 
       {documents.length === 0 ? (
-        <div style={{ padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '8px', marginBottom: '2rem' }}>
+        <div style={{ padding: '1rem', backgroundColor: styles.vars.color.surface, border: `1px solid ${styles.vars.color.border}`, borderRadius: '8px', marginBottom: '2rem' }}>
           {t('documentAcceptance.noDocumentsRequired')}
         </div>
       ) : (
@@ -219,12 +219,12 @@ export function DocumentAcceptance({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
             {documents.map((document) => (
-              <div key={document.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem' }}>
+              <div key={document.id} style={{ border: `1px solid ${styles.vars.color.border}`, borderRadius: '8px', padding: '1rem', backgroundColor: styles.vars.color.surface }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem', fontWeight: '600' }}>{document.name}</h3>
+                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem', fontWeight: '600', color: styles.vars.color.textPrimary }}>{document.name}</h3>
                     {document.description && (
-                      <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>{document.description}</p>
+                      <p style={{ margin: 0, color: styles.vars.color.textSecondary, fontSize: '0.875rem' }}>{document.description}</p>
                     )}
                   </div>
                   
@@ -263,7 +263,7 @@ export function DocumentAcceptance({
                     />
                     <span style={{ fontSize: '0.875rem' }}>
                       {t('documentAcceptance.acceptText', { documentName: document.name })}
-                      {document.required && <span style={{ color: 'red' }}> *</span>}
+                      {document.required && <span style={{ color: styles.vars.color.error }}> *</span>}
                     </span>
                   </label>
                 </div>
@@ -281,8 +281,8 @@ export function DocumentAcceptance({
             className={styles.button}
             disabled={documents.length > 0 && !allAccepted}
             style={{ 
-              backgroundColor: documents.length > 0 && !allAccepted ? '#d1d5db' : '#3b82f6',
-              color: 'white',
+              backgroundColor: documents.length > 0 && !allAccepted ? styles.vars.color.disabled : styles.vars.color.primary,
+              color: styles.vars.color.white,
               opacity: documents.length > 0 && !allAccepted ? 0.6 : 1,
               cursor: documents.length > 0 && !allAccepted ? 'not-allowed' : 'pointer'
             }}
@@ -297,7 +297,7 @@ export function DocumentAcceptance({
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backgroundColor: styles.vars.color.overlay,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -308,7 +308,7 @@ export function DocumentAcceptance({
         >
           <div 
             style={{
-              backgroundColor: 'white',
+              backgroundColor: styles.vars.color.surface,
               borderRadius: '8px',
               width: '90vw',
               height: '90vh',
@@ -322,13 +322,13 @@ export function DocumentAcceptance({
             <div 
               style={{
                 padding: '1rem',
-                borderBottom: '1px solid #e5e7eb',
+                borderBottom: `1px solid ${styles.vars.color.border}`,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}
             >
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', color: styles.vars.color.textPrimary }}>
                 {modalDocument.document.name}
               </h3>
               <button

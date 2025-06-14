@@ -257,8 +257,8 @@ export default function IdentificationInfo({ onNext }: IdentificationInfoProps) 
             autoComplete="off"
             disabled={formData.noSSN}
             style={{
-              backgroundColor: formData.noSSN ? '#f3f4f6' : undefined,
-              color: formData.noSSN ? '#9ca3af' : undefined,
+              backgroundColor: formData.noSSN ? styles.vars.color.surface : undefined,
+              color: formData.noSSN ? styles.vars.color.disabled : undefined,
               cursor: formData.noSSN ? 'not-allowed' : undefined,
             }}
           />

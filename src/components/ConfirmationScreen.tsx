@@ -236,20 +236,20 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
               gap: '1rem',
               padding: '1rem',
               backgroundColor: styles.vars.color.surface,
-              border: `2px solid #f59e0b`,
+              border: `2px solid ${styles.vars.color.warning}`,
               borderRadius: '8px'
             }}>
               <div style={{ 
                 width: '24px', 
                 height: '24px', 
-                backgroundColor: '#f59e0b',
+                backgroundColor: styles.vars.color.warning,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>!</span>
+                <span style={{ color: styles.vars.color.white, fontWeight: 'bold', fontSize: '14px' }}>!</span>
               </div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={{ fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0', color: styles.vars.color.textPrimary }}>

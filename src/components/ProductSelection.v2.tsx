@@ -135,7 +135,7 @@ export default function ProductSelectionV2() {
         <Building2 className={styles.bankIcon} />
         <h1 className={styles.bankName}>{bankInfo?.bankName || t('bankInfo.defaultName')}</h1>
         {/* Debug info - can be removed in production */}
-        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
+        <small style={{ color: styles.vars.color.textMuted, fontSize: '12px', marginTop: '4px' }}>
           Bank: {fi || 'default'} | Language: {lng}
         </small>
       </div>
