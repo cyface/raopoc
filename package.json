@@ -4,10 +4,10 @@
   "description": "Bank customer onboarding application",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:server\"",
+    "dev": "concurrently \"pnpm dev:server\" \"sleep 2 && pnpm dev:frontend\"",
     "dev:frontend": "vite",
     "dev:server": "cd server && nest start --watch",
-    "dev:https": "concurrently \"pnpm dev:frontend\" \"pnpm dev:server\" \"pnpm dev:caddy\"",
+    "dev:https": "concurrently \"pnpm dev:server\" \"sleep 2 && pnpm dev:frontend\" \"sleep 2 && pnpm dev:caddy\"",
     "dev:caddy": "caddy run --config Caddyfile",
     "build": "tsc && vite build",
     "build:server": "cd server && nest build",
