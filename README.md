@@ -1,6 +1,6 @@
 # Bank Customer Onboarding Application
 
-A modern, secure React-based customer onboarding application for banks that provides a smooth, multi-step account setup process with comprehensive data protection, built with React Router v7 and NestJS.
+A modern, secure React-based customer onboarding application for banks that provides a smooth, multi-step account setup process with comprehensive data protection, built with React Router v6 and NestJS.
 
 ## Features
 
@@ -213,7 +213,7 @@ pnpm run preview
 │   │   └── __tests__/     # Route-specific tests
 │   ├── services/          # API services and configuration management
 │   ├── styles/            # Vanilla Extract theme system
-│   ├── test-utils/        # Testing utilities for React Router v7
+│   ├── test-utils/        # Testing utilities for React Router v6
 │   ├── types/             # TypeScript type definitions
 │   └── utils/             # Utility functions and helpers
 ├── server/                # NestJS backend application

@@ -2,19 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## ⚠️ CRITICAL: React Router v7 Usage
+## ⚠️ CRITICAL: React Router v6 Usage
 
-**This project uses React Router v7.6.2** - ALWAYS use React Router v7 APIs and patterns:
+**This project uses React Router v6** - ALWAYS use React Router v6 APIs and patterns:
 
-- ✅ Import from `'react-router'` (NOT `'react-router-dom'`)
-- ✅ Use `Response.json()` instead of `json()` helper
+- ✅ Import from `'react-router-dom'`
+- ✅ Use `json()` helper for responses
 - ✅ Use route-based data loading with loaders and actions
 - ✅ Use `Form` component for submissions with actions
 - ✅ Use `useNavigation()` for pending states
 - ✅ Route components in `src/routes/` with loaders in `src/routes/loaders/`
-- ❌ DO NOT use deprecated React Router v6 patterns
-- ❌ DO NOT import from `'react-router-dom'`
-- ❌ DO NOT use `defer()` or `Await` components (removed in v7)
+- ✅ Can use `defer()` and `Await` components for streaming data
+- ❌ DO NOT use React Router v7 patterns (not yet migrated)
 
 ## ⚠️ CRITICAL: NestJS Backend Architecture
 
@@ -159,14 +158,14 @@ The application uses JSON configuration files in the `config/` directory:
 
 ## Project Structure
 
-This is a modern React Router v7 + NestJS application with:
+This is a modern React Router v6 + NestJS application with:
 
 ### Frontend (`src/`)
-- **Router**: React Router v7 configuration in `src/router/`
+- **Router**: React Router v6 configuration in `src/router/`
 - **Routes**: Route components with loaders/actions in `src/routes/`
 - **Components**: Reusable React components in `src/components/`
-- **Test Utils**: React Router v7 testing utilities in `src/test-utils/`
-- **Main entry point**: `src/main.tsx` with React Router v7 provider
+- **Test Utils**: React Router v6 testing utilities in `src/test-utils/`
+- **Main entry point**: `src/main.tsx` with React Router v6 provider
 
 ### Backend (`server/`)
 - **NestJS Structure**: Controllers, services, DTOs following NestJS conventions
@@ -179,7 +178,7 @@ This is a modern React Router v7 + NestJS application with:
 - Modern customer onboarding application for banks
 - Goal: Smoothly guide customers through bank account setup with enterprise-grade architecture
 - Key Features:
-  - **React Router v7**: Route-based data loading, form actions, lazy loading
+  - **React Router v6**: Route-based data loading, form actions, lazy loading
   - Product selection (checking, savings, money market) with dynamic pricing
   - Configurable workflow steps with route-based navigation
   - Personal information collection with comprehensive validation
@@ -192,20 +191,20 @@ This is a modern React Router v7 + NestJS application with:
   - Dynamic field interactions with real-time validation
   - Route-based data loading for optimal performance
 - Technology Stack:
-  - **Frontend**: React 18 + React Router v7 + TypeScript 5+
+  - **Frontend**: React 18 + React Router v6 + TypeScript 5+
   - **Backend**: NestJS + TypeScript (enterprise architecture)
   - **Build Tool**: Vite with HMR and optimized bundling
-  - **Routing**: React Router v7 with loaders, actions, error boundaries
+  - **Routing**: React Router v6 with loaders, actions, error boundaries
   - **UI Components**: Vanilla Extract CSS-in-JS with theme system
   - **Validation**: Zod (frontend) + class-validator (backend)
-  - **Testing**: Vitest + React Testing Library with React Router v7 utilities
+  - **Testing**: Vitest + React Testing Library with React Router v6 utilities
 
 ## Security and Testing
 
 - **NestJS Security**: Enterprise-grade security with guards, pipes, and middleware
 - **Multi-layer Validation**: Zod schemas (frontend) + class-validator decorators (backend)
 - **PII Encryption**: AES-256-GCM encryption for all sensitive data
-- **Testing**: Vitest with React Router v7 test utilities and NestJS testing module
+- **Testing**: Vitest with React Router v6 test utilities and NestJS testing module
 - **Type Safety**: Strict TypeScript configuration with comprehensive type checking
 
 ## Data Validation
@@ -239,21 +238,21 @@ This is a modern React Router v7 + NestJS application with:
 - **Error Handling**: Comprehensive error boundaries and API error responses
 - **Type Safety**: Strongly typed API interfaces with DTOs and response types
 
-## React Router v7 Patterns
+## React Router v6 Patterns
 
-**ALWAYS follow these React Router v7 patterns:**
+**ALWAYS follow these React Router v6 patterns:**
 
 ```typescript
 // Route component with loader and action
 export const customerInfoLoader: LoaderFunction = async ({ request }) => {
   // Load data before component renders
-  return { data: await fetchData() }
+  return json({ data: await fetchData() })
 }
 
 export const customerInfoAction: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
   // Process form submission
-  return Response.json({ success: true }) // Use Response.json, not json()
+  return json({ success: true }) // Use json() helper
 }
 
 // Route component
@@ -358,14 +357,14 @@ When testing the onboarding flow:
 1. **Use devStep for rapid testing**: Start at any step without manually filling previous steps
 2. **Test edge cases with scenarios**: Use `noSSN`, `differentBilling`, etc. for comprehensive testing
 3. **Validate form behavior**: Ensure forms work with both empty and pre-populated data
-4. **Test route transitions**: Verify React Router v7 loaders/actions work correctly with mock data
+4. **Test route transitions**: Verify React Router v6 loaders/actions work correctly with mock data
 
 ## Code Generation Guidelines
 
 - **ALWAYS run typecheck and lint** after code changes: `pnpm typecheck && pnpm lint`
-- **Use React Router v7 APIs only** - import from `'react-router'`
+- **Use React Router v6 APIs only** - import from `'react-router-dom'`
 - **Follow NestJS patterns** for backend code with proper decorators
-- **Write tests** using Vitest with React Router v7 test utilities
+- **Write tests** using Vitest with React Router v6 test utilities
 - **Validate forms** using both Zod (frontend) and class-validator (backend)
 - **Use devStep for testing** - include URL parameters in test scenarios when appropriate
 

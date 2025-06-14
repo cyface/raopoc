@@ -2,12 +2,18 @@ import { render, screen } from '@testing-library/react'
 import { Trans } from 'react-i18next'
 import { describe, it, expect } from 'vitest'
 
+interface MockTransProps {
+  i18nKey: string
+  values?: Record<string, string>
+  components?: Record<string, React.ReactElement>
+}
+
 // Mock i18next
 vi.mock('react-i18next', () => ({
-  Trans: ({ i18nKey, values, components }: any) => {
+  Trans: ({ i18nKey, values, components }: MockTransProps) => {
     // Simulate how Trans component works with HTML tags
     if (i18nKey === 'confirmationScreen.success.emailMessage') {
-      const text = `A confirmation email has been sent to <strong>${values.email}</strong> with your application details.`
+      const text = `A confirmation email has been sent to <strong>${values?.email || 'user@example.com'}</strong> with your application details.`
       
       // Simple HTML replacement for testing
       const parts = text.split(/<strong>(.*?)<\/strong>/)
