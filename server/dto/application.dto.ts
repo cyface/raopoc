@@ -8,19 +8,57 @@ export class CreateApplicationDto {
 
   @IsNotEmpty()
   @IsObject()
-  customerInfo: any
+  customerInfo: {
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber: string
+    mailingAddress: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    billingAddress?: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    useSameAddress: boolean
+  }
 
   @IsOptional()
   @IsObject()
-  identificationInfo?: any
+  identificationInfo?: {
+    identificationType: string
+    identificationNumber: string
+    state?: string
+    country?: string
+    socialSecurityNumber?: string
+    noSSN: boolean
+    dateOfBirth: string
+  }
 
   @IsOptional()
   @IsObject()
-  documentAcceptance?: any
+  documentAcceptance?: {
+    acceptances: Record<string, {
+      documentId: string
+      accepted: boolean
+      acceptedAt?: string
+    }>
+    allAccepted: boolean
+  }
 
   @IsOptional()
   @IsObject()
-  metadata?: any
+  metadata?: {
+    userAgent?: string
+    ipAddress?: string
+    timestamp?: string
+    [key: string]: unknown
+  }
 }
 
 export class CreditCheckDto {

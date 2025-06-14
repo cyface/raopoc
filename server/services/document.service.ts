@@ -9,7 +9,14 @@ export class DocumentService {
   
   constructor(private readonly configService: ConfigService) {}
 
-  async getDocument(documentId: string): Promise<{ buffer: Buffer; document: any }> {
+  async getDocument(documentId: string): Promise<{ buffer: Buffer; document: {
+    id: string
+    name: string
+    description?: string
+    url: string
+    required: boolean
+    category: string
+  } }> {
     const documentsConfig = this.configService.getDocuments()
     
     if (!documentsConfig) {

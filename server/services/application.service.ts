@@ -14,7 +14,46 @@ export class ApplicationService {
     private readonly configService: ConfigService
   ) {}
 
-  async createApplication(applicationData: any, userAgent?: string, ipAddress?: string) {
+  async createApplication(applicationData: {
+    selectedProducts: string[]
+    customerInfo?: {
+      firstName: string
+      lastName: string
+      email: string
+      phoneNumber: string
+      mailingAddress: {
+        street: string
+        city: string
+        state: string
+        zipCode: string
+      }
+      billingAddress?: {
+        street: string
+        city: string
+        state: string
+        zipCode: string
+      }
+      useSameAddress: boolean
+    }
+    identificationInfo?: {
+      identificationType: string
+      identificationNumber: string
+      state?: string
+      country?: string
+      socialSecurityNumber?: string
+      noSSN: boolean
+      dateOfBirth: string
+    }
+    documentAcceptance?: {
+      acceptances: Record<string, {
+        documentId: string
+        accepted: boolean
+        acceptedAt?: string
+      }>
+      allAccepted: boolean
+    }
+    metadata?: Record<string, unknown>
+  }, userAgent?: string, ipAddress?: string) {
     const applicationId = randomUUID()
     
     const lastName = applicationData.customerInfo?.lastName || 'Unknown'
