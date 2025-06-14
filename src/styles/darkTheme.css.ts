@@ -22,9 +22,11 @@ export const darkTheme = createTheme(vars, {
     borderFocus: '#3b82f6',
     selectedBg: '#1e3a8a',
     error: '#ef4444',
+    warning: '#f59e0b',
     success: '#22c55e',
     disabled: '#64748b',
     icon: '#60a5fa',
     white: '#ffffff',
+    overlay: 'rgba(0, 0, 0, 0.85)',
   }
 })

@@ -18,10 +18,12 @@ export const [themeClass, vars] = createTheme({
     borderFocus: '#3b82f6',
     selectedBg: '#eff6ff',
     error: '#dc2626',
+    warning: '#f59e0b',
     success: '#10b981',
     disabled: '#9ba0a6',
     icon: '#3b82f6',
     white: '#ffffff',
+    overlay: 'rgba(0, 0, 0, 0.75)',
   }
 })
 

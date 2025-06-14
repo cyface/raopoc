@@ -22,10 +22,12 @@ export const greenLightTheme = createTheme(vars, {
     borderFocus: '#1b5e20',      // Dark green focus
     selectedBg: '#e8f5e8',       // Light green selected
     error: '#d32f2f',            // Keep red for errors
+    warning: '#f57c00',          // Orange warning for contrast
     success: '#4caf50',          // Green success
     disabled: '#81a881',         // Light green-gray for disabled
     icon: '#1b5e20',             // Dark green icons
     white: '#ffffff',            // White
+    overlay: 'rgba(0, 0, 0, 0.75)', // Dark overlay
   }
 })
 
@@ -47,9 +49,11 @@ export const greenDarkTheme = createTheme(vars, {
     borderFocus: '#66bb6a',      // Light green focus
     selectedBg: '#3e7b3e',       // Medium dark green selected
     error: '#ef5350',            // Light red for dark theme
+    warning: '#ff9800',          // Orange warning for contrast
     success: '#81c784',          // Light green success
     disabled: '#5a7a5a',         // Muted green for disabled in dark theme
     icon: '#66bb6a',             // Light green icons
     white: '#ffffff',            // White
+    overlay: 'rgba(0, 0, 0, 0.85)', // Dark overlay
   }
 })

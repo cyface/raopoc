@@ -22,10 +22,12 @@ export const orangeLightTheme = createTheme(vars, {
     borderFocus: '#ea580c',      // Orange focus
     selectedBg: '#ffedd5',       // Light orange selected
     error: '#dc2626',            // Keep red for errors
+    warning: '#ea580c',          // Orange warning (matches primary)
     success: '#16a34a',          // Green success
     disabled: '#d4a574',         // Light orange-tan for disabled
     icon: '#ea580c',             // Orange icons
     white: '#ffffff',            // White
+    overlay: 'rgba(0, 0, 0, 0.75)', // Dark overlay
   }
 })
 
@@ -47,9 +49,11 @@ export const orangeDarkTheme = createTheme(vars, {
     borderFocus: '#fb923c',      // Light orange focus
     selectedBg: '#92400e',       // Medium dark orange selected
     error: '#ef5350',            // Light red for dark theme
+    warning: '#fb923c',          // Orange warning (matches primary)
     success: '#4ade80',          // Light green success
     disabled: '#92400e',         // Muted orange for disabled in dark theme
     icon: '#fb923c',             // Light orange icons
     white: '#ffffff',            // White
+    overlay: 'rgba(0, 0, 0, 0.85)', // Dark overlay
   }
 })
