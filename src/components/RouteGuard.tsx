@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOnboarding } from '../context/OnboardingContext'
+import { useUrlParams } from '../hooks/useUrlParams'
 import { ROUTES, StepNumber } from '../constants/routes'
 
 interface RouteGuardProps {
@@ -12,10 +13,16 @@ interface RouteGuardProps {
 export function RouteGuard({ children, requiredStep, allowSkipTo = false }: RouteGuardProps) {
   const { data } = useOnboarding()
   const navigate = useNavigate()
+  const { devStep } = useUrlParams()
 
   useEffect(() => {
     // Allow access to step 1 (product selection) always
     if (requiredStep === 1) return
+
+    // In dev mode, allow skipping to any step when devStep is present
+    if (devStep && devStep === requiredStep) {
+      return
+    }
 
     // Check if user has completed previous steps
     const hasSelectedProducts = data.selectedProducts.length > 0
@@ -54,7 +61,7 @@ export function RouteGuard({ children, requiredStep, allowSkipTo = false }: Rout
         }
         break
     }
-  }, [requiredStep, data, navigate, allowSkipTo])
+  }, [requiredStep, data, navigate, allowSkipTo, devStep])
 
   return <>{children}</>
 }
