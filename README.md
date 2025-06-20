@@ -94,7 +94,7 @@ pnpm run dev:https
 
 ### Docker Development
 
-For containerized development with Redis:
+For containerized development with PostgreSQL and Redis:
 
 ```bash
 # Start development containers
@@ -111,6 +111,7 @@ docker-compose -f docker-compose.dev.yml down
 **Access your application:**
 - 🌐 Frontend: http://localhost:5173
 - 🔌 Backend API: http://localhost:3000
+- 🗃️ PostgreSQL: localhost:5434
 - 📊 Redis: localhost:6381
 
 See [Docker documentation](docker/DOCKER.md) for full setup details and production deployment.

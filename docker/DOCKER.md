@@ -43,7 +43,17 @@ This document explains how to run the Bank Customer Onboarding application using
 2. **Access the application:**
    - Frontend (Vite): http://localhost:5173
    - Backend API: http://localhost:3000
-   - Redis: localhost:6379
+   - PostgreSQL: localhost:5434
+   - Redis: localhost:6381
+
+3. **Connect to development database:**
+   ```bash
+   # Using psql from host (if installed)
+   psql -h localhost -p 5434 -U raopoc -d raopoc_dev
+   
+   # Or connect via Docker
+   docker-compose -f docker-compose.dev.yml exec postgres psql -U raopoc -d raopoc_dev
+   ```
 
 ## Configuration
 

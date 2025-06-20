@@ -1,4 +1,23 @@
 services:
+  # PostgreSQL database for development
+  postgres:
+    image: postgres:16-alpine
+    container_name: raopoc-postgres-dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-raopoc_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-raopoc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-raopoc123}
+    ports:
+      - "5434:5432"  # Non-standard port for development
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-raopoc}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   # Redis service for development
   redis:
     image: redis:7-alpine
@@ -25,6 +44,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - DATABASE_URL=postgres://${POSTGRES_USER:-raopoc}:${POSTGRES_PASSWORD:-raopoc123}@postgres:5432/${POSTGRES_DB:-raopoc_dev}
       - REDIS_URL=redis://redis:6379
       - VITE_CONFIG_CACHE_TIMEOUT=5000
     volumes:
@@ -43,11 +63,15 @@ services:
       - /app/node_modules
       - /app/server/node_modules
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
     command: pnpm run dev
 
 volumes:
-  redis-data:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
     driver: local
