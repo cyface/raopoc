@@ -374,6 +374,6 @@ When testing the onboarding flow:
 
 ## Docker Configuration
 
-- This application should be runnable via Docker
-- Requires a Dockerfile and docker-compose
-- Docker-compose should include Redis for session management
+- This application is fully containerized with Docker
+- See [docker/DOCKER.md](docker/DOCKER.md) for complete Docker setup and deployment instructions
+- Docker Compose includes PostgreSQL, pgBouncer, Redis, and Caddy for a complete production stack

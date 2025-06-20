@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+server/dist/
+*.tsbuildinfo
+
+# Development files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Docker files (don't copy these into the image)
+docker/
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Caddy files (we'll copy only what's needed)
+Caddyfile
+caddy_data/
+caddy_config/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS files
+Thumbs.db
+
+# Local environment overrides
+*.local
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+__tests__/
+__mocks__/
+
+# Vitest
+vitest.config.ts
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# Package manager files (we'll copy package.json and lock files separately)
+.npmrc
+.yarnrc
+.pnpmfile.cjs

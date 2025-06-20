@@ -2,6 +2,13 @@
 
 A modern, secure React-based customer onboarding application for banks that provides a smooth, multi-step account setup process with comprehensive data protection, built with React Router v6 and NestJS.
 
+## Documentation
+
+- 📚 [CLAUDE.md](CLAUDE.md) - AI assistant guidelines and project conventions
+- 🐳 [Docker Setup](docker/DOCKER.md) - Containerization and deployment
+- 🌐 [Internationalization Architecture](docs/I18N_ARCHITECTURE.md) - i18n implementation details
+- 🔒 [Security & Design Recommendations](docs/SECURITY_AND_DESIGN_RECOMMENDATIONS.md) - Security best practices
+
 ## Features
 
 ### 🏦 Customer Onboarding
@@ -84,6 +91,29 @@ pnpm run dev:https
 - 🔌 Backend API: https://api.localhost
 
 **First-time setup:** Your browser will warn about self-signed certificates. Click "Advanced" → "Proceed to site" to continue.
+
+### Docker Development
+
+For containerized development with Redis:
+
+```bash
+# Start development containers
+cd docker
+docker-compose -f docker-compose.dev.yml up
+
+# Or run in background
+docker-compose -f docker-compose.dev.yml up -d
+
+# Stop containers
+docker-compose -f docker-compose.dev.yml down
+```
+
+**Access your application:**
+- 🌐 Frontend: http://localhost:5173
+- 🔌 Backend API: http://localhost:3000
+- 📊 Redis: localhost:6381
+
+See [Docker documentation](docker/DOCKER.md) for full setup details and production deployment.
 
 ### Testing & Quality Assurance
 ```bash
@@ -172,6 +202,20 @@ pnpm run build:server
 pnpm run preview
 ```
 
+## Docker Deployment
+
+For containerized deployment with PostgreSQL, Redis, and HTTPS:
+
+```bash
+# Navigate to docker directory
+cd docker
+
+# Start all services
+docker-compose up -d
+```
+
+See [Docker documentation](docker/DOCKER.md) for detailed setup instructions.
+
 ## Tech Stack
 
 ### Frontend
@@ -229,6 +273,15 @@ pnpm run preview
 │   ├── products.json     # Available banking products
 │   ├── bank-info.json    # Bank branding and contact info
 │   └── [bankslug]/       # Bank-specific configuration overrides
+├── docs/                 # Project documentation
+│   ├── I18N_ARCHITECTURE.md
+│   └── SECURITY_AND_DESIGN_RECOMMENDATIONS.md
+├── docker/               # Docker configuration
+│   ├── Dockerfile        # Production Docker image
+│   ├── docker-compose.yml # Full stack orchestration
+│   ├── Caddyfile.docker  # HTTPS proxy configuration
+│   ├── .dockerignore     # Docker build optimization
+│   └── DOCKER.md         # Docker documentation
 ├── translations/         # i18n translation files (English/Spanish)
 ├── applications/         # Encrypted application storage
 ├── Caddyfile            # HTTPS reverse proxy configuration
