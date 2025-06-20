@@ -2,10 +2,16 @@ import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { ValidationPipe, Logger } from '@nestjs/common'
+import { SessionService } from './services/session.service'
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
   const app = await NestFactory.create(AppModule)
+  
+  // Configure session middleware
+  const sessionService = app.get(SessionService)
+  const sessionMiddleware = await sessionService.createSessionMiddleware()
+  app.use(sessionMiddleware)
   
   app.useGlobalPipes(new ValidationPipe({
     transform: true,

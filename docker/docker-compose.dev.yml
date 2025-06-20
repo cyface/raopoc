@@ -46,6 +46,7 @@ services:
       - PORT=3000
       - DATABASE_URL=postgres://${POSTGRES_USER:-raopoc}:${POSTGRES_PASSWORD:-raopoc123}@postgres:5432/${POSTGRES_DB:-raopoc_dev}
       - REDIS_URL=redis://redis:6379
+      - SESSION_SECRET=${SESSION_SECRET:-development-session-secret}
       - VITE_CONFIG_CACHE_TIMEOUT=5000
     volumes:
       # Mount source code for hot reload

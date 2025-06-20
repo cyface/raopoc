@@ -6,11 +6,13 @@ import { ConfigController } from './controllers/config.controller'
 import { ApplicationController } from './controllers/application.controller'
 import { TranslationController } from './controllers/translation.controller'
 import { DocumentController } from './controllers/document.controller'
+import { SessionController } from './controllers/session.controller'
 import { ConfigService } from './services/config.service'
 import { EncryptionService } from './services/encryption.service'
 import { ApplicationService } from './services/application.service'
 import { TranslationService } from './services/translation.service'
 import { DocumentService } from './services/document.service'
+import { SessionService } from './services/session.service'
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { DocumentService } from './services/document.service'
     ApplicationController,
     TranslationController,
     DocumentController,
+    SessionController,
   ],
   providers: [
     ConfigService,
@@ -34,6 +37,7 @@ import { DocumentService } from './services/document.service'
     ApplicationService,
     TranslationService,
     DocumentService,
+    SessionService,
   ],
 })
 export class AppModule {}
