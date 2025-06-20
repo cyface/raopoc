@@ -3,8 +3,16 @@ import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'
 import { createClient } from 'redis'
 
-// For connect-redis v9+, import the default export function
-const connectRedis = require('connect-redis').default || require('connect-redis')
+// For connect-redis v9+, use dynamic import to avoid ESLint require errors
+let connectRedis: (session: typeof session) => new(...args: unknown[]) => unknown
+async function loadConnectRedis() {
+  if (!connectRedis) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const ConnectRedis = require('connect-redis')
+    connectRedis = ConnectRedis.default || ConnectRedis
+  }
+  return connectRedis
+}
 
 @Injectable()
 export class SessionService {
@@ -12,7 +20,7 @@ export class SessionService {
 
   constructor(private configService: ConfigService) {}
 
-  async createSessionMiddleware(): Promise<any> {
+  async createSessionMiddleware(): Promise<(req: unknown, res: unknown, next: unknown) => void> {
     const sessionSecret = this.configService.get<string>('SESSION_SECRET') || 'fallback-secret-change-in-production'
     const redisUrl = this.configService.get<string>('REDIS_URL')
 
@@ -56,7 +64,8 @@ export class SessionService {
         await redisClient.connect()
 
         // Create Redis store - connect-redis v9+ exports a function that returns a class
-        const RedisStoreClass = connectRedis(session)
+        const connectRedisLib = await loadConnectRedis()
+        const RedisStoreClass = connectRedisLib(session)
         const redisStore = new RedisStoreClass({
           client: redisClient,
           prefix: 'raopoc:sess:',
