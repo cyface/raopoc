@@ -8,6 +8,7 @@ import { TranslationController } from './controllers/translation.controller'
 import { DocumentController } from './controllers/document.controller'
 import { SessionController } from './controllers/session.controller'
 import { LeadController } from './controllers/lead.controller'
+import { SpaController } from './controllers/spa.controller'
 import { ConfigService } from './services/config.service'
 import { EncryptionService } from './services/encryption.service'
 import { ApplicationService } from './services/application.service'
@@ -26,11 +27,11 @@ import { PrismaService } from './services/prisma.service'
       serveRoot: '/public',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'dist'),
-      exclude: ['/api*'],
+      rootPath: join(__dirname, '..', '..', 'dist'),
+      exclude: ['/api/{*path}'],
       serveStaticOptions: {
-        index: 'index.html',
-        fallthrough: false,
+        fallthrough: true,
+        index: false,
       },
     }),
   ],
@@ -41,6 +42,7 @@ import { PrismaService } from './services/prisma.service'
     DocumentController,
     SessionController,
     LeadController,
+    SpaController, // Must be last to catch SPA routes
   ],
   providers: [
     ConfigService,

@@ -72,5 +72,8 @@ ENV PORT=3000
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
+# Change to server directory to match development structure
+WORKDIR /app/server/dist
+
 # Start the application
-CMD ["node", "server/dist/main.js"]
+CMD ["node", "main.js"]

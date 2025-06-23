@@ -61,7 +61,7 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "3000"  # Expose port for Coolify's Traefik to route to
-    command: sh -c "pnpm exec prisma migrate deploy && node server/dist/main.js"
+    command: sh -c "cd /app && pnpm exec prisma migrate deploy && cd /app/server/dist && node main.js"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -70,13 +70,13 @@ services:
       # Redis configuration
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       # API URL for frontend - use Coolify's generated FQDN
-      API_URL: https://$SERVICE_FQDN_APP_3000/api
+      API_URL: /api
       # Session secret
       SESSION_SECRET: ${SESSION_SECRET}
       # Encryption key for PII
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       # Add Coolify's domain to CORS
-      COOLIFY_URL: https://$SERVICE_FQDN_APP_3000
+      COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
     depends_on:
       postgres:
         condition: service_healthy

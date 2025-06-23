@@ -30,11 +30,8 @@ export class ConfigService implements OnModuleInit {
 
   private async loadConfigFile(filename: string) {
     try {
-      // In production (Docker), config is at /app/config
-      // In development, it's at ../config relative to the server directory
-      const configPath = process.env.NODE_ENV === 'production' 
-        ? path.join(process.cwd(), 'config', filename)
-        : path.join(process.cwd(), '..', 'config', filename)
+      // Config is at ../../../config relative to the compiled JS
+      const configPath = path.join(__dirname, '..', '..', '..', 'config', filename)
       
       const data = await fs.readFile(configPath, 'utf-8')
       return JSON.parse(data)
@@ -61,7 +58,7 @@ export class ConfigService implements OnModuleInit {
   }
 
   private watchConfigFiles() {
-    const configPath = path.join(process.cwd(), '..', 'config')
+    const configPath = path.join(__dirname, '..', '..', '..', 'config')
     const watcher = chokidar.watch(configPath, {
       persistent: true,
       ignoreInitial: true
@@ -95,7 +92,7 @@ export class ConfigService implements OnModuleInit {
   }
 
   async loadConfigWithFallback(configName: string, bankSlug?: string): Promise<unknown> {
-    const configDir = path.join(process.cwd(), '..', 'config')
+    const configDir = path.join(__dirname, '..', '..', '..', 'config')
     
     const configFileName = configName.endsWith('.json') ? configName : `${configName}.json`
     
