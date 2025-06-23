@@ -87,5 +87,14 @@
     "vite": "^5.4.19",
     "vitest": "^2.1.9"
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  }
 }

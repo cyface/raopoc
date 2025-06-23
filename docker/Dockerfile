@@ -10,11 +10,17 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml .pnpmrc ./
 
+# Copy Prisma schema before installing dependencies
+COPY prisma ./prisma
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
+
+# Generate Prisma client
+RUN pnpm exec prisma generate
 
 # Build frontend and backend
 RUN pnpm run build && pnpm run build:server
@@ -43,6 +49,10 @@ RUN pnpm install --prod --frozen-lockfile
 # Copy built application from builder stage
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/server/dist ./server/dist
+
+# Copy Prisma generated client and schema
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 
 # Copy necessary configuration files
 COPY --chown=nodejs:nodejs server ./server
