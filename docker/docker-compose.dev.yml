@@ -1,4 +1,4 @@
-name: raopoc
+name: raopoc-dev
 
 services:
   # PostgreSQL database for development

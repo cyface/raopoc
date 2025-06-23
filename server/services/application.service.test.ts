@@ -8,9 +8,6 @@ import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
 
 describe('ApplicationService - Lead Management', () => {
   let service: ApplicationService
-  let prismaService: PrismaService
-  let encryptionService: EncryptionService
-  let configService: ConfigService
 
   const mockPrismaService = {
     lead: {
@@ -57,9 +54,6 @@ describe('ApplicationService - Lead Management', () => {
     }).compile()
 
     service = module.get<ApplicationService>(ApplicationService)
-    prismaService = module.get<PrismaService>(PrismaService)
-    encryptionService = module.get<EncryptionService>(EncryptionService)
-    configService = module.get<ConfigService>(ConfigService)
 
     // Clear all mocks before each test
     vi.clearAllMocks()
@@ -160,6 +154,7 @@ describe('ApplicationService - Lead Management', () => {
 
       const result = await service.createOrUpdateLead(mockLeadData)
 
+      expect(result).toEqual({ ...existingLead, currentStep: 3, documentAcceptances: [] })
       expect(mockPrismaService.lead.update).toHaveBeenCalledWith({
         where: { sessionId: 'session-123' },
         data: expect.objectContaining({
@@ -363,6 +358,7 @@ describe('ApplicationService - Lead Management', () => {
 
       const result = await service.submitLead('lead-123')
 
+      expect(result).toEqual(submittedLead)
       expect(mockPrismaService.lead.update).toHaveBeenCalledWith({
         where: { id: 'lead-123' },
         data: {

@@ -93,7 +93,7 @@ vi.mock('react-i18next', () => ({
       return key
     }
   }),
-  Trans: ({ i18nKey, values, components }: any) => {
+  Trans: ({ i18nKey, values }: any) => {
     return `${i18nKey}_${JSON.stringify(values || {})}`
   }
 }))
@@ -105,10 +105,16 @@ describe('ConfirmationScreen', () => {
     // Mock bank info service
     vi.mocked(configService.getBankInfo).mockResolvedValue({
       bankName: 'Test Bank',
+      displayName: 'Test Bank',
       contact: {
+        phone: '1-800-TEST-BANK',
         phoneDisplay: '1-800-TEST-BANK',
         email: 'support@testbank.com',
         hours: 'Monday - Friday 9:00 AM - 5:00 PM EST'
+      },
+      branding: {
+        primaryColor: '#3b82f6',
+        logoIcon: 'test-logo.svg'
       }
     })
   })

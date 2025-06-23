@@ -6,7 +6,6 @@ import { LeadStatus } from '@prisma/client'
 
 describe('LeadController', () => {
   let controller: LeadController
-  let applicationService: ApplicationService
 
   const mockApplicationService = {
     createOrUpdateLead: vi.fn(),
@@ -30,7 +29,6 @@ describe('LeadController', () => {
     }).compile()
 
     controller = module.get<LeadController>(LeadController)
-    applicationService = module.get<ApplicationService>(ApplicationService)
 
     // Clear all mocks before each test
     vi.clearAllMocks()
