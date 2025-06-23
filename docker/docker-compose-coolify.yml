@@ -17,6 +17,35 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - raopoc-network
+
+  # PgBouncer connection pooler (internal access only)
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_PORT: 6432
+      PGBOUNCER_MAX_CLIENT_CONN: 100
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_POOL_MODE: session
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # pgbouncer exposes a `pgbouncer` "meta database", providing an interface for statistics and to administer the instance. We use it here to check if pgbouncer is working properly.
+      # note that these env vars are not the ones above, but ones defined inside the container
+      test: 'env PGPASSWORD="$$POSTGRESQL_PASSWORD" psql -p 6432 -U "$$POSTGRESQL_USERNAME" pgbouncer -b -c "SHOW USERS" >/dev/null'
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    networks:
+      - raopoc-network
 
   # Redis for session management
   redis:
@@ -33,20 +62,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - raopoc-network
 
   # Application - serves both React frontend and NestJS API
   app:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    ports:
-      - "3000:3000"  # Expose port for Coolify's Traefik to route to
+    expose:
+      - "3000"  # Expose port for Coolify's Traefik to route to
     command: sh -c "cd /app && pnpm exec prisma migrate deploy && cd /app/server/dist && node main.js"
     environment:
       NODE_ENV: production
       PORT: 3000
       # Database configuration
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
       # Redis configuration
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       # API URL for frontend - use Coolify's generated FQDN
@@ -58,8 +89,12 @@ services:
       # Add Coolify's domain to CORS
 #      COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - raopoc-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 30s
