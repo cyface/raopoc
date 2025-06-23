@@ -55,9 +55,10 @@ RUN pnpm install --prod --frozen-lockfile
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/server/dist ./server/dist
 
-# Copy Prisma generated client and schema
-#COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-#COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
+# Copy Prisma generated client and migrations
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 
 # Copy necessary configuration files
 COPY --chown=nodejs:nodejs server ./server

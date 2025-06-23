@@ -30,8 +30,13 @@ export class ConfigService implements OnModuleInit {
 
   private async loadConfigFile(filename: string) {
     try {
-      const filePath = path.join(process.cwd(), '..', 'config', filename)
-      const data = await fs.readFile(filePath, 'utf-8')
+      // In production (Docker), config is at /app/config
+      // In development, it's at ../config relative to the server directory
+      const configPath = process.env.NODE_ENV === 'production' 
+        ? path.join(process.cwd(), 'config', filename)
+        : path.join(process.cwd(), '..', 'config', filename)
+      
+      const data = await fs.readFile(configPath, 'utf-8')
       return JSON.parse(data)
     } catch (error) {
       this.logger.error(`Error loading config file ${filename}:`, error)
