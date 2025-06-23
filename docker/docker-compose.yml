@@ -97,8 +97,8 @@ services:
       - "443:443"
       - "443:443/udp"  # HTTP/3
     volumes:
-      - ./Caddyfile.docker:/etc/caddy/Caddyfile:ro
-      - ../dist:/srv/app:ro  # Serve static files
+      - ${PWD}/Caddyfile.docker:/etc/caddy/Caddyfile:ro
+      - ${PWD}/../dist:/srv/app:ro  # Serve static files
       - caddy_data:/data
       - caddy_config:/config
     environment:

@@ -1,0 +1,271 @@
+name: raopoc
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: raopoc-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"  # Non-standard port to avoid conflicts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - raopoc-network
+
+  # PgBouncer connection pooler
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: raopoc-pgbouncer
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_PORT: 6432
+      PGBOUNCER_MAX_CLIENT_CONN: 100
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_POOL_MODE: session
+    ports:
+      - "6433:6432"  # Non-standard port to avoid conflicts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - raopoc-network
+
+  # Redis for session management
+  redis:
+    image: redis:7-alpine
+    container_name: raopoc-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6380:6379"  # Non-standard port to avoid conflicts
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - raopoc-network
+
+  # Application
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: raopoc-app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Database configuration
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      # Redis configuration
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      # API URL for frontend
+      API_URL: ${API_URL:-https://app.localhost/api}
+      # Session secret
+      SESSION_SECRET: ${SESSION_SECRET}
+      # Encryption key for PII
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - raopoc-network
+
+  # Caddy web server for HTTPS and reverse proxy
+  caddy:
+    image: caddy:2-alpine
+    container_name: raopoc-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      # Using inline content to avoid file mounting issues in Coolify
+      - type: bind
+        source: ./Caddyfile
+        target: /etc/caddy/Caddyfile
+        is_directory: false
+        content: |
+          # Caddyfile for Docker production deployment
+          # Handles HTTPS, reverse proxy, static file serving, and caching
+
+          # Global options
+          {
+              # Enable the admin API
+              admin off
+              
+              # Auto HTTPS settings
+              # auto_https on
+              
+              # Email for Let's Encrypt (optional)
+              # email admin@example.com
+          }
+
+          # Main application domain
+          https://app.localhost, app.localhost:443 {
+              # Enable automatic HTTPS with self-signed certificates for localhost
+              # For production domains, Caddy will automatically get Let's Encrypt certificates
+              tls internal
+
+              # Security headers
+              header {
+                  # Enable HSTS
+                  Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+                  # Prevent clickjacking
+                  X-Frame-Options "DENY"
+                  # Prevent MIME type sniffing
+                  X-Content-Type-Options "nosniff"
+                  # Enable XSS protection
+                  X-XSS-Protection "1; mode=block"
+                  # Referrer policy
+                  Referrer-Policy "strict-origin-when-cross-origin"
+                  # Remove server header
+                  -Server
+              }
+
+              # Handle API routes - proxy to NestJS backend
+              handle /api/* {
+                  reverse_proxy app:3000 {
+                      # Add forwarded headers
+                      header_up X-Real-IP {remote_host}
+                      header_up X-Forwarded-For {remote_host}
+                      header_up X-Forwarded-Proto {scheme}
+                      
+                      # Health check
+                      health_uri /api/health
+                      health_interval 30s
+                      health_timeout 5s
+                      health_status 200
+                  }
+              }
+
+              # Handle static assets with caching
+              @static {
+                  path *.js *.css *.ico *.png *.jpg *.jpeg *.gif *.svg *.woff *.woff2 *.ttf *.eot
+              }
+              handle @static {
+                  root * /srv/app
+                  file_server
+                  
+                  # Cache control for static assets
+                  header {
+                      # Cache for 1 year for versioned assets
+                      ?Cache-Control "public, max-age=31536000, immutable"
+                      
+                      # Conditional caching based on environment variable
+                      @cache_enabled expression {env.CACHE_ENABLED} == "true"
+                      Cache-Control @cache_enabled "public, max-age={env.CACHE_MAX_AGE}, stale-while-revalidate={env.CACHE_STALE_WHILE_REVALIDATE}"
+                  }
+              }
+
+              # Handle SPA routes - serve index.html for all non-API, non-static routes
+              handle {
+                  root * /srv/app
+                  try_files {path} /index.html
+                  file_server
+                  
+                  # No caching for HTML
+                  header /index.html {
+                      Cache-Control "no-cache, no-store, must-revalidate"
+                      Pragma "no-cache"
+                      Expires "0"
+                  }
+              }
+
+              # Compression
+              encode gzip zstd
+
+              # Logging
+              log {
+                  output stdout
+                  format console
+                  level INFO
+              }
+          }
+
+          # API subdomain (alternative access point)
+          https://api.localhost, api.localhost:443 {
+              tls internal
+
+              # Security headers
+              header {
+                  X-Content-Type-Options "nosniff"
+                  X-Frame-Options "DENY"
+                  X-XSS-Protection "1; mode=block"
+                  -Server
+              }
+
+              # Proxy all requests to the NestJS backend
+              reverse_proxy app:3000 {
+                  header_up X-Real-IP {remote_host}
+                  header_up X-Forwarded-For {remote_host}
+                  header_up X-Forwarded-Proto {scheme}
+              }
+
+              # CORS headers for API subdomain
+              header {
+                  Access-Control-Allow-Origin "https://app.localhost"
+                  Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+                  Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+                  Access-Control-Allow-Credentials "true"
+                  Access-Control-Max-Age "86400"
+              }
+
+              # Handle OPTIONS requests
+              @options method OPTIONS
+              respond @options 204
+
+              # Compression
+              encode gzip zstd
+
+              # Logging
+              log {
+                  output stdout
+                  format console
+                  level INFO
+              }
+          }
+
+          # HTTP to HTTPS redirect
+          http://app.localhost, http://api.localhost {
+              redir https://{host}{uri} permanent
+          }
+      - ../dist:/srv/app:ro  # Serve static files
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      # Cache control based on environment variables
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
+      CACHE_MAX_AGE: ${CACHE_MAX_AGE:-3600}
+      CACHE_STALE_WHILE_REVALIDATE: ${CACHE_STALE_WHILE_REVALIDATE:-86400}
+    depends_on:
+      - app
+    networks:
+      - raopoc-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  raopoc-network:
+    driver: bridge
