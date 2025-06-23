@@ -60,7 +60,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     ports:
-      - "3000"  # Expose port for Coolify's Traefik to route to
+      - "3000:3000"  # Expose port for Coolify's Traefik to route to
     command: sh -c "cd /app && pnpm exec prisma migrate deploy && cd /app/server/dist && node main.js"
     environment:
       NODE_ENV: production

@@ -52,7 +52,7 @@ COPY --from=builder --chown=nodejs:nodejs /app/server/dist ./server/dist
 
 # Copy node_modules from builder and prune dev dependencies
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-RUN pnpm prune --prod
+RUN pnpm prune --prod --frozen-lockfile
 
 # Copy necessary configuration files
 COPY --chown=nodejs:nodejs server ./server
