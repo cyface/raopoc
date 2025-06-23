@@ -62,8 +62,6 @@ services:
       # Add Coolify's domain to CORS
 #      COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
     depends_on:
-      pgbouncer:
-        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
