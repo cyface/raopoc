@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { CheckCircleIcon, EnvelopeIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useTranslation, Trans } from 'react-i18next';
@@ -20,6 +20,8 @@ export function ConfirmationScreen({ applicationId }: ConfirmationScreenProps) {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [finalApplicationId, setFinalApplicationId] = useState<string | null>(applicationId || null);
   const [bankInfo, setBankInfo] = useState<BankInfo | null>(null);
+  const [hasStartedSubmission, setHasStartedSubmission] = useState(false);
+  const submissionStartedRef = useRef(false);
 
   const mockSendConfirmationEmail = useCallback(async (appId: string, email?: string) => {
     // Mock email sending with a delay
@@ -57,24 +59,43 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
     setSubmissionError(null);
 
     try {
-      // Submit application to API
-      const response = await fetch(`${getApiUrl()}/applications`, {
+      // First, create/update the lead with all data
+      const leadResponse = await fetch(`${getApiUrl()}/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          currentStep: 5,
+          completedSteps: [1, 2, 3, 4, 5]
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to submit application: ${response.status}`);
+      if (!leadResponse.ok) {
+        throw new Error(`Failed to save lead: ${leadResponse.status}`);
       }
 
-      const result = await response.json();
-      setFinalApplicationId(result.applicationId);
+      const leadResult = await leadResponse.json();
+      const leadId = leadResult.id;
+
+      // Then submit the lead (mark as submitted)
+      const submitResponse = await fetch(`${getApiUrl()}/leads/${leadId}/submit`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!submitResponse.ok) {
+        throw new Error(`Failed to submit lead: ${submitResponse.status}`);
+      }
+
+      await submitResponse.json();
+      setFinalApplicationId(leadId);
 
       // Mock sending confirmation email
-      await mockSendConfirmationEmail(result.applicationId, data.customerInfo?.email);
+      await mockSendConfirmationEmail(leadId, data.customerInfo?.email);
 
       setIsSubmitted(true);
     } catch (error) {
@@ -95,11 +116,15 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
       }
     };
     loadBankInfo();
+  }, []);
 
-    if (!applicationId && !isSubmitted && !isSubmitting) {
+  useEffect(() => {
+    if (!applicationId && !isSubmitted && !isSubmitting && !hasStartedSubmission && !submissionStartedRef.current) {
+      submissionStartedRef.current = true;
+      setHasStartedSubmission(true);
       handleSubmitApplication();
     }
-  }, [applicationId, isSubmitted, isSubmitting, handleSubmitApplication]);
+  }, [applicationId, isSubmitted, isSubmitting, hasStartedSubmission, handleSubmitApplication]);
 
   if (isSubmitting) {
     return (

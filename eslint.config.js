@@ -39,6 +39,7 @@ export default typescript.config(
     ignores: [
       'dist/',
       'server/dist/',
+      'server/generated/',
       'node_modules/',
       'coverage/',
       '*.config.js',

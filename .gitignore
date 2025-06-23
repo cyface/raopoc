@@ -46,3 +46,6 @@ coverage/
 # Caddy
 caddy_data/
 caddy_config/server/dist/
+
+/src/generated/prisma
+/server/generated

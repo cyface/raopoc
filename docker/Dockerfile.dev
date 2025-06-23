@@ -18,6 +18,9 @@ RUN pnpm install --frozen-lockfile
 # Copy application files
 COPY . .
 
+# Generate Prisma client
+RUN pnpm prisma generate --no-hints
+
 # Expose ports for both frontend and backend
 EXPOSE 3000 5173
 

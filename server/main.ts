@@ -30,9 +30,9 @@ async function bootstrap() {
   })
   
   const port = Number(process.env.PORT) || 3000
-  await app.listen(port, '127.0.0.1')
+  await app.listen(port, '0.0.0.0')
   
-  logger.log(`Server running on http://127.0.0.1:${port}`)
+  logger.log(`Server running on http://0.0.0.0:${port}`)
   logger.log('Config endpoints available at:')
   logger.log(`  - http://127.0.0.1:${port}/api/config/states`)
   logger.log(`  - http://127.0.0.1:${port}/api/config/countries`)

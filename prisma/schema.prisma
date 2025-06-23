@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id                    String   @id @default(cuid())
+  status               LeadStatus @default(DRAFT)
+  currentStep          Int      @default(1)
+  completedSteps       Int[]
+  
+  // Multi-tenant configuration
+  financialInstitution String?
+  language            String   @default("en")
+  theme               String?
+  
+  // Product Selection - stored as array of enum values
+  selectedProducts    ProductType[]
+  
+  // Customer Information (encrypted JSON blob)
+  customerInfo        Json?
+  
+  // Identification Information (encrypted JSON blob)
+  identificationInfo  Json?
+  
+  // Credit Check Results
+  creditCheckStatus   CreditStatus?
+  requiresVerification Boolean @default(false)
+  creditCheckMessage  String?
+  creditCheckAt       DateTime?
+  
+  // Document Acceptance
+  documentAcceptances DocumentAcceptance[]
+  allDocumentsAccepted Boolean @default(false)
+  
+  // Session and Tracking Data
+  sessionId          String?  @unique
+  userAgent          String?
+  ipAddress          String?  // Encrypted
+  submissionSource   String   @default("web-onboarding")
+  browserFingerprint String?
+  lastActivity       DateTime @default(now())
+  
+  // Development/Testing Support
+  devStep            Int?
+  mockScenario       String?
+  
+  // Timestamps
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  submittedAt        DateTime?
+  
+  @@map("leads")
+}
+
+model DocumentAcceptance {
+  id          String   @id @default(cuid())
+  leadId      String
+  documentId  String
+  accepted    Boolean  @default(false)
+  acceptedAt  DateTime?
+  
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  @@unique([leadId, documentId])
+  @@map("document_acceptances")
+}
+
+enum LeadStatus {
+  DRAFT
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REQUIRES_VERIFICATION
+  REJECTED
+}
+
+enum ProductType {
+  CHECKING
+  SAVINGS
+  MONEY_MARKET
+}
+
+enum CreditStatus {
+  APPROVED
+  REQUIRES_VERIFICATION
+  PENDING
+  ERROR
+}

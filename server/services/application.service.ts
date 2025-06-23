@@ -4,6 +4,8 @@ import * as path from 'path'
 import { randomUUID } from 'crypto'
 import { EncryptionService } from './encryption.service'
 import { ConfigService } from './config.service'
+import { PrismaService } from './prisma.service'
+import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
 
 @Injectable()
 export class ApplicationService {
@@ -11,7 +13,8 @@ export class ApplicationService {
   
   constructor(
     private readonly encryptionService: EncryptionService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService
   ) {}
 
   async createApplication(applicationData: {
@@ -134,5 +137,277 @@ export class ApplicationService {
         ? 'Additional verification required - a representative will contact you'
         : 'Credit check passed'
     }
+  }
+
+  // New Lead Management Methods using Prisma
+
+  /**
+   * Create or update a lead in the database
+   */
+  async createOrUpdateLead(data: {
+    sessionId?: string
+    selectedProducts?: string[]
+    customerInfo?: any
+    identificationInfo?: any
+    currentStep?: number
+    completedSteps?: number[]
+    financialInstitution?: string
+    language?: string
+    theme?: string
+    devStep?: number
+    mockScenario?: string
+    userAgent?: string
+    ipAddress?: string
+  }) {
+    const leadData: any = {
+      status: LeadStatus.IN_PROGRESS,
+      currentStep: data.currentStep || 1,
+      completedSteps: data.completedSteps || [],
+      financialInstitution: data.financialInstitution,
+      language: data.language || 'en',
+      theme: data.theme,
+      sessionId: data.sessionId,
+      userAgent: data.userAgent,
+      ipAddress: data.ipAddress ? JSON.stringify(await this.encryptionService.encryptValue(data.ipAddress)) : null,
+      devStep: data.devStep,
+      mockScenario: data.mockScenario,
+      lastActivity: new Date()
+    }
+
+    // Convert and set selected products
+    if (data.selectedProducts) {
+      leadData.selectedProducts = data.selectedProducts.map(product => {
+        switch (product.toLowerCase()) {
+          case 'checking': return ProductType.CHECKING
+          case 'savings': return ProductType.SAVINGS
+          case 'money-market': return ProductType.MONEY_MARKET
+          default: return ProductType.CHECKING
+        }
+      })
+    }
+
+    // Encrypt and set customer info
+    if (data.customerInfo) {
+      leadData.customerInfo = await this.encryptionService.encryptSensitiveFields(data.customerInfo)
+    }
+
+    // Encrypt and set identification info
+    if (data.identificationInfo) {
+      leadData.identificationInfo = await this.encryptionService.encryptSensitiveFields(data.identificationInfo)
+    }
+
+    // Try to update existing lead by session ID, or create new one
+    if (data.sessionId) {
+      const existingLead = await this.prisma.lead.findUnique({
+        where: { sessionId: data.sessionId }
+      })
+
+      if (existingLead) {
+        const updatedLead = await this.prisma.lead.update({
+          where: { sessionId: data.sessionId },
+          data: leadData,
+          include: { documentAcceptances: true }
+        })
+        
+        this.logger.log(`Lead updated: ${updatedLead.id}`)
+        return updatedLead
+      }
+    }
+
+    // Create new lead
+    const newLead = await this.prisma.lead.create({
+      data: leadData,
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Lead created: ${newLead.id}`)
+    return newLead
+  }
+
+  /**
+   * Get lead by session ID
+   */
+  async getLeadBySessionId(sessionId: string) {
+    const lead = await this.prisma.lead.findUnique({
+      where: { sessionId },
+      include: { documentAcceptances: true }
+    })
+
+    if (!lead) {
+      return null
+    }
+
+    // Decrypt sensitive data
+    const decryptedLead = { ...lead } as any
+    if (lead.customerInfo) {
+      decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
+    }
+    if (lead.identificationInfo) {
+      decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
+    }
+    if (lead.ipAddress) {
+      decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
+    }
+
+    return decryptedLead
+  }
+
+  /**
+   * Get lead by ID
+   */
+  async getLeadById(id: string) {
+    const lead = await this.prisma.lead.findUnique({
+      where: { id },
+      include: { documentAcceptances: true }
+    })
+
+    if (!lead) {
+      return null
+    }
+
+    // Decrypt sensitive data
+    const decryptedLead = { ...lead } as any
+    if (lead.customerInfo) {
+      decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
+    }
+    if (lead.identificationInfo) {
+      decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
+    }
+    if (lead.ipAddress) {
+      decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
+    }
+
+    return decryptedLead
+  }
+
+  /**
+   * Update lead credit check results
+   */
+  async updateLeadCreditCheck(leadId: string, creditCheckResult: {
+    status: string
+    requiresVerification: boolean
+    message: string
+  }) {
+    let creditStatus: CreditStatus
+    switch (creditCheckResult.status) {
+      case 'approved': creditStatus = CreditStatus.APPROVED; break
+      case 'requires_verification': creditStatus = CreditStatus.REQUIRES_VERIFICATION; break
+      case 'pending': creditStatus = CreditStatus.PENDING; break
+      default: creditStatus = CreditStatus.ERROR
+    }
+
+    const updatedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        creditCheckStatus: creditStatus,
+        requiresVerification: creditCheckResult.requiresVerification,
+        creditCheckMessage: creditCheckResult.message,
+        creditCheckAt: new Date(),
+        lastActivity: new Date()
+      },
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Credit check updated for lead: ${leadId}`)
+    return updatedLead
+  }
+
+  /**
+   * Update document acceptances for a lead
+   */
+  async updateLeadDocumentAcceptances(leadId: string, acceptances: {
+    documentId: string
+    accepted: boolean
+  }[]) {
+    // Delete existing acceptances for this lead
+    await this.prisma.documentAcceptance.deleteMany({
+      where: { leadId }
+    })
+
+    // Create new acceptances
+    const documentAcceptances = await Promise.all(
+      acceptances.map(acceptance =>
+        this.prisma.documentAcceptance.create({
+          data: {
+            leadId,
+            documentId: acceptance.documentId,
+            accepted: acceptance.accepted,
+            acceptedAt: acceptance.accepted ? new Date() : null
+          }
+        })
+      )
+    )
+
+    // Update lead's allDocumentsAccepted status
+    const allAccepted = acceptances.every(acc => acc.accepted)
+    await this.prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        allDocumentsAccepted: allAccepted,
+        lastActivity: new Date()
+      }
+    })
+
+    this.logger.log(`Document acceptances updated for lead: ${leadId}`)
+    return documentAcceptances
+  }
+
+  /**
+   * Submit lead (mark as submitted)
+   */
+  async submitLead(leadId: string) {
+    const submittedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        status: LeadStatus.SUBMITTED,
+        submittedAt: new Date(),
+        lastActivity: new Date()
+      },
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Lead submitted: ${leadId}`)
+    return submittedLead
+  }
+
+  /**
+   * Get all leads (for back-office)
+   */
+  async getAllLeads(params?: {
+    status?: LeadStatus
+    financialInstitution?: string
+    limit?: number
+    offset?: number
+  }) {
+    const where: any = {}
+    if (params?.status) where.status = params.status
+    if (params?.financialInstitution) where.financialInstitution = params.financialInstitution
+
+    const leads = await this.prisma.lead.findMany({
+      where,
+      include: { documentAcceptances: true },
+      orderBy: { createdAt: 'desc' },
+      take: params?.limit || 50,
+      skip: params?.offset || 0
+    })
+
+    // Decrypt sensitive data for each lead
+    const decryptedLeads = await Promise.all(
+      leads.map(async (lead) => {
+        const decryptedLead = { ...lead } as any
+        if (lead.customerInfo) {
+          decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
+        }
+        if (lead.identificationInfo) {
+          decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
+        }
+        if (lead.ipAddress) {
+          decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
+        }
+        return decryptedLead
+      })
+    )
+
+    return decryptedLeads
   }
 }

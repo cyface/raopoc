@@ -2,17 +2,8 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'
 import { createClient } from 'redis'
-
-// For connect-redis v9+, use dynamic import to avoid ESLint require errors
-let connectRedis: (session: typeof session) => new(...args: unknown[]) => unknown
-async function loadConnectRedis() {
-  if (!connectRedis) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const ConnectRedis = require('connect-redis')
-    connectRedis = ConnectRedis.default || ConnectRedis
-  }
-  return connectRedis
-}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { RedisStore } = require('connect-redis')
 
 @Injectable()
 export class SessionService {
@@ -63,10 +54,8 @@ export class SessionService {
 
         await redisClient.connect()
 
-        // Create Redis store - connect-redis v9+ exports a function that returns a class
-        const connectRedisLib = await loadConnectRedis()
-        const RedisStoreClass = connectRedisLib(session)
-        const redisStore = new RedisStoreClass({
+        // Create Redis store - connect-redis v9 directly exports the store class
+        const redisStore = new RedisStore({
           client: redisClient,
           prefix: 'raopoc:sess:',
           ttl: 60 * 60 * 24 // 24 hours in seconds

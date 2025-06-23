@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { DevHelper } from './components/DevHelper'
 import { DevStepNavigator } from './components/DevStepNavigator'
 import { RouteGuard } from './components/RouteGuard'
@@ -32,11 +32,20 @@ function UrlParamWatcher() {
   return null // This component only watches, doesn't render anything
 }
 
+function RootRedirect() {
+  const location = useLocation()
+  
+  // Preserve search parameters when redirecting from root
+  const targetUrl = ROUTES.STEP_1 + location.search
+  
+  return <Navigate to={targetUrl} replace />
+}
+
 function OnboardingFlow() {
   return (
     <Routes>
-      {/* Root redirect to first step */}
-      <Route path="/" element={<Navigate to={ROUTES.STEP_1} replace />} />
+      {/* Root redirect to first step - preserves URL parameters */}
+      <Route path="/" element={<RootRedirect />} />
       
       {/* Named route redirects */}
       <Route path={NAMED_ROUTES.PRODUCT_SELECTION} element={<NamedRouteRedirect />} />

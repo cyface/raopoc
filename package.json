@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Bank customer onboarding application",
   "type": "module",
+  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "dev": "concurrently \"pnpm dev:server\" \"sleep 2 && pnpm dev:frontend\"",
-    "dev:frontend": "vite",
+    "dev:frontend": "vite --host",
     "dev:server": "cd server && nest start --watch",
     "dev:https": "concurrently \"pnpm dev:server\" \"sleep 2 && pnpm dev:frontend\" \"sleep 2 && pnpm dev:caddy\"",
     "dev:caddy": "caddy run --config Caddyfile",
@@ -20,6 +21,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
+    "prisma:migrate": "prisma migrate dev",
     "generate-pdfs": "tsx scripts/generate-pdfs.ts"
   },
   "dependencies": {
@@ -30,6 +32,7 @@
     "@nestjs/core": "^11.1.3",
     "@nestjs/platform-express": "^11.1.3",
     "@nestjs/serve-static": "^5.0.3",
+    "@prisma/client": "^6.10.1",
     "@types/express": "^5.0.3",
     "@vanilla-extract/css": "^1.17.2",
     "@vanilla-extract/recipes": "^0.5.5",
@@ -44,6 +47,7 @@
     "i18next": "^25.2.1",
     "i18next-browser-languagedetector": "^8.1.0",
     "lucide-react": "^0.468.0",
+    "prisma": "^6.10.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.5.2",

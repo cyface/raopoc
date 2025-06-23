@@ -7,12 +7,14 @@ import { ApplicationController } from './controllers/application.controller'
 import { TranslationController } from './controllers/translation.controller'
 import { DocumentController } from './controllers/document.controller'
 import { SessionController } from './controllers/session.controller'
+import { LeadController } from './controllers/lead.controller'
 import { ConfigService } from './services/config.service'
 import { EncryptionService } from './services/encryption.service'
 import { ApplicationService } from './services/application.service'
 import { TranslationService } from './services/translation.service'
 import { DocumentService } from './services/document.service'
 import { SessionService } from './services/session.service'
+import { PrismaService } from './services/prisma.service'
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { SessionService } from './services/session.service'
     TranslationController,
     DocumentController,
     SessionController,
+    LeadController,
   ],
   providers: [
     ConfigService,
@@ -38,6 +41,7 @@ import { SessionService } from './services/session.service'
     TranslationService,
     DocumentService,
     SessionService,
+    PrismaService,
   ],
 })
 export class AppModule {}

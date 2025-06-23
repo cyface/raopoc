@@ -9,7 +9,16 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    host: '0.0.0.0', // Allow connections from outside container
     strictPort: true, // Fail if port 5173 is not available
+    hmr: {
+      port: 5173,
+      host: 'localhost', // WebSocket connection host
+      clientPort: 5173, // Port for client to connect to WebSocket
+    },
+    watch: {
+      usePolling: true, // Use polling for file changes in Docker
+    },
   },
   // @ts-ignore - Vitest config
   test: {

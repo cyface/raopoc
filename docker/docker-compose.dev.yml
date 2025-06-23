@@ -1,3 +1,5 @@
+name: raopoc
+
 services:
   # PostgreSQL database for development
   postgres:
@@ -56,10 +58,25 @@ services:
       - ../config:/app/config
       - ../translations:/app/translations
       - ../applications:/app/applications
+      - ../prisma:/app/prisma
+      - ../scripts:/app/scripts
+      # Mount configuration files
       - ../index.html:/app/index.html
       - ../vite.config.ts:/app/vite.config.ts
       - ../tsconfig.json:/app/tsconfig.json
+      - ../tsconfig.server.json:/app/tsconfig.server.json
+      - ../package.json:/app/package.json
+      - ../pnpm-lock.yaml:/app/pnpm-lock.yaml
+      - ../pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+      - ../eslint.config.js:/app/eslint.config.js
+      # Mount server-specific configs
       - ../server/tsconfig.json:/app/server/tsconfig.json
+      - ../server/nest-cli.json:/app/server/nest-cli.json
+      - ../server/package.json:/app/server/package.json
+      # Mount any .env files if they exist
+      - ../.env:/app/.env:ro
+      - ../.env.development:/app/.env.development:ro
+      - ../.env.local:/app/.env.local:ro
       # Exclude node_modules
       - /app/node_modules
       - /app/server/node_modules
@@ -69,7 +86,7 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    command: pnpm run dev
+    command: sh -c "pnpm prisma generate --no-hints && pnpm prisma migrate deploy && pnpm run dev"
 
 volumes:
   postgres_dev_data:
