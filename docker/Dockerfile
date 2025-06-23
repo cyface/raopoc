@@ -42,16 +42,17 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Set working directory
 WORKDIR /app
 
-# Copy built application from builder stage
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/server/dist ./server/dist
-
 # Copy package files and Prisma schema
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-# Install production dependencies and generate Prisma client
-RUN pnpm install --prod --frozen-lockfile && pnpm exec prisma generate
+# Copy built application from builder stage
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/server/dist ./server/dist
+
+# Copy node_modules from builder and prune dev dependencies
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+RUN pnpm prune --prod
 
 # Copy necessary configuration files
 COPY --chown=nodejs:nodejs server ./server
