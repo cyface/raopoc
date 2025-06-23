@@ -75,8 +75,6 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
       # Encryption key for PII
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      # Add Coolify's domain to CORS
-      COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
     depends_on:
       postgres:
         condition: service_healthy
