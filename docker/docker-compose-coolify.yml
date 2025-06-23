@@ -39,8 +39,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    expose:
-      - "3000"  # Expose port for Coolify's Traefik to route to
+    ports:
+      - "3000:3000"  # Expose port for Coolify's Traefik to route to
     command: sh -c "cd /app && pnpm exec prisma migrate deploy && cd /app/server/dist && node main.js"
     environment:
       NODE_ENV: production
@@ -70,3 +70,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  raopoc-network:
+    driver: bridge
