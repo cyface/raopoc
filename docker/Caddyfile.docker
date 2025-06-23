@@ -7,7 +7,7 @@
 	admin off
 	
 	# Auto HTTPS settings
-	auto_https on
+#	auto_https on
 	
 	# Email for Let's Encrypt (optional)
 	# email admin@example.com
