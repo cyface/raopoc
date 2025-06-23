@@ -60,7 +60,7 @@ services:
     ports:
       - "3000"  # Expose port for Coolify's Traefik to route to
     # Run migrations before starting the app
-    command: sh -c "npx prisma migrate deploy && npm run start:server"
+    command: sh -c "pnpm exec prisma migrate deploy && node server/dist/main.js"
     environment:
       NODE_ENV: production
       PORT: 3000
