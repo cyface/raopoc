@@ -76,6 +76,8 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       # Add Coolify's domain to CORS
       COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
+    labels:
+      - traefik.http.services.f8c4oogosoo8k000ok0gsw88-app.loadbalancer.server.port=3000
     depends_on:
       postgres:
         condition: service_healthy
