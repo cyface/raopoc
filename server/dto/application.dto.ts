@@ -4,11 +4,11 @@ export class CreateApplicationDto {
   @IsNotEmpty()
   @IsArray()
   @IsEnum(['checking', 'savings', 'money-market'], { each: true })
-  selectedProducts: ('checking' | 'savings' | 'money-market')[]
+  selectedProducts!: ('checking' | 'savings' | 'money-market')[]
 
   @IsNotEmpty()
   @IsObject()
-  customerInfo: {
+  customerInfo!: {
     firstName: string
     lastName: string
     email: string
@@ -64,5 +64,5 @@ export class CreateApplicationDto {
 export class CreditCheckDto {
   @IsNotEmpty()
   @IsString()
-  ssn: string
+  ssn!: string
 }

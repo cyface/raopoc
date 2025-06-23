@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'
 import { createClient } from 'redis'
+import type { RequestHandler } from 'express'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RedisStore } = require('connect-redis')
 
@@ -11,7 +12,7 @@ export class SessionService {
 
   constructor(private configService: ConfigService) {}
 
-  async createSessionMiddleware(): Promise<(req: unknown, res: unknown, next: unknown) => void> {
+  async createSessionMiddleware(): Promise<RequestHandler> {
     const sessionSecret = this.configService.get<string>('SESSION_SECRET') || 'fallback-secret-change-in-production'
     const redisUrl = this.configService.get<string>('REDIS_URL')
 
@@ -36,7 +37,7 @@ export class SessionService {
         const redisClient = createClient({
           url: redisUrl,
           socket: {
-            reconnectStrategy: (retries) => Math.min(retries * 50, 500)
+            reconnectStrategy: (retries: number) => Math.min(retries * 50, 500)
           }
         })
 
