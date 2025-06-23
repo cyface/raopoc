@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "prisma:migrate": "prisma migrate dev",
     "generate-pdfs": "tsx scripts/generate-pdfs.ts"
   },
