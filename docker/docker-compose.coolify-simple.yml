@@ -1,0 +1,97 @@
+name: raopoc
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - raopoc-network
+
+  # PgBouncer connection pooler
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_PORT: 6432
+      PGBOUNCER_MAX_CLIENT_CONN: 100
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_POOL_MODE: session
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - raopoc-network
+
+  # Redis for session management
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - raopoc-network
+
+  # Application - serves both React frontend and NestJS API
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000"  # Expose port for Coolify's Traefik to route to
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Database configuration
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      # Redis configuration
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      # API URL for frontend - use Coolify's generated FQDN
+      API_URL: ${API_URL:-https://${SERVICE_FQDN_APP_3000}/api}
+      # Session secret
+      SESSION_SECRET: ${SESSION_SECRET}
+      # Encryption key for PII
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      # Add Coolify's domain to CORS
+      COOLIFY_URL: https://${SERVICE_FQDN_APP_3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - raopoc-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  raopoc-network:
+    driver: bridge

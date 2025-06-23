@@ -93,9 +93,7 @@ services:
     image: caddy:2-alpine
     container_name: raopoc-caddy
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"  # HTTP/3
+      - "8080:80"  # Use non-standard ports to avoid conflicts with Coolify's Traefik
     volumes:
       # Using inline content to avoid file mounting issues in Coolify
       - type: bind
