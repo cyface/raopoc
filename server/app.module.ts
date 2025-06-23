@@ -21,10 +21,20 @@ import { PrismaService } from './services/prisma.service'
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'public'),
-      serveRoot: '/public',
-    }),
+    ServeStaticModule.forRoot([
+      {
+        rootPath: join(__dirname, '..', '..', 'public'),
+        serveRoot: '/public',
+      },
+      {
+        rootPath: join(__dirname, '..', 'dist'),
+        exclude: ['/api*'],
+        serveStaticOptions: {
+          index: 'index.html',
+          fallthrough: false,
+        },
+      },
+    ]),
   ],
   controllers: [
     ConfigController,
