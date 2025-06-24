@@ -5,7 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { useOnboarding } from '../context/OnboardingContext';
 import { configService, type BankInfo } from '../services/configService';
 import { useTheme } from '../context/ThemeContext';
-import { getApiUrl } from '../utils/apiUrl';
+import { leadService } from '../services/leadService';
 
 interface ConfirmationScreenProps {
   applicationId?: string;
@@ -59,43 +59,12 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
     setSubmissionError(null);
 
     try {
-      // First, create/update the lead with all data
-      const leadResponse = await fetch(`${getApiUrl()}/leads`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          currentStep: 5,
-          completedSteps: [1, 2, 3, 4, 5]
-        }),
-      });
-
-      if (!leadResponse.ok) {
-        throw new Error(`Failed to save lead: ${leadResponse.status}`);
-      }
-
-      const leadResult = await leadResponse.json();
-      const leadId = leadResult.id;
-
-      // Then submit the lead (mark as submitted)
-      const submitResponse = await fetch(`${getApiUrl()}/leads/${leadId}/submit`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!submitResponse.ok) {
-        throw new Error(`Failed to submit lead: ${submitResponse.status}`);
-      }
-
-      await submitResponse.json();
-      setFinalApplicationId(leadId);
+      // Submit the lead using the lead service
+      const submittedLead = await leadService.submitLead();
+      setFinalApplicationId(submittedLead.id);
 
       // Mock sending confirmation email
-      await mockSendConfirmationEmail(leadId, data.customerInfo?.email);
+      await mockSendConfirmationEmail(submittedLead.id, data.customerInfo?.email);
 
       setIsSubmitted(true);
     } catch (error) {

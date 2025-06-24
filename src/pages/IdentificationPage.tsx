@@ -4,6 +4,7 @@ import { useOnboarding } from '../context/OnboardingContext'
 import IdentificationInfo from '../components/IdentificationInfo'
 import { ROUTES } from '../constants/routes'
 import type { IdentificationInfoData } from '../types/identification'
+import { leadService } from '../services/leadService'
 
 export function IdentificationPage() {
   const { setCurrentStep, setIdentificationInfo } = useOnboarding()
@@ -14,9 +15,20 @@ export function IdentificationPage() {
     setCurrentStep(3)
   }, [setCurrentStep])
 
-  const handleNext = (identificationInfo: IdentificationInfoData) => {
-    setIdentificationInfo(identificationInfo)
-    navigate(ROUTES.STEP_4)
+  const handleNext = async (identificationInfo: IdentificationInfoData) => {
+    try {
+      // Save to database first
+      await leadService.saveIdentificationInfo(identificationInfo)
+      
+      // Update global context
+      setIdentificationInfo(identificationInfo)
+      
+      // Navigate to next step
+      navigate(ROUTES.STEP_4)
+    } catch (error) {
+      console.error('Error saving identification info:', error)
+      // You might want to show an error message here
+    }
   }
 
   return <IdentificationInfo onNext={handleNext} />
