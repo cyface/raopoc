@@ -46,6 +46,7 @@ export default typescript.config(
       '*.config.ts',
       'vite.config.ts',
       'public/',
+      'browser-tests/',
     ],
   },
 );
