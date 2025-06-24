@@ -4,18 +4,17 @@ import { DevStepNavigator } from './components/DevStepNavigator'
 import { RouteGuard } from './components/RouteGuard'
 import { NamedRouteRedirect } from './components/NamedRouteRedirect'
 import { OnboardingProvider } from './context/OnboardingContext'
-import { ThemeProvider } from './context/ThemeContext'
 import { useUrlParams } from './hooks/useUrlParams'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { ROUTES, NAMED_ROUTES } from './constants/routes'
 
 // Import page components
-import { ProductSelectionPage } from './pages/ProductSelectionPage'
-import { CustomerInfoPage } from './pages/CustomerInfoPage'
-import { IdentificationPage } from './pages/IdentificationPage'
-import { DocumentsPage } from './pages/DocumentsPage'
-import { ConfirmationPage } from './pages/ConfirmationPage'
+import { ProductSelectionPage } from './pages'
+import { CustomerInfoPage } from './pages'
+import { IdentificationPage } from './pages'
+import { DocumentsPage } from './pages'
+import { ConfirmationPage } from './pages'
 
 function UrlParamWatcher() {
   const { lng } = useUrlParams()
@@ -103,15 +102,16 @@ function OnboardingFlow() {
 }
 
 function App() {
+  console.log('App component rendering');
+  
+  // This component now only handles onboarding routes (admin routes are separate)
   return (
-    <ThemeProvider>
-      <OnboardingProvider>
-        <UrlParamWatcher />
-        <DevStepNavigator />
-        <OnboardingFlow />
-        <DevHelper />
-      </OnboardingProvider>
-    </ThemeProvider>
+    <OnboardingProvider>
+      <UrlParamWatcher />
+      <DevStepNavigator />
+      <OnboardingFlow />
+      <DevHelper />
+    </OnboardingProvider>
   )
 }
 

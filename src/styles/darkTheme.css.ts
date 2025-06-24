@@ -27,6 +27,7 @@ export const darkTheme = createTheme(vars, {
     disabled: '#64748b',
     icon: '#60a5fa',
     white: '#ffffff',
+    scrollShadow: 'rgba(255, 255, 255, 0.3)',
     overlay: 'rgba(0, 0, 0, 0.85)',
   }
 })

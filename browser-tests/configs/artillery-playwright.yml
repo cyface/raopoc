@@ -1,0 +1,62 @@
+config:
+  # Test configuration
+  target: 'http://localhost:5173'  # Vite dev server default port
+  phases:
+    - duration: 30
+      arrivalRate: 1
+      name: "Warm up"
+    - duration: 60
+      arrivalRate: 2
+      name: "Ramp up load"
+    - duration: 120
+      arrivalRate: 5
+      name: "Sustained load"
+    - duration: 30
+      arrivalRate: 1
+      name: "Cool down"
+  
+  # Playwright-specific configuration
+  engines:
+    playwright:
+      launchOptions:
+        headless: true
+        args:
+          - '--no-sandbox'
+          - '--disable-dev-shm-usage'
+          - '--disable-gpu'
+          - '--window-size=1280,720'
+      contextOptions:
+        viewport:
+          width: 1280
+          height: 720
+        userAgent: 'Artillery Load Test Bot'
+        ignoreHTTPSErrors: true
+      aggregateByName: true
+  
+  # Variables for test customization
+  variables:
+    baseUrl: 'http://localhost:5173'
+    
+  # Metrics and reporting
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    
+  # HTTP settings for any direct HTTP calls
+  http:
+    timeout: 30
+    
+  # Custom metrics
+  statsInterval: 10
+
+# Test scenarios
+scenarios:
+  - name: "Complete Onboarding Flow"
+    weight: 80
+    engine: playwright
+    testFunction: "completeOnboardingFlow"
+    
+  - name: "Complete Onboarding Flow - No SSN Edge Case"
+    weight: 20
+    engine: playwright
+    testFunction: "completeOnboardingFlowNoSSN"

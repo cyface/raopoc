@@ -23,6 +23,7 @@ export const [themeClass, vars] = createTheme({
     disabled: '#9ba0a6',
     icon: '#3b82f6',
     white: '#ffffff',
+    scrollShadow: 'rgba(0, 0, 0, 0.2)',
     overlay: 'rgba(0, 0, 0, 0.75)',
   }
 })

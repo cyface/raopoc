@@ -1,0 +1,35 @@
+{
+  "name": "banking-onboarding-browser-tests",
+  "version": "1.0.0",
+  "description": "Playwright and Artillery load tests for banking onboarding application",
+  "main": "index.js",
+  "scripts": {
+    "test:playwright": "playwright test",
+    "test:playwright-ui": "playwright test --ui",
+    "test:playwright-headed": "playwright test --headed",
+    "test:artillery": "artillery run configs/artillery-playwright.yml",
+    "test:artillery-quick": "artillery quick --count 5 --num 2 http://localhost:5173",
+    "install-browsers": "playwright install",
+    "test:all": "npm run test:playwright && npm run test:artillery"
+  },
+  "keywords": [
+    "playwright",
+    "artillery",
+    "load-testing",
+    "banking",
+    "onboarding",
+    "e2e-testing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "artillery": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

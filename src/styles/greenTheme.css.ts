@@ -27,6 +27,7 @@ export const greenLightTheme = createTheme(vars, {
     disabled: '#81a881',         // Light green-gray for disabled
     icon: '#1b5e20',             // Dark green icons
     white: '#ffffff',            // White
+    scrollShadow: 'rgba(0, 0, 0, 0.2)', // Scroll shadow
     overlay: 'rgba(0, 0, 0, 0.75)', // Dark overlay
   }
 })
@@ -54,6 +55,7 @@ export const greenDarkTheme = createTheme(vars, {
     disabled: '#5a7a5a',         // Muted green for disabled in dark theme
     icon: '#66bb6a',             // Light green icons
     white: '#ffffff',            // White
+    scrollShadow: 'rgba(255, 255, 255, 0.3)', // Scroll shadow for dark
     overlay: 'rgba(0, 0, 0, 0.85)', // Dark overlay
   }
 })

@@ -8,6 +8,7 @@ import { TranslationController } from './controllers/translation.controller'
 import { DocumentController } from './controllers/document.controller'
 import { SessionController } from './controllers/session.controller'
 import { LeadController } from './controllers/lead.controller'
+import { AdminController } from './controllers/admin.controller'
 import { SpaController } from './controllers/spa.controller'
 import { ConfigService } from './services/config.service'
 import { EncryptionService } from './services/encryption.service'
@@ -42,6 +43,7 @@ import { PrismaService } from './services/prisma.service'
     DocumentController,
     SessionController,
     LeadController,
+    AdminController,
     SpaController, // Must be last to catch SPA routes
   ],
   providers: [

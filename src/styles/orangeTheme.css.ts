@@ -27,6 +27,7 @@ export const orangeLightTheme = createTheme(vars, {
     disabled: '#d4a574',         // Light orange-tan for disabled
     icon: '#ea580c',             // Orange icons
     white: '#ffffff',            // White
+    scrollShadow: 'rgba(0, 0, 0, 0.2)', // Scroll shadow
     overlay: 'rgba(0, 0, 0, 0.75)', // Dark overlay
   }
 })
@@ -54,6 +55,7 @@ export const orangeDarkTheme = createTheme(vars, {
     disabled: '#92400e',         // Muted orange for disabled in dark theme
     icon: '#fb923c',             // Light orange icons
     white: '#ffffff',            // White
+    scrollShadow: 'rgba(255, 255, 255, 0.3)', // Scroll shadow for dark
     overlay: 'rgba(0, 0, 0, 0.85)', // Dark overlay
   }
 })
