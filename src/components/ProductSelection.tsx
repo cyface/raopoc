@@ -27,6 +27,7 @@ export default function ProductSelection() {
   
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
   const [error, setError] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const toggleProduct = (productType: ProductType) => {
     setSelectedProducts(prev => {
@@ -39,17 +40,26 @@ export default function ProductSelection() {
     setError('')
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     try {
+      setIsLoading(true)
+      setError('')
+      
       const data: ProductSelectionData = { selectedProducts }
       ProductSelectionSchema.parse(data)
       
+      // Update global context (do not save to database yet)
       setGlobalProducts(selectedProducts)
+      
+      // Navigate to next step
       navigate(ROUTES.STEP_2)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
       }
+      console.error('Error in product selection:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -102,9 +112,9 @@ export default function ProductSelection() {
         <button
           className={styles.primaryButton}
           onClick={handleNext}
-          disabled={selectedProducts.length === 0}
+          disabled={selectedProducts.length === 0 || isLoading}
         >
-          {t('common.next')}
+          {isLoading ? t('common.saving') || 'Saving...' : t('common.next')}
         </button>
       </div>
     </div>
