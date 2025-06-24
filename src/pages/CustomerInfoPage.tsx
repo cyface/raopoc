@@ -4,6 +4,7 @@ import { useOnboarding } from '../context/OnboardingContext'
 import CustomerInfo from '../components/CustomerInfo'
 import { ROUTES } from '../constants/routes'
 import type { CustomerInfoData } from '../types/customer'
+import { leadService } from '../services/leadService'
 
 export function CustomerInfoPage() {
   const { setCurrentStep, data, setCustomerInfo } = useOnboarding()
@@ -14,9 +15,20 @@ export function CustomerInfoPage() {
     setCurrentStep(2)
   }, [setCurrentStep])
 
-  const handleNext = (customerInfo: CustomerInfoData) => {
-    setCustomerInfo(customerInfo)
-    navigate(ROUTES.STEP_3)
+  const handleNext = async (customerInfo: CustomerInfoData) => {
+    try {
+      // Save to database first, including selected products
+      await leadService.saveCustomerInfo(customerInfo, data.selectedProducts)
+      
+      // Update global context
+      setCustomerInfo(customerInfo)
+      
+      // Navigate to next step
+      navigate(ROUTES.STEP_3)
+    } catch (error) {
+      console.error('Error saving customer info:', error)
+      // You might want to show an error message here
+    }
   }
 
   return (
