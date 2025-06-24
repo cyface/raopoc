@@ -382,7 +382,7 @@ export class ApplicationService {
         case 1:
           // Product selection step
           if (stepData.stepData.selectedProducts) {
-            updateData.selectedProducts = stepData.stepData.selectedProducts.map(product => {
+            updateData.selectedProducts = stepData.stepData.selectedProducts.map((product: string) => {
               switch (product.toLowerCase()) {
                 case 'checking': return ProductType.CHECKING
                 case 'savings': return ProductType.SAVINGS
