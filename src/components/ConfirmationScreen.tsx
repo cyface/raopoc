@@ -61,10 +61,10 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
     try {
       // Submit the lead using the lead service
       const submittedLead = await leadService.submitLead();
-      setFinalApplicationId(submittedLead.id);
+      setFinalApplicationId(submittedLead.id || null);
 
       // Mock sending confirmation email
-      await mockSendConfirmationEmail(submittedLead.id, data.customerInfo?.email);
+      await mockSendConfirmationEmail(submittedLead.id || '', data.customerInfo?.email || '');
 
       setIsSubmitted(true);
     } catch (error) {
