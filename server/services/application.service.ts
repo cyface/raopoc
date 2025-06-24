@@ -353,6 +353,79 @@ export class ApplicationService {
   }
 
   /**
+   * Update lead step progress
+   */
+  async updateLeadStep(leadId: string, stepData: {
+    currentStep: number
+    completedSteps?: number[]
+    stepData?: any
+  }) {
+    const updateData: any = {
+      currentStep: stepData.currentStep,
+      lastActivity: new Date()
+    }
+
+    // Update completed steps array
+    if (stepData.completedSteps) {
+      updateData.completedSteps = stepData.completedSteps
+    } else {
+      // Auto-generate completed steps based on current step
+      updateData.completedSteps = Array.from({ length: stepData.currentStep }, (_, i) => i + 1)
+    }
+
+    // Update step-specific data
+    if (stepData.stepData) {
+      // Encrypt sensitive data before storing
+      const encryptedStepData = await this.encryptionService.encryptSensitiveFields(stepData.stepData)
+      
+      switch (stepData.currentStep) {
+        case 1:
+          // Product selection step
+          if (stepData.stepData.selectedProducts) {
+            updateData.selectedProducts = stepData.stepData.selectedProducts.map(product => {
+              switch (product.toLowerCase()) {
+                case 'checking': return ProductType.CHECKING
+                case 'savings': return ProductType.SAVINGS
+                case 'money-market': return ProductType.MONEY_MARKET
+                default: return ProductType.CHECKING
+              }
+            })
+          }
+          break
+        case 2:
+          // Customer info step
+          if (stepData.stepData.customerInfo) {
+            updateData.customerInfo = encryptedStepData
+          }
+          break
+        case 3:
+          // Identification step
+          if (stepData.stepData.identificationInfo) {
+            updateData.identificationInfo = encryptedStepData
+          }
+          break
+        case 4:
+          // Documents step - handled separately via updateLeadDocumentAcceptances
+          break
+        case 5:
+          // Confirmation step - mark as submitted
+          updateData.status = LeadStatus.SUBMITTED
+          updateData.submittedAt = new Date()
+          break
+      }
+    }
+
+    const updatedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: updateData,
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Lead step updated: ${leadId} - Step ${stepData.currentStep}`)
+    return updatedLead
+  }
+
+  /**
    * Submit lead (mark as submitted)
    */
   async submitLead(leadId: string) {

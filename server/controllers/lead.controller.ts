@@ -66,6 +66,18 @@ export class LeadController {
     return this.applicationService.updateLeadDocumentAcceptances(leadId, body.acceptances)
   }
 
+  @Put(':id/step')
+  async updateLeadStep(
+    @Param('id') leadId: string,
+    @Body() stepData: {
+      currentStep: number
+      completedSteps?: number[]
+      stepData?: any
+    }
+  ) {
+    return this.applicationService.updateLeadStep(leadId, stepData)
+  }
+
   @Put(':id/submit')
   async submitLead(@Param('id') leadId: string) {
     return this.applicationService.submitLead(leadId)
