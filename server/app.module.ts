@@ -11,7 +11,6 @@ import { LeadController } from './controllers/lead.controller'
 import { AdminController } from './controllers/admin.controller'
 import { SpaController } from './controllers/spa.controller'
 import { ConfigService } from './services/config.service'
-import { EncryptionService } from './services/encryption.service'
 import { ApplicationService } from './services/application.service'
 import { TranslationService } from './services/translation.service'
 import { DocumentService } from './services/document.service'
@@ -48,7 +47,6 @@ import { PrismaService } from './services/prisma.service'
   ],
   providers: [
     ConfigService,
-    EncryptionService,
     ApplicationService,
     TranslationService,
     DocumentService,

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { Test, TestingModule } from '@nestjs/testing'
 import { ApplicationService } from './application.service'
-import { EncryptionService } from './encryption.service'
 import { ConfigService } from './config.service'
 import { PrismaService } from './prisma.service'
 import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
@@ -23,13 +22,6 @@ describe('ApplicationService - Lead Management', () => {
     }
   }
 
-  const mockEncryptionService = {
-    encryptSensitiveFields: vi.fn(),
-    decryptSensitiveFields: vi.fn(),
-    encryptValue: vi.fn(),
-    decryptValue: vi.fn()
-  }
-
   const mockConfigService = {
     getBadSSNs: vi.fn()
   }
@@ -41,10 +33,6 @@ describe('ApplicationService - Lead Management', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService
-        },
-        {
-          provide: EncryptionService,
-          useValue: mockEncryptionService
         },
         {
           provide: ConfigService,
@@ -87,16 +75,6 @@ describe('ApplicationService - Lead Management', () => {
     }
 
     it('should create a new lead when sessionId does not exist', async () => {
-      const mockEncryptedCustomerInfo = { encrypted: 'customer_data', _encrypted: true }
-      const mockEncryptedIdentInfo = { encrypted: 'ident_data', _encrypted: true }
-      const mockEncryptedIp = { encrypted: 'ip_data', _encrypted: true }
-
-      // Mock encryption
-      mockEncryptionService.encryptSensitiveFields
-        .mockResolvedValueOnce(mockEncryptedCustomerInfo)
-        .mockResolvedValueOnce(mockEncryptedIdentInfo)
-      mockEncryptionService.encryptValue.mockResolvedValue(mockEncryptedIp)
-
       // Mock Prisma calls
       mockPrismaService.lead.findUnique.mockResolvedValue(null)
       mockPrismaService.lead.create.mockResolvedValue({
@@ -104,8 +82,8 @@ describe('ApplicationService - Lead Management', () => {
         sessionId: 'session-123',
         status: LeadStatus.IN_PROGRESS,
         selectedProducts: [ProductType.CHECKING, ProductType.SAVINGS],
-        customerInfo: mockEncryptedCustomerInfo,
-        identificationInfo: mockEncryptedIdentInfo,
+        customerInfo: mockLeadData.customerInfo,
+        identificationInfo: mockLeadData.identificationInfo,
         documentAcceptances: []
       })
 
@@ -125,9 +103,9 @@ describe('ApplicationService - Lead Management', () => {
           financialInstitution: 'testbank',
           language: 'en',
           userAgent: 'Mozilla/5.0...',
-          customerInfo: mockEncryptedCustomerInfo,
-          identificationInfo: mockEncryptedIdentInfo,
-          ipAddress: JSON.stringify(mockEncryptedIp)
+          customerInfo: mockLeadData.customerInfo,
+          identificationInfo: mockLeadData.identificationInfo,
+          ipAddress: '192.168.1.1'
         }),
         include: { documentAcceptances: true }
       })
@@ -141,9 +119,6 @@ describe('ApplicationService - Lead Management', () => {
         sessionId: 'session-123',
         status: LeadStatus.IN_PROGRESS
       }
-
-      const mockEncryptedData = { encrypted: 'updated_data', _encrypted: true }
-      mockEncryptionService.encryptSensitiveFields.mockResolvedValue(mockEncryptedData)
 
       mockPrismaService.lead.findUnique.mockResolvedValue(existingLead)
       mockPrismaService.lead.update.mockResolvedValue({
@@ -171,8 +146,6 @@ describe('ApplicationService - Lead Management', () => {
         selectedProducts: ['checking', 'savings', 'money-market']
       }
 
-      mockEncryptionService.encryptSensitiveFields.mockResolvedValue({})
-      mockEncryptionService.encryptValue.mockResolvedValue({})
       mockPrismaService.lead.findUnique.mockResolvedValue(null)
       mockPrismaService.lead.create.mockResolvedValue({ id: 'test', documentAcceptances: [] })
 
@@ -188,31 +161,21 @@ describe('ApplicationService - Lead Management', () => {
   })
 
   describe('getLeadBySessionId', () => {
-    it('should return decrypted lead data by session ID', async () => {
-      const mockEncryptedLead = {
+    it('should return lead data by session ID', async () => {
+      const mockLead = {
         id: 'lead-123',
         sessionId: 'session-123',
-        customerInfo: { encrypted: 'customer_data', _encrypted: true },
-        identificationInfo: { encrypted: 'ident_data', _encrypted: true },
-        ipAddress: JSON.stringify({ encrypted: 'ip_data', _encrypted: true }),
+        customerInfo: { firstName: 'John', lastName: 'Doe' },
+        identificationInfo: { ssn: '123-45-6789' },
+        ipAddress: '192.168.1.1',
         documentAcceptances: []
       }
 
-      const mockDecryptedCustomer = { firstName: 'John', lastName: 'Doe' }
-      const mockDecryptedIdent = { ssn: '123-45-6789' }
-      const mockDecryptedIp = '192.168.1.1'
-
-      mockPrismaService.lead.findUnique.mockResolvedValue(mockEncryptedLead)
-      mockEncryptionService.decryptSensitiveFields
-        .mockResolvedValueOnce(mockDecryptedCustomer)
-        .mockResolvedValueOnce(mockDecryptedIdent)
-      mockEncryptionService.decryptValue.mockResolvedValue(mockDecryptedIp)
+      mockPrismaService.lead.findUnique.mockResolvedValue(mockLead)
 
       const result = await service.getLeadBySessionId('session-123')
 
-      expect(result.customerInfo).toEqual(mockDecryptedCustomer)
-      expect(result.identificationInfo).toEqual(mockDecryptedIdent)
-      expect(result.ipAddress).toBe(mockDecryptedIp)
+      expect(result).toEqual(mockLead)
     })
 
     it('should return null for non-existent session', async () => {
@@ -374,13 +337,13 @@ describe('ApplicationService - Lead Management', () => {
   })
 
   describe('getAllLeads', () => {
-    it('should return decrypted leads with filtering', async () => {
+    it('should return leads with filtering', async () => {
       const mockLeads = [
         {
           id: 'lead-1',
           status: LeadStatus.SUBMITTED,
           financialInstitution: 'testbank',
-          customerInfo: { encrypted: 'data1', _encrypted: true },
+          customerInfo: { firstName: 'John' },
           identificationInfo: null,
           ipAddress: null,
           documentAcceptances: []
@@ -389,7 +352,7 @@ describe('ApplicationService - Lead Management', () => {
           id: 'lead-2',
           status: LeadStatus.IN_PROGRESS,
           financialInstitution: 'testbank',
-          customerInfo: { encrypted: 'data2', _encrypted: true },
+          customerInfo: { firstName: 'Jane' },
           identificationInfo: null,
           ipAddress: null,
           documentAcceptances: []
@@ -397,7 +360,6 @@ describe('ApplicationService - Lead Management', () => {
       ]
 
       mockPrismaService.lead.findMany.mockResolvedValue(mockLeads)
-      mockEncryptionService.decryptSensitiveFields.mockResolvedValue({ firstName: 'John' })
 
       const result = await service.getAllLeads({
         status: LeadStatus.SUBMITTED,
@@ -418,7 +380,7 @@ describe('ApplicationService - Lead Management', () => {
       })
 
       expect(result).toHaveLength(2)
-      expect(mockEncryptionService.decryptSensitiveFields).toHaveBeenCalledTimes(2)
+      expect(result).toEqual(mockLeads)
     })
 
     it('should use default pagination when not specified', async () => {

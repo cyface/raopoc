@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { randomUUID } from 'crypto'
-import { EncryptionService } from './encryption.service'
 import { ConfigService } from './config.service'
 import { PrismaService } from './prisma.service'
 import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
@@ -12,7 +11,6 @@ export class ApplicationService {
   private readonly logger = new Logger(ApplicationService.name)
   
   constructor(
-    private readonly encryptionService: EncryptionService,
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService
   ) {}
@@ -63,13 +61,11 @@ export class ApplicationService {
     const sanitizedLastName = lastName.replace(/[^a-zA-Z0-9]/g, '')
     const filename = `${applicationId}-${sanitizedLastName}.json`
     
-    const encryptedData = await this.encryptionService.encryptSensitiveFields(applicationData)
-    
     const application = {
       id: applicationId,
       submittedAt: new Date().toISOString(),
       status: 'submitted',
-      data: encryptedData,
+      data: applicationData,
       metadata: {
         userAgent,
         ipAddress,
@@ -108,9 +104,7 @@ export class ApplicationService {
     const applicationData = await fs.readFile(filePath, 'utf-8')
     const application = JSON.parse(applicationData)
     
-    if (application.data) {
-      application.data = await this.encryptionService.decryptSensitiveFields(application.data)
-    }
+    // No decryption needed anymore
     
     return application
   }
@@ -168,7 +162,7 @@ export class ApplicationService {
       theme: data.theme,
       sessionId: data.sessionId,
       userAgent: data.userAgent,
-      ipAddress: data.ipAddress ? JSON.stringify(await this.encryptionService.encryptValue(data.ipAddress)) : null,
+      ipAddress: data.ipAddress || null,
       devStep: data.devStep,
       mockScenario: data.mockScenario,
       lastActivity: new Date()
@@ -186,14 +180,14 @@ export class ApplicationService {
       })
     }
 
-    // Encrypt and set customer info
+    // Set customer info
     if (data.customerInfo) {
-      leadData.customerInfo = await this.encryptionService.encryptSensitiveFields(data.customerInfo)
+      leadData.customerInfo = data.customerInfo
     }
 
-    // Encrypt and set identification info
+    // Set identification info
     if (data.identificationInfo) {
-      leadData.identificationInfo = await this.encryptionService.encryptSensitiveFields(data.identificationInfo)
+      leadData.identificationInfo = data.identificationInfo
     }
 
     // Try to update existing lead by session ID, or create new one
@@ -237,19 +231,8 @@ export class ApplicationService {
       return null
     }
 
-    // Decrypt sensitive data
-    const decryptedLead = { ...lead } as any
-    if (lead.customerInfo) {
-      decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
-    }
-    if (lead.identificationInfo) {
-      decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
-    }
-    if (lead.ipAddress) {
-      decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
-    }
-
-    return decryptedLead
+    // No decryption needed anymore
+    return lead
   }
 
   /**
@@ -265,19 +248,8 @@ export class ApplicationService {
       return null
     }
 
-    // Decrypt sensitive data
-    const decryptedLead = { ...lead } as any
-    if (lead.customerInfo) {
-      decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
-    }
-    if (lead.identificationInfo) {
-      decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
-    }
-    if (lead.ipAddress) {
-      decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
-    }
-
-    return decryptedLead
+    // No decryption needed anymore
+    return lead
   }
 
   /**
@@ -375,9 +347,6 @@ export class ApplicationService {
 
     // Update step-specific data
     if (stepData.stepData) {
-      // Encrypt sensitive data before storing
-      const encryptedStepData = await this.encryptionService.encryptSensitiveFields(stepData.stepData)
-      
       switch (stepData.currentStep) {
         case 1:
           // Product selection step
@@ -395,13 +364,13 @@ export class ApplicationService {
         case 2:
           // Customer info step
           if (stepData.stepData.customerInfo) {
-            updateData.customerInfo = encryptedStepData
+            updateData.customerInfo = stepData.stepData.customerInfo
           }
           break
         case 3:
           // Identification step
           if (stepData.stepData.identificationInfo) {
-            updateData.identificationInfo = encryptedStepData
+            updateData.identificationInfo = stepData.stepData.identificationInfo
           }
           break
         case 4:
@@ -464,23 +433,7 @@ export class ApplicationService {
       skip: params?.offset || 0
     })
 
-    // Decrypt sensitive data for each lead
-    const decryptedLeads = await Promise.all(
-      leads.map(async (lead) => {
-        const decryptedLead = { ...lead } as any
-        if (lead.customerInfo) {
-          decryptedLead.customerInfo = await this.encryptionService.decryptSensitiveFields(lead.customerInfo)
-        }
-        if (lead.identificationInfo) {
-          decryptedLead.identificationInfo = await this.encryptionService.decryptSensitiveFields(lead.identificationInfo)
-        }
-        if (lead.ipAddress) {
-          decryptedLead.ipAddress = await this.encryptionService.decryptValue(JSON.parse(lead.ipAddress as string))
-        }
-        return decryptedLead
-      })
-    )
-
-    return decryptedLeads
+    // No decryption needed anymore
+    return leads
   }
 }

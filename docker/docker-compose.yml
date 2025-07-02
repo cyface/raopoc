@@ -78,8 +78,6 @@ services:
       API_URL: ${API_URL:-https://app.localhost/api}
       # Session secret
       SESSION_SECRET: ${SESSION_SECRET}
-      # Encryption key for PII
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
     depends_on:
       postgres:
         condition: service_healthy
