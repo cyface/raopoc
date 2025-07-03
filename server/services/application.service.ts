@@ -444,6 +444,94 @@ export class ApplicationService {
   }
 
   /**
+   * Generic lead update - update any lead fields
+   */
+  async updateLead(leadId: string, updateData: any) {
+    const processedUpdateData: any = {
+      ...updateData,
+      lastActivity: new Date()
+    }
+
+    // Handle customer info update with versioning
+    if (updateData.customerInfo) {
+      const existingLead = await this.prisma.lead.findUnique({
+        where: { id: leadId },
+        select: { customerInfoHistory: true }
+      })
+      
+      if (existingLead && Array.isArray(existingLead.customerInfoHistory) && existingLead.customerInfoHistory.length > 0) {
+        // Add new version to existing history
+        const currentHistory = existingLead.customerInfoHistory as unknown as VersionedCustomerInfo[]
+        const nextVersion = Math.max(...currentHistory.map(v => v.version)) + 1
+        const newVersionedRecord: VersionedCustomerInfo = {
+          version: nextVersion,
+          timestamp: new Date().toISOString(),
+          data: updateData.customerInfo,
+          source: 'graphql-update',
+          changeReason: 'direct_update'
+        }
+        processedUpdateData.customerInfoHistory = [...currentHistory, newVersionedRecord] as any
+      } else {
+        // Create initial version
+        processedUpdateData.customerInfoHistory = [this.createVersionedCustomerInfo(updateData.customerInfo, 'graphql-update', 'direct_update')] as any
+      }
+      // Remove the direct customerInfo field - we only store in history
+      delete processedUpdateData.customerInfo
+    }
+
+    // Handle identification info update with versioning
+    if (updateData.identificationInfo) {
+      const existingLead = await this.prisma.lead.findUnique({
+        where: { id: leadId },
+        select: { identificationInfoHistory: true }
+      })
+      
+      if (existingLead && Array.isArray(existingLead.identificationInfoHistory) && existingLead.identificationInfoHistory.length > 0) {
+        // Add new version to existing history
+        const currentHistory = existingLead.identificationInfoHistory as unknown as VersionedIdentificationInfo[]
+        const nextVersion = Math.max(...currentHistory.map(v => v.version)) + 1
+        const newVersionedRecord: VersionedIdentificationInfo = {
+          version: nextVersion,
+          timestamp: new Date().toISOString(),
+          data: updateData.identificationInfo,
+          source: 'graphql-update',
+          changeReason: 'direct_update'
+        }
+        processedUpdateData.identificationInfoHistory = [...currentHistory, newVersionedRecord] as any
+      } else {
+        // Create initial version
+        processedUpdateData.identificationInfoHistory = [this.createVersionedIdentificationInfo(updateData.identificationInfo, 'graphql-update', 'direct_update')] as any
+      }
+      // Remove the direct identificationInfo field - we only store in history
+      delete processedUpdateData.identificationInfo
+    }
+
+    // Convert string array to ProductType enum for selectedProducts
+    if (updateData.selectedProducts) {
+      processedUpdateData.selectedProducts = updateData.selectedProducts.map((product: any) => {
+        if (typeof product === 'string') {
+          switch (product.toLowerCase()) {
+            case 'checking': return ProductType.CHECKING
+            case 'savings': return ProductType.SAVINGS
+            case 'money-market': return ProductType.MONEY_MARKET
+            default: return ProductType.CHECKING
+          }
+        }
+        return product // Already an enum value
+      })
+    }
+
+    const updatedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: processedUpdateData,
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Lead updated: ${leadId}`)
+    return updatedLead
+  }
+
+  /**
    * Submit lead (mark as submitted)
    */
   async submitLead(leadId: string) {

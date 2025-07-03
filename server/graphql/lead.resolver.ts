@@ -5,6 +5,7 @@ import { ConfigService } from '../services/config.service'
 import { Lead, CreditCheckResult, Product } from './object-types'
 import { 
   CreateLeadInput, 
+  UpdateLeadInput,
   UpdateLeadStepInput,
   UpdateLeadCreditCheckInput,
   UpdateLeadDocumentsInput,
@@ -67,6 +68,37 @@ export class LeadResolver {
       ipAddress: input.ipAddress
     })
 
+    return this.transformLead(lead)
+  }
+
+  @Mutation(() => Lead)
+  async updateLead(@Args('input') input: UpdateLeadInput): Promise<Lead> {
+    // Build update data object with only provided fields
+    const updateData: any = {}
+    
+    if (input.status !== undefined) updateData.status = input.status
+    if (input.currentStep !== undefined) updateData.currentStep = input.currentStep
+    if (input.completedSteps !== undefined) updateData.completedSteps = input.completedSteps
+    if (input.selectedProducts !== undefined) updateData.selectedProducts = input.selectedProducts
+    if (input.financialInstitution !== undefined) updateData.financialInstitution = input.financialInstitution
+    if (input.language !== undefined) updateData.language = input.language
+    if (input.theme !== undefined) updateData.theme = input.theme
+    if (input.devStep !== undefined) updateData.devStep = input.devStep
+    if (input.mockScenario !== undefined) updateData.mockScenario = input.mockScenario
+    if (input.userAgent !== undefined) updateData.userAgent = input.userAgent
+    if (input.ipAddress !== undefined) updateData.ipAddress = input.ipAddress
+
+    // Handle nested customer info update
+    if (input.customerInfo) {
+      updateData.customerInfo = input.customerInfo
+    }
+
+    // Handle nested identification info update
+    if (input.identificationInfo) {
+      updateData.identificationInfo = input.identificationInfo
+    }
+
+    const lead = await this.applicationService.updateLead(input.leadId, updateData)
     return this.transformLead(lead)
   }
 

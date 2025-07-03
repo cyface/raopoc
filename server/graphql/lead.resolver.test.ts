@@ -59,6 +59,7 @@ describe('LeadResolver', () => {
       getLeadBySessionId: vi.fn(),
       getAllLeads: vi.fn(),
       createOrUpdateLead: vi.fn(),
+      updateLead: vi.fn(),
       updateLeadStep: vi.fn(),
       updateLeadCreditCheck: vi.fn(),
       updateLeadDocumentAcceptances: vi.fn(),
@@ -473,6 +474,113 @@ describe('LeadResolver', () => {
         expect(result[0].title).toBe('Bank Checking')
         expect(result[1].title).toBe('Bank Savings')
         expect(mockConfigService.loadConfigWithFallback).toHaveBeenCalledWith('products', 'testbank')
+      })
+    })
+  })
+
+  describe('updateLead mutation', () => {
+    it('should update lead with provided fields', async () => {
+      // Arrange
+      const updateInput = {
+        leadId: 'lead-123',
+        currentStep: 3,
+        customerInfo: {
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+          phoneNumber: '555-123-9999',
+          mailingAddress: {
+            street: '456 Oak St',
+            city: 'Boston',
+            state: 'MA',
+            zipCode: '02101'
+          },
+          useSameAddress: true
+        },
+        language: 'es'
+      }
+
+      mockApplicationService.updateLead.mockResolvedValue({
+        ...mockLead,
+        currentStep: 3,
+        language: 'es'
+      })
+      mockApplicationService.getLatestCustomerInfo.mockReturnValue({
+        data: updateInput.customerInfo
+      })
+      mockApplicationService.getLatestIdentificationInfo.mockReturnValue(null)
+
+      // Act
+      const result = await resolver.updateLead(updateInput)
+
+      // Assert
+      expect(result.currentStep).toBe(3)
+      expect(result.language).toBe('es')
+      expect(mockApplicationService.updateLead).toHaveBeenCalledWith('lead-123', {
+        currentStep: 3,
+        customerInfo: updateInput.customerInfo,
+        language: 'es'
+      })
+    })
+
+    it('should handle partial updates (only firstName)', async () => {
+      // Arrange
+      const updateInput = {
+        leadId: 'lead-123',
+        customerInfo: {
+          firstName: 'UpdatedName',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          phoneNumber: '555-123-4567',
+          mailingAddress: {
+            street: '123 Main St',
+            city: 'New York',
+            state: 'NY',
+            zipCode: '10001'
+          },
+          useSameAddress: true
+        }
+      }
+
+      mockApplicationService.updateLead.mockResolvedValue({
+        ...mockLead
+      })
+      mockApplicationService.getLatestCustomerInfo.mockReturnValue({
+        data: updateInput.customerInfo
+      })
+      mockApplicationService.getLatestIdentificationInfo.mockReturnValue(null)
+
+      // Act
+      await resolver.updateLead(updateInput)
+
+      // Assert
+      expect(mockApplicationService.updateLead).toHaveBeenCalledWith('lead-123', {
+        customerInfo: updateInput.customerInfo
+      })
+    })
+
+    it('should handle status updates', async () => {
+      // Arrange
+      const updateInput = {
+        leadId: 'lead-123',
+        status: LeadStatus.SUBMITTED
+      }
+
+      mockApplicationService.updateLead.mockResolvedValue({
+        ...mockLead,
+        status: LeadStatus.SUBMITTED
+      })
+      mockApplicationService.getLatestCustomerInfo.mockReturnValue({
+        data: mockLead.customerInfoHistory[0].data
+      })
+      mockApplicationService.getLatestIdentificationInfo.mockReturnValue(null)
+
+      // Act
+      await resolver.updateLead(updateInput)
+
+      // Assert
+      expect(mockApplicationService.updateLead).toHaveBeenCalledWith('lead-123', {
+        status: LeadStatus.SUBMITTED
       })
     })
   })

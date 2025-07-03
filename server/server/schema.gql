@@ -228,6 +228,7 @@ scalar JSON
 
 type Mutation {
   createOrUpdateLead(input: CreateLeadInput!): Lead!
+  updateLead(input: UpdateLeadInput!): Lead!
   updateLeadStep(input: UpdateLeadStepInput!): Lead!
   updateLeadCreditCheck(input: UpdateLeadCreditCheckInput!): Lead!
   updateLeadDocuments(input: UpdateLeadDocumentsInput!): [String!]!
@@ -257,58 +258,75 @@ input CreateLeadInput {
 }
 
 input CustomerInfoInput {
-  firstName: String! = ""
-  lastName: String! = ""
-  email: String! = ""
-  phoneNumber: String! = ""
-  mailingAddress: AddressInput! = {street: "", city: "", state: "", zipCode: ""}
+  firstName: String!
+  lastName: String!
+  email: String!
+  phoneNumber: String!
+  mailingAddress: AddressInput!
   billingAddress: AddressInput
-  useSameAddress: Boolean! = false
+  useSameAddress: Boolean!
 }
 
 input AddressInput {
-  street: String! = ""
-  city: String! = ""
-  state: String! = ""
-  zipCode: String! = ""
+  street: String!
+  city: String!
+  state: String!
+  zipCode: String!
 }
 
 input IdentificationInfoInput {
-  identificationType: String! = ""
-  identificationNumber: String! = ""
+  identificationType: String!
+  identificationNumber: String!
   state: String
   country: String
   socialSecurityNumber: String
-  noSSN: Boolean! = false
-  dateOfBirth: String! = ""
+  noSSN: Boolean!
+  dateOfBirth: String!
+}
+
+input UpdateLeadInput {
+  leadId: String!
+  status: LeadStatus
+  currentStep: Float
+  completedSteps: [Float!]
+  selectedProducts: [ProductType!]
+  customerInfo: CustomerInfoInput
+  identificationInfo: IdentificationInfoInput
+  financialInstitution: String
+  language: String
+  theme: String
+  devStep: Float
+  mockScenario: String
+  userAgent: String
+  ipAddress: String
 }
 
 input UpdateLeadStepInput {
-  leadId: String! = ""
-  currentStep: Float! = 0
+  leadId: String!
+  currentStep: Float!
   completedSteps: [Float!]
   stepData: String
 }
 
 input UpdateLeadCreditCheckInput {
-  leadId: String! = ""
-  status: String! = ""
-  requiresVerification: Boolean! = false
-  message: String! = ""
+  leadId: String!
+  status: String!
+  requiresVerification: Boolean!
+  message: String!
 }
 
 input UpdateLeadDocumentsInput {
-  leadId: String! = ""
-  acceptances: [DocumentAcceptanceInput!]! = []
+  leadId: String!
+  acceptances: [DocumentAcceptanceInput!]!
 }
 
 input DocumentAcceptanceInput {
-  documentId: String! = ""
-  accepted: Boolean! = false
+  documentId: String!
+  accepted: Boolean!
 }
 
 input CreditCheckInput {
-  ssn: String! = ""
+  ssn: String!
 }
 
 input CreateApplicationInput {
@@ -321,10 +339,10 @@ input CreateApplicationInput {
 }
 
 input SessionLoginInput {
-  username: String! = ""
+  username: String!
 }
 
 input AdminLoginInput {
-  username: String! = ""
-  password: String! = ""
+  username: String!
+  password: String!
 }

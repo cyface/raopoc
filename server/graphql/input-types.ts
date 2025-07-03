@@ -1,52 +1,54 @@
 import { Field, InputType } from '@nestjs/graphql'
 import { ProductType, LeadStatus } from '@prisma/client'
+import { IsOptional, IsString, IsNumber, IsArray, IsEnum, ValidateNested } from 'class-validator'
+import { Type } from 'class-transformer'
 
 @InputType()
 export class AddressInput {
   @Field()
-  street: string = ''
+  street!: string
 
   @Field()
-  city: string = ''
+  city!: string
 
   @Field()
-  state: string = ''
+  state!: string
 
   @Field()
-  zipCode: string = ''
+  zipCode!: string
 }
 
 @InputType()
 export class CustomerInfoInput {
   @Field()
-  firstName: string = ''
+  firstName!: string
 
   @Field()
-  lastName: string = ''
+  lastName!: string
 
   @Field()
-  email: string = ''
+  email!: string
 
   @Field()
-  phoneNumber: string = ''
+  phoneNumber!: string
 
   @Field(() => AddressInput)
-  mailingAddress: AddressInput = new AddressInput()
+  mailingAddress!: AddressInput
 
   @Field(() => AddressInput, { nullable: true })
   billingAddress?: AddressInput
 
   @Field()
-  useSameAddress: boolean = false
+  useSameAddress!: boolean
 }
 
 @InputType()
 export class IdentificationInfoInput {
   @Field()
-  identificationType: string = ''
+  identificationType!: string
 
   @Field()
-  identificationNumber: string = ''
+  identificationNumber!: string
 
   @Field({ nullable: true })
   state?: string
@@ -58,19 +60,19 @@ export class IdentificationInfoInput {
   socialSecurityNumber?: string
 
   @Field()
-  noSSN: boolean = false
+  noSSN!: boolean
 
   @Field()
-  dateOfBirth: string = ''
+  dateOfBirth!: string
 }
 
 @InputType()
 export class DocumentAcceptanceInput {
   @Field()
-  documentId: string = ''
+  documentId!: string
 
   @Field()
-  accepted: boolean = false
+  accepted!: boolean
 }
 
 @InputType()
@@ -137,12 +139,88 @@ export class CreateLeadInput {
 }
 
 @InputType()
+export class UpdateLeadInput {
+  @Field()
+  @IsString()
+  leadId!: string
+
+  @Field(() => LeadStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(LeadStatus)
+  status?: LeadStatus
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  currentStep?: number
+
+  @Field(() => [Number], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  completedSteps?: number[]
+
+  @Field(() => [ProductType], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ProductType, { each: true })
+  selectedProducts?: ProductType[]
+
+  @Field(() => CustomerInfoInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CustomerInfoInput)
+  customerInfo?: CustomerInfoInput
+
+  @Field(() => IdentificationInfoInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => IdentificationInfoInput)
+  identificationInfo?: IdentificationInfoInput
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  financialInstitution?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  language?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  theme?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  devStep?: number
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  mockScenario?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  userAgent?: string
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  ipAddress?: string
+}
+
+@InputType()
 export class UpdateLeadStepInput {
   @Field()
-  leadId: string = ''
+  leadId!: string
 
   @Field()
-  currentStep: number = 0
+  currentStep!: number
 
   @Field(() => [Number], { nullable: true })
   completedSteps?: number[]
@@ -154,46 +232,46 @@ export class UpdateLeadStepInput {
 @InputType()
 export class UpdateLeadCreditCheckInput {
   @Field()
-  leadId: string = ''
+  leadId!: string
 
   @Field()
-  status: string = ''
+  status!: string
 
   @Field()
-  requiresVerification: boolean = false
+  requiresVerification!: boolean
 
   @Field()
-  message: string = ''
+  message!: string
 }
 
 @InputType()
 export class UpdateLeadDocumentsInput {
   @Field()
-  leadId: string = ''
+  leadId!: string
 
   @Field(() => [DocumentAcceptanceInput])
-  acceptances: DocumentAcceptanceInput[] = []
+  acceptances!: DocumentAcceptanceInput[]
 }
 
 @InputType()
 export class CreditCheckInput {
   @Field()
-  ssn: string = ''
+  ssn!: string
 }
 
 @InputType()
 export class AdminLoginInput {
   @Field()
-  username: string = ''
+  username!: string
 
   @Field()
-  password: string = ''
+  password!: string
 }
 
 @InputType()
 export class SessionLoginInput {
   @Field()
-  username: string = ''
+  username!: string
 }
 
 @InputType()

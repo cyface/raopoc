@@ -15,6 +15,12 @@ This guide provides step-by-step instructions for manually testing the GraphQL A
 - **curl**: Command line testing
 - **Frontend integration**: React Apollo Client
 
+### 🆕 Key Features
+- **Generic Lead Updates**: Use `updateLead` mutation to update any combination of lead fields
+- **Product Joins**: Lead queries automatically include product details via the `products` field
+- **Multi-tenant Support**: Bank-specific configurations with automatic fallbacks
+- **Versioned Data**: Customer and identification updates maintain full version history
+
 ## 🎮 GraphQL Playground
 
 ### Access Playground
@@ -54,6 +60,71 @@ query GetLead {
     currentStep
     selectedProducts
     financialInstitution
+  }
+}
+
+# 3. Update the lead with new customer information
+mutation UpdateLeadCustomerInfo {
+  updateLead(input: {
+    leadId: "your-lead-id-here"
+    customerInfo: {
+      firstName: "Jane"
+      lastName: "Doe"
+      email: "jane@example.com"
+      phoneNumber: "555-123-4567"
+      mailingAddress: {
+        street: "123 Main St"
+        city: "New York"
+        state: "NY"
+        zipCode: "10001"
+      }
+      useSameAddress: true
+    }
+  }) {
+    id
+    customerInfo {
+      firstName
+      lastName
+      email
+    }
+    products {
+      type
+      title
+    }
+  }
+}
+
+# 4. Update multiple fields at once
+mutation UpdateLeadMultiple {
+  updateLead(input: {
+    leadId: "your-lead-id-here"
+    currentStep: 3
+    language: "es"
+    selectedProducts: [CHECKING, SAVINGS]
+    status: IN_PROGRESS
+  }) {
+    id
+    currentStep
+    language
+    selectedProducts
+    status
+    products {
+      type
+      title
+      description
+    }
+  }
+}
+
+# 5. Update just the status
+mutation UpdateLeadStatus {
+  updateLead(input: {
+    leadId: "your-lead-id-here"
+    status: SUBMITTED
+  }) {
+    id
+    status
+    submittedAt
   }
 }
 ```
@@ -656,7 +727,61 @@ query GetLegacyApplication($appId: ID!) {
 }
 ```
 
-#### Update Lead with Customer Information
+#### Generic Lead Update (Any Fields)
+```json
+{
+  "query": "mutation UpdateLead($input: UpdateLeadInput!) { updateLead(input: $input) { id currentStep language selectedProducts status customerInfo { firstName lastName email } products { type title description } } }",
+  "variables": {
+    "input": {
+      "leadId": "YOUR_LEAD_ID",
+      "currentStep": 3,
+      "language": "es",
+      "selectedProducts": ["CHECKING", "SAVINGS"],
+      "status": "IN_PROGRESS"
+    }
+  }
+}
+```
+
+#### Update Customer Information Only
+```json
+{
+  "query": "mutation UpdateLeadCustomerInfo($input: UpdateLeadInput!) { updateLead(input: $input) { id customerInfo { firstName lastName email phoneNumber } products { type title } } }",
+  "variables": {
+    "input": {
+      "leadId": "YOUR_LEAD_ID",
+      "customerInfo": {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@example.com",
+        "phoneNumber": "555-123-4567",
+        "mailingAddress": {
+          "street": "123 Main St",
+          "city": "New York",
+          "state": "NY",
+          "zipCode": "10001"
+        },
+        "useSameAddress": true
+      }
+    }
+  }
+}
+```
+
+#### Update Lead Status Only
+```json
+{
+  "query": "mutation UpdateLeadStatus($input: UpdateLeadInput!) { updateLead(input: $input) { id status submittedAt } }",
+  "variables": {
+    "input": {
+      "leadId": "YOUR_LEAD_ID",
+      "status": "SUBMITTED"
+    }
+  }
+}
+```
+
+#### Update Lead with Customer Information (Legacy Method)
 ```json
 {
   "query": "mutation UpdateLeadStep($input: UpdateLeadStepInput!) { updateLeadStep(input: $input) { id currentStep customerInfo { firstName lastName email } } }",
@@ -844,6 +969,7 @@ curl -X POST http://localhost:3000/graphql \
 
 ### Mutation with Variables
 ```bash
+# Create a new lead
 curl -X POST http://localhost:3000/graphql \
   -H "Content-Type: application/json" \
   -d '{
@@ -853,6 +979,60 @@ curl -X POST http://localhost:3000/graphql \
         "sessionId": "curl-test",
         "selectedProducts": ["savings"],
         "currentStep": 1
+      }
+    }
+  }'
+
+# Update lead with customer information
+curl -X POST http://localhost:3000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation UpdateLead($input: UpdateLeadInput!) { updateLead(input: $input) { id customerInfo { firstName lastName email } products { type title } } }",
+    "variables": {
+      "input": {
+        "leadId": "YOUR_LEAD_ID",
+        "customerInfo": {
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "email": "jane@example.com",
+          "phoneNumber": "555-123-4567",
+          "mailingAddress": {
+            "street": "123 Main St",
+            "city": "New York",
+            "state": "NY",
+            "zipCode": "10001"
+          },
+          "useSameAddress": true
+        }
+      }
+    }
+  }'
+
+# Update multiple lead fields
+curl -X POST http://localhost:3000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation UpdateLeadMultiple($input: UpdateLeadInput!) { updateLead(input: $input) { id currentStep language status products { type title } } }",
+    "variables": {
+      "input": {
+        "leadId": "YOUR_LEAD_ID",
+        "currentStep": 3,
+        "language": "es",
+        "selectedProducts": ["CHECKING", "SAVINGS"],
+        "status": "IN_PROGRESS"
+      }
+    }
+  }'
+
+# Update lead status only
+curl -X POST http://localhost:3000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation UpdateLeadStatus($input: UpdateLeadInput!) { updateLead(input: $input) { id status submittedAt } }",
+    "variables": {
+      "input": {
+        "leadId": "YOUR_LEAD_ID",
+        "status": "SUBMITTED"
       }
     }
   }'
