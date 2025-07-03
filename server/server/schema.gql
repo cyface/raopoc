@@ -67,6 +67,7 @@ type Lead {
   updatedAt: DateTime!
   submittedAt: DateTime
   lastActivity: DateTime!
+  products: [Product!]!
 }
 
 """The status of a lead in the onboarding process"""

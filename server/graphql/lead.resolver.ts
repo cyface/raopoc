@@ -1,7 +1,8 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql'
+import { Resolver, Query, Mutation, Args, ID, ResolveField, Parent } from '@nestjs/graphql'
 import { Injectable } from '@nestjs/common'
 import { ApplicationService } from '../services/application.service'
-import { Lead, CreditCheckResult } from './object-types'
+import { ConfigService } from '../services/config.service'
+import { Lead, CreditCheckResult, Product } from './object-types'
 import { 
   CreateLeadInput, 
   UpdateLeadStepInput,
@@ -14,7 +15,10 @@ import {
 @Resolver(() => Lead)
 @Injectable()
 export class LeadResolver {
-  constructor(private readonly applicationService: ApplicationService) {}
+  constructor(
+    private readonly applicationService: ApplicationService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Query(() => Lead, { nullable: true })
   async lead(@Args('id', { type: () => ID }) id: string): Promise<Lead | null> {
@@ -112,6 +116,27 @@ export class LeadResolver {
   @Mutation(() => CreditCheckResult)
   async performCreditCheck(@Args('input') input: CreditCheckInput): Promise<CreditCheckResult> {
     return await this.applicationService.performCreditCheck(input.ssn)
+  }
+
+  @ResolveField(() => [Product])
+  async products(@Parent() lead: Lead): Promise<Product[]> {
+    // Get products based on the lead's financial institution for multi-tenant support
+    let allProducts: Product[]
+    
+    try {
+      // Try to get bank-specific products first
+      allProducts = await this.configService.loadConfigWithFallback('products', lead.financialInstitution) as Product[]
+    } catch (error) {
+      // Fallback to default products if bank-specific config fails
+      allProducts = this.configService.getProducts() || []
+    }
+    
+    // Filter products to only include those selected by the lead
+    // Convert enum values to lowercase strings to match product.type format
+    const selectedProductStrings = lead.selectedProducts.map((productType: any) => String(productType).toLowerCase())
+    return allProducts.filter(product => 
+      selectedProductStrings.includes(product.type)
+    )
   }
 
   private transformLead(lead: any): Lead {

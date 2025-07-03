@@ -269,6 +269,17 @@ describe('GraphQL Integration Tests', () => {
   })
 
   describe('Session Operations', () => {
+    it('should query session health', async () => {
+      // Test the session health resolver directly
+      const sessionResolver = app.get<SessionResolver>(SessionResolver)
+      
+      const result = await sessionResolver.sessionHealth()
+      
+      expect(result).toBeDefined()
+      expect(result.status).toBe('ok')
+      expect(result.timestamp).toBeInstanceOf(Date)
+    })
+
     it.skip('should query session info', async () => {
       // This test demonstrates session GraphQL queries
       // Session operations require actual session middleware setup
@@ -298,7 +309,7 @@ describe('GraphQL Integration Tests', () => {
         version: '1.0.0',
         lastModified: '2023-01-01T00:00:00Z'
       }
-      mockTranslationService.getManifest.mockReturnValue(mockManifest)
+      mockTranslationService.getManifest.mockResolvedValue(mockManifest)
 
       // Test resolver directly
       const translationResolver = app.get<TranslationResolver>(TranslationResolver)

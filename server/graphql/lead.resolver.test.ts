@@ -5,6 +5,7 @@ import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
 describe('LeadResolver', () => {
   let resolver: LeadResolver
   let mockApplicationService: any
+  let mockConfigService: any
 
   const mockLead = {
     id: 'lead-123',
@@ -67,7 +68,12 @@ describe('LeadResolver', () => {
       getLatestIdentificationInfo: vi.fn()
     }
 
-    resolver = new LeadResolver(mockApplicationService)
+    mockConfigService = {
+      getProducts: vi.fn(),
+      loadConfigWithFallback: vi.fn()
+    }
+
+    resolver = new LeadResolver(mockApplicationService, mockConfigService)
   })
 
   afterEach(() => {
@@ -428,6 +434,46 @@ describe('LeadResolver', () => {
       // Assert
       expect(result!.customerInfo).toBeNull()
       expect(result!.identificationInfo).toBeNull()
+    })
+
+    describe('products resolver field', () => {
+      it('should return filtered products based on selectedProducts', async () => {
+        // Arrange
+        const mockProducts = [
+          { type: 'checking', title: 'Checking Account', description: 'Basic checking', icon: 'check' },
+          { type: 'savings', title: 'Savings Account', description: 'Basic savings', icon: 'save' },
+          { type: 'credit-card', title: 'Credit Card', description: 'Basic card', icon: 'card' }
+        ]
+        mockConfigService.getProducts.mockReturnValue(mockProducts)
+        mockConfigService.loadConfigWithFallback.mockRejectedValue(new Error('No bank config'))
+
+        // Act
+        const result = await resolver.products(mockLead as any)
+
+        // Assert
+        expect(result).toHaveLength(2)
+        expect(result[0].type).toBe('checking')
+        expect(result[1].type).toBe('savings')
+        expect(mockConfigService.getProducts).toHaveBeenCalled()
+      })
+
+      it('should use bank-specific products when available', async () => {
+        // Arrange
+        const mockBankProducts = [
+          { type: 'checking', title: 'Bank Checking', description: 'Bank-specific checking', icon: 'check' },
+          { type: 'savings', title: 'Bank Savings', description: 'Bank-specific savings', icon: 'save' }
+        ]
+        mockConfigService.loadConfigWithFallback.mockResolvedValue(mockBankProducts)
+
+        // Act
+        const result = await resolver.products(mockLead as any)
+
+        // Assert
+        expect(result).toHaveLength(2)
+        expect(result[0].title).toBe('Bank Checking')
+        expect(result[1].title).toBe('Bank Savings')
+        expect(mockConfigService.loadConfigWithFallback).toHaveBeenCalledWith('products', 'testbank')
+      })
     })
   })
 })
