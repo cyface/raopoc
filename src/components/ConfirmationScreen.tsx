@@ -59,12 +59,21 @@ ${bankInfo?.bankName || t('bankInfo.defaultName')} ${t('confirmationScreen.email
     setSubmissionError(null);
 
     try {
-      // Submit the lead using the lead service
+      // First complete the onboarding to create/update the lead to step 5
+      const completedLead = await leadService.completeOnboarding({
+        selectedProducts: data.selectedProducts,
+        customerInfo: data.customerInfo,
+        identificationInfo: data.identificationInfo,
+        currentStep: 5,
+        completedSteps: [1, 2, 3, 4, 5]
+      });
+      
+      // Then submit the lead
       const submittedLead = await leadService.submitLead();
-      setFinalApplicationId(submittedLead.id || null);
+      setFinalApplicationId(submittedLead.id || completedLead.id || null);
 
       // Mock sending confirmation email
-      await mockSendConfirmationEmail(submittedLead.id || '', data.customerInfo?.email || '');
+      await mockSendConfirmationEmail(submittedLead.id || completedLead.id || '', data.customerInfo?.email || '');
 
       setIsSubmitted(true);
     } catch (error) {

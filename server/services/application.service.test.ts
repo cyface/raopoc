@@ -27,21 +27,8 @@ describe('ApplicationService - Lead Management', () => {
   }
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ApplicationService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService
-        },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService
-        }
-      ],
-    }).compile()
-
-    service = module.get<ApplicationService>(ApplicationService)
+    // Create service instance manually with mocked dependencies
+    service = new ApplicationService(mockConfigService as any, mockPrismaService as any)
 
     // Clear all mocks before each test
     vi.clearAllMocks()

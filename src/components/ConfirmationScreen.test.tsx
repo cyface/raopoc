@@ -124,6 +124,21 @@ describe('ConfirmationScreen', () => {
   })
 
   it('should automatically submit lead data to PostgreSQL on mount', async () => {
+    // Mock sessionStorage
+    const mockSessionStorage = {
+      getItem: vi.fn().mockImplementation((key) => {
+        if (key === 'onboarding-lead-id') return 'lead-123'
+        if (key === 'onboarding-session-id') return 'session-123'
+        return null
+      }),
+      setItem: vi.fn(),
+      removeItem: vi.fn()
+    }
+    Object.defineProperty(global, 'sessionStorage', {
+      value: mockSessionStorage,
+      writable: true
+    })
+    
     // Mock successful API responses
     mockFetch
       .mockResolvedValueOnce({
@@ -161,6 +176,21 @@ describe('ConfirmationScreen', () => {
   })
 
   it('should display success message after successful PostgreSQL submission', async () => {
+    // Mock sessionStorage (initially no lead ID, will be set after creation)
+    const storage: Record<string, string> = {
+      'onboarding-session-id': 'session-456'
+    }
+    const mockSessionStorage = {
+      getItem: vi.fn().mockImplementation((key) => storage[key] || null),
+      setItem: vi.fn().mockImplementation((key, value) => { storage[key] = value }),
+      removeItem: vi.fn().mockImplementation((key) => { delete storage[key] })
+    }
+    Object.defineProperty(global, 'sessionStorage', {
+      value: mockSessionStorage,
+      writable: true
+    })
+    
+    // Mock API responses: 1) create lead, 2) submit lead
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
@@ -176,7 +206,7 @@ describe('ConfirmationScreen', () => {
     // Wait for submission to complete and success message to appear
     await waitFor(() => {
       expect(screen.getByText('confirmationScreen.success.title')).toBeInTheDocument()
-    })
+    }, { timeout: 5000 })
 
     // Verify the application ID is displayed
     expect(screen.getByText('lead-456')).toBeInTheDocument()

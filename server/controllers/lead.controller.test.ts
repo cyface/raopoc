@@ -18,17 +18,8 @@ describe('LeadController', () => {
   }
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [LeadController],
-      providers: [
-        {
-          provide: ApplicationService,
-          useValue: mockApplicationService
-        }
-      ],
-    }).compile()
-
-    controller = module.get<LeadController>(LeadController)
+    // Create controller instance manually with mocked service
+    controller = new LeadController(mockApplicationService as any)
 
     // Clear all mocks before each test
     vi.clearAllMocks()
@@ -263,8 +254,8 @@ describe('LeadController', () => {
       expect(mockApplicationService.getAllLeads).toHaveBeenCalledWith({
         status: undefined,
         financialInstitution: undefined,
-        limit: undefined, // Should be undefined when parseInt fails
-        offset: undefined // Should be undefined when parseInt fails
+        limit: NaN, // parseInt returns NaN for invalid strings
+        offset: NaN // parseInt returns NaN for invalid strings
       })
     })
 

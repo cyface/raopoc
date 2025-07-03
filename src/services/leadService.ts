@@ -197,7 +197,18 @@ class LeadService {
     }
   }
 
-  async completeOnboarding(): Promise<LeadData> {
+  async completeOnboarding(allData?: Partial<LeadData>): Promise<LeadData> {
+    // If we have all the data provided, use createOrUpdateLead to ensure a lead exists
+    if (allData) {
+      const completedSteps = [...(allData.completedSteps || [1, 2, 3, 4]), 5]
+      return this.createOrUpdateLead({
+        ...allData,
+        currentStep: 5,
+        completedSteps: Array.from(new Set(completedSteps))
+      })
+    }
+    
+    // Otherwise, update the existing lead
     const currentLead = await this.getCurrentLead()
     const completedSteps = [...(currentLead?.completedSteps || [1, 2, 3, 4]), 5]
     
