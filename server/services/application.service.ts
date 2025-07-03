@@ -181,14 +181,16 @@ export class ApplicationService {
       })
     }
 
-    // Set customer info as versioned data
+    // Set customer info as versioned data AND legacy field
     if (data.customerInfo) {
       leadData.customerInfoHistory = [this.createVersionedCustomerInfo(data.customerInfo)]
+      leadData.customerInfo = data.customerInfo // Also populate legacy field
     }
 
-    // Set identification info as versioned data
+    // Set identification info as versioned data AND legacy field
     if (data.identificationInfo) {
       leadData.identificationInfoHistory = [this.createVersionedIdentificationInfo(data.identificationInfo)]
+      leadData.identificationInfo = data.identificationInfo // Also populate legacy field
     }
 
     // Try to update existing lead by session ID, or create new one
@@ -363,7 +365,7 @@ export class ApplicationService {
           }
           break
         case 2:
-          // Customer info step - handle as versioned data
+          // Customer info step - handle as versioned data AND legacy field
           if (stepData.stepData.customerInfo) {
             // Get existing lead to check for current customer info
             const existingLead = await this.prisma.lead.findUnique({
@@ -387,10 +389,12 @@ export class ApplicationService {
               // Create initial version
               updateData.customerInfoHistory = [this.createVersionedCustomerInfo(stepData.stepData.customerInfo, 'web-onboarding', 'step_completion')] as any
             }
+            // Also update legacy field for backward compatibility
+            updateData.customerInfo = stepData.stepData.customerInfo
           }
           break
         case 3:
-          // Identification step - handle as versioned data
+          // Identification step - handle as versioned data AND legacy field
           if (stepData.stepData.identificationInfo) {
             // Get existing lead to check for current identification info
             const existingLead = await this.prisma.lead.findUnique({
@@ -414,6 +418,8 @@ export class ApplicationService {
               // Create initial version
               updateData.identificationInfoHistory = [this.createVersionedIdentificationInfo(stepData.stepData.identificationInfo, 'web-onboarding', 'step_completion')] as any
             }
+            // Also update legacy field for backward compatibility
+            updateData.identificationInfo = stepData.stepData.identificationInfo
           }
           break
         case 4:
