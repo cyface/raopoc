@@ -1,8 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { Test, TestingModule } from '@nestjs/testing'
 import { ApplicationService } from './application.service'
-import { ConfigService } from './config.service'
-import { PrismaService } from './prisma.service'
 import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
 
 describe('ApplicationService - Lead Management', () => {
