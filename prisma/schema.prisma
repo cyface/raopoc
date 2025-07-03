@@ -30,6 +30,12 @@ model Lead {
   // Identification Information (encrypted JSON blob)
   identificationInfo  Json?
   
+  // Customer Information with versioning (array of versioned records)
+  customerInfoHistory        Json[]   @default([])
+  
+  // Identification Information with versioning (array of versioned records)
+  identificationInfoHistory  Json[]   @default([])
+  
   // Credit Check Results
   creditCheckStatus   CreditStatus?
   requiresVerification Boolean @default(false)

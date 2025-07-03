@@ -1,5 +1,48 @@
 import { IsNotEmpty, IsOptional, IsString, IsObject, IsArray, IsEnum } from 'class-validator'
 
+// Versioned data structure interfaces
+export interface VersionedCustomerInfo {
+  version: number
+  timestamp: string
+  data: {
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber: string
+    mailingAddress: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    billingAddress?: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    useSameAddress: boolean
+  }
+  source?: string
+  changeReason?: string
+}
+
+export interface VersionedIdentificationInfo {
+  version: number
+  timestamp: string
+  data: {
+    identificationType: string
+    identificationNumber: string
+    state?: string
+    country?: string
+    socialSecurityNumber?: string
+    noSSN: boolean
+    dateOfBirth: string
+  }
+  source?: string
+  changeReason?: string
+}
+
 export class CreateApplicationDto {
   @IsNotEmpty()
   @IsArray()
@@ -59,6 +102,54 @@ export class CreateApplicationDto {
     timestamp?: string
     [key: string]: unknown
   }
+}
+
+export class CreateVersionedDataDto {
+  @IsNotEmpty()
+  @IsString()
+  leadId!: string
+
+  @IsOptional()
+  @IsObject()
+  customerInfo?: {
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber: string
+    mailingAddress: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    billingAddress?: {
+      street: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    useSameAddress: boolean
+  }
+
+  @IsOptional()
+  @IsObject()
+  identificationInfo?: {
+    identificationType: string
+    identificationNumber: string
+    state?: string
+    country?: string
+    socialSecurityNumber?: string
+    noSSN: boolean
+    dateOfBirth: string
+  }
+
+  @IsOptional()
+  @IsString()
+  changeReason?: string
+
+  @IsOptional()
+  @IsString()
+  source?: string
 }
 
 export class CreditCheckDto {

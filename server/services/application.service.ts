@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import { ConfigService } from './config.service'
 import { PrismaService } from './prisma.service'
 import { LeadStatus, ProductType, CreditStatus } from '@prisma/client'
+import { VersionedCustomerInfo, VersionedIdentificationInfo } from '../dto/application.dto'
 
 @Injectable()
 export class ApplicationService {
@@ -180,14 +181,14 @@ export class ApplicationService {
       })
     }
 
-    // Set customer info
+    // Set customer info as versioned data
     if (data.customerInfo) {
-      leadData.customerInfo = data.customerInfo
+      leadData.customerInfoHistory = [this.createVersionedCustomerInfo(data.customerInfo)]
     }
 
-    // Set identification info
+    // Set identification info as versioned data
     if (data.identificationInfo) {
-      leadData.identificationInfo = data.identificationInfo
+      leadData.identificationInfoHistory = [this.createVersionedIdentificationInfo(data.identificationInfo)]
     }
 
     // Try to update existing lead by session ID, or create new one
@@ -362,15 +363,57 @@ export class ApplicationService {
           }
           break
         case 2:
-          // Customer info step
+          // Customer info step - handle as versioned data
           if (stepData.stepData.customerInfo) {
-            updateData.customerInfo = stepData.stepData.customerInfo
+            // Get existing lead to check for current customer info
+            const existingLead = await this.prisma.lead.findUnique({
+              where: { id: leadId },
+              select: { customerInfoHistory: true }
+            })
+            
+            if (existingLead && Array.isArray(existingLead.customerInfoHistory) && existingLead.customerInfoHistory.length > 0) {
+              // Add new version to existing history
+              const currentHistory = existingLead.customerInfoHistory as unknown as VersionedCustomerInfo[]
+              const nextVersion = Math.max(...currentHistory.map(v => v.version)) + 1
+              const newVersionedRecord: VersionedCustomerInfo = {
+                version: nextVersion,
+                timestamp: new Date().toISOString(),
+                data: stepData.stepData.customerInfo,
+                source: 'web-onboarding',
+                changeReason: 'step_completion'
+              }
+              updateData.customerInfoHistory = [...currentHistory, newVersionedRecord] as any
+            } else {
+              // Create initial version
+              updateData.customerInfoHistory = [this.createVersionedCustomerInfo(stepData.stepData.customerInfo, 'web-onboarding', 'step_completion')] as any
+            }
           }
           break
         case 3:
-          // Identification step
+          // Identification step - handle as versioned data
           if (stepData.stepData.identificationInfo) {
-            updateData.identificationInfo = stepData.stepData.identificationInfo
+            // Get existing lead to check for current identification info
+            const existingLead = await this.prisma.lead.findUnique({
+              where: { id: leadId },
+              select: { identificationInfoHistory: true }
+            })
+            
+            if (existingLead && Array.isArray(existingLead.identificationInfoHistory) && existingLead.identificationInfoHistory.length > 0) {
+              // Add new version to existing history
+              const currentHistory = existingLead.identificationInfoHistory as unknown as VersionedIdentificationInfo[]
+              const nextVersion = Math.max(...currentHistory.map(v => v.version)) + 1
+              const newVersionedRecord: VersionedIdentificationInfo = {
+                version: nextVersion,
+                timestamp: new Date().toISOString(),
+                data: stepData.stepData.identificationInfo,
+                source: 'web-onboarding',
+                changeReason: 'step_completion'
+              }
+              updateData.identificationInfoHistory = [...currentHistory, newVersionedRecord] as any
+            } else {
+              // Create initial version
+              updateData.identificationInfoHistory = [this.createVersionedIdentificationInfo(stepData.stepData.identificationInfo, 'web-onboarding', 'step_completion')] as any
+            }
           }
           break
         case 4:
@@ -435,5 +478,155 @@ export class ApplicationService {
 
     // No decryption needed anymore
     return leads
+  }
+
+  // Versioned Data Management Methods
+
+  /**
+   * Create versioned customer info record
+   */
+  private createVersionedCustomerInfo(data: any, source?: string, changeReason?: string): VersionedCustomerInfo {
+    return {
+      version: 1,
+      timestamp: new Date().toISOString(),
+      data: data,
+      source: source || 'web-onboarding',
+      changeReason: changeReason || 'initial_entry'
+    }
+  }
+
+  /**
+   * Create versioned identification info record
+   */
+  private createVersionedIdentificationInfo(data: any, source?: string, changeReason?: string): VersionedIdentificationInfo {
+    return {
+      version: 1,
+      timestamp: new Date().toISOString(),
+      data: data,
+      source: source || 'web-onboarding',
+      changeReason: changeReason || 'initial_entry'
+    }
+  }
+
+  /**
+   * Add new version of customer info to existing lead
+   */
+  async addCustomerInfoVersion(leadId: string, customerInfo: any, source?: string, changeReason?: string) {
+    const existingLead = await this.prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { customerInfoHistory: true }
+    })
+
+    if (!existingLead) {
+      throw new Error('Lead not found')
+    }
+
+    const currentHistory = existingLead.customerInfoHistory as unknown as VersionedCustomerInfo[]
+    const nextVersion = currentHistory.length > 0 ? Math.max(...currentHistory.map(v => v.version)) + 1 : 1
+
+    const newVersionedRecord: VersionedCustomerInfo = {
+      version: nextVersion,
+      timestamp: new Date().toISOString(),
+      data: customerInfo,
+      source: source || 'web-onboarding',
+      changeReason: changeReason || 'data_update'
+    }
+
+    const updatedHistory = [...currentHistory, newVersionedRecord]
+
+    const updatedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        customerInfoHistory: updatedHistory as any,
+        lastActivity: new Date()
+      },
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Customer info version ${nextVersion} added for lead: ${leadId}`)
+    return updatedLead
+  }
+
+  /**
+   * Add new version of identification info to existing lead
+   */
+  async addIdentificationInfoVersion(leadId: string, identificationInfo: any, source?: string, changeReason?: string) {
+    const existingLead = await this.prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { identificationInfoHistory: true }
+    })
+
+    if (!existingLead) {
+      throw new Error('Lead not found')
+    }
+
+    const currentHistory = existingLead.identificationInfoHistory as unknown as VersionedIdentificationInfo[]
+    const nextVersion = currentHistory.length > 0 ? Math.max(...currentHistory.map(v => v.version)) + 1 : 1
+
+    const newVersionedRecord: VersionedIdentificationInfo = {
+      version: nextVersion,
+      timestamp: new Date().toISOString(),
+      data: identificationInfo,
+      source: source || 'web-onboarding',
+      changeReason: changeReason || 'data_update'
+    }
+
+    const updatedHistory = [...currentHistory, newVersionedRecord]
+
+    const updatedLead = await this.prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        identificationInfoHistory: updatedHistory as any,
+        lastActivity: new Date()
+      },
+      include: { documentAcceptances: true }
+    })
+
+    this.logger.log(`Identification info version ${nextVersion} added for lead: ${leadId}`)
+    return updatedLead
+  }
+
+  /**
+   * Get latest version of customer info
+   */
+  getLatestCustomerInfo(customerInfoHistory: VersionedCustomerInfo[]): VersionedCustomerInfo | null {
+    if (!customerInfoHistory || customerInfoHistory.length === 0) {
+      return null
+    }
+    return customerInfoHistory.reduce((latest, current) => 
+      current.version > latest.version ? current : latest
+    )
+  }
+
+  /**
+   * Get latest version of identification info
+   */
+  getLatestIdentificationInfo(identificationInfoHistory: VersionedIdentificationInfo[]): VersionedIdentificationInfo | null {
+    if (!identificationInfoHistory || identificationInfoHistory.length === 0) {
+      return null
+    }
+    return identificationInfoHistory.reduce((latest, current) => 
+      current.version > latest.version ? current : latest
+    )
+  }
+
+  /**
+   * Get version history for customer info
+   */
+  getCustomerInfoHistory(leadId: string) {
+    return this.prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { customerInfoHistory: true }
+    })
+  }
+
+  /**
+   * Get version history for identification info
+   */
+  getIdentificationInfoHistory(leadId: string) {
+    return this.prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { identificationInfoHistory: true }
+    })
   }
 }
