@@ -126,7 +126,7 @@ export class LeadResolver {
     try {
       // Try to get bank-specific products first
       allProducts = await this.configService.loadConfigWithFallback('products', lead.financialInstitution) as Product[]
-    } catch (error) {
+    } catch {
       // Fallback to default products if bank-specific config fails
       allProducts = this.configService.getProducts() || []
     }
